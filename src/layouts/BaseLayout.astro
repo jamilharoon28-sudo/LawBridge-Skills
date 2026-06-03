@@ -167,27 +167,38 @@ const {
 
     <script is:inline>
       if (window.netlifyIdentity) {
-        window.netlifyIdentity.on("init", (user) => {
-          const hash = window.location.hash || "";
-          const hasIdentityToken =
-            hash.includes("invite_token") ||
-            hash.includes("confirmation_token") ||
-            hash.includes("recovery_token");
+        const hash = window.location.hash || "";
 
-          if (!user && hasIdentityToken) {
-            window.netlifyIdentity.open(hash.includes("invite_token") ? "signup" : undefined);
+        const hasInviteToken = hash.includes("invite_token");
+        const hasRecoveryToken = hash.includes("recovery_token");
+        const hasConfirmationToken = hash.includes("confirmation_token");
+
+        window.netlifyIdentity.on("init", (user) => {
+          if (!user && hasInviteToken) {
+            window.netlifyIdentity.open("signup");
+            return;
+          }
+
+          if (!user && (hasRecoveryToken || hasConfirmationToken)) {
+            window.netlifyIdentity.open();
           }
         });
 
         window.netlifyIdentity.on("login", () => {
-          const hash = window.location.hash || "";
-          const isIdentityCallback =
-            hash.includes("invite_token") ||
-            hash.includes("confirmation_token") ||
-            hash.includes("recovery_token");
+          const currentHash = window.location.hash || "";
+          const isRecoveryFlow = currentHash.includes("recovery_token");
+          const isInviteFlow = currentHash.includes("invite_token");
+          const isConfirmationFlow = currentHash.includes("confirmation_token");
 
-          if (isIdentityCallback || window.location.pathname.startsWith("/login")) {
-            document.location.href = "/admin/";
+          if (isRecoveryFlow || isInviteFlow || isConfirmationFlow) {
+            return;
+          }
+
+          if (
+            window.location.pathname === "/login" ||
+            window.location.pathname === "/login/"
+          ) {
+            window.location.href = "/admin";
           }
         });
 
