@@ -1,1 +1,26 @@
+---
+import BaseLayout from "../../layouts/BaseLayout.astro";
+import { getCollection } from "astro:content";
 
+export async function getStaticPaths() {
+  const workshops = await getCollection("workshops");
+
+  return workshops.map((workshop) => ({
+    params: { slug: workshop.slug },
+    props: { workshop }
+  }));
+}
+
+const { workshop } = Astro.props;
+const { Content } = await workshop.render();
+---
+
+<BaseLayout title={`${workshop.data.title} | LawBridge`}>
+  <main>
+    <article>
+      <h1>{workshop.data.title}</h1>
+      <p>{workshop.data.date.toLocaleDateString()}</p>
+      <Content />
+    </article>
+  </main>
+</BaseLayout>
