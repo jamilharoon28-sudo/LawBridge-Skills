@@ -1,0 +1,21 @@
+---
+links:
+  - label: "Curriculum"
+    url: "/curriculum"
+  - label: "Students"
+    url: "/students"
+  - label: "Mentors"
+    url: "/mentors"
+  - label: "Workshops"
+    url: "/workshops"
+  - label: "Webinars"
+    url: "/webinars"
+  - label: "Resources"
+    url: "/resources"
+  - label: "Blog"
+    url: "/blog"
+  - label: "About"
+    url: "/about"
+  - label: "Contact"
+    url: "/contact"
+---
