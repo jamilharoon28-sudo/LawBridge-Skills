@@ -7,9 +7,6 @@ public_folder: "/uploads"
 
 editor:
   preview: false
-# Keeps the CMS focused on editing instead of showing a confusing preview panel.
-editor:
-  preview: false
 
 collections:
   - name: "pages"
@@ -122,45 +119,94 @@ collections:
             required: false
             collapsed: true
             fields:
-              - { label: "Small Label", name: "eyebrow", widget: "string", required: false }
-              - { label: "Heading", name: "heading", widget: "string", required: false }
-              - { label: "Description", name: "description", widget: "text", required: false }
+              - label: "Small Label"
+                name: "eyebrow"
+                widget: "string"
+                required: false
+              - label: "Heading"
+                name: "heading"
+                widget: "string"
+                required: false
+              - label: "Description"
+                name: "description"
+                widget: "text"
+                required: false
+
           - label: "Method / How It Works Section"
             name: "method"
             widget: "object"
             required: false
             collapsed: true
             fields:
-              - { label: "Small Label", name: "eyebrow", widget: "string", required: false }
-              - { label: "Heading", name: "heading", widget: "string", required: false }
-              - { label: "Description", name: "description", widget: "text", required: false }
+              - label: "Small Label"
+                name: "eyebrow"
+                widget: "string"
+                required: false
+              - label: "Heading"
+                name: "heading"
+                widget: "string"
+                required: false
+              - label: "Description"
+                name: "description"
+                widget: "text"
+                required: false
+
           - label: "Curriculum / What You Build Section"
             name: "curriculum"
             widget: "object"
             required: false
             collapsed: true
             fields:
-              - { label: "Small Label", name: "eyebrow", widget: "string", required: false }
-              - { label: "Heading", name: "heading", widget: "string", required: false }
-              - { label: "Description", name: "description", widget: "text", required: false }
+              - label: "Small Label"
+                name: "eyebrow"
+                widget: "string"
+                required: false
+              - label: "Heading"
+                name: "heading"
+                widget: "string"
+                required: false
+              - label: "Description"
+                name: "description"
+                widget: "text"
+                required: false
+
           - label: "Pathways / Options Section"
             name: "pathways"
             widget: "object"
             required: false
             collapsed: true
             fields:
-              - { label: "Small Label", name: "eyebrow", widget: "string", required: false }
-              - { label: "Heading", name: "heading", widget: "string", required: false }
-              - { label: "Description", name: "description", widget: "text", required: false }
+              - label: "Small Label"
+                name: "eyebrow"
+                widget: "string"
+                required: false
+              - label: "Heading"
+                name: "heading"
+                widget: "string"
+                required: false
+              - label: "Description"
+                name: "description"
+                widget: "text"
+                required: false
+
           - label: "Final Call-To-Action Section"
             name: "cta"
             widget: "object"
             required: false
             collapsed: true
             fields:
-              - { label: "Small Label", name: "eyebrow", widget: "string", required: false }
-              - { label: "Heading", name: "heading", widget: "string", required: false }
-              - { label: "Description", name: "description", widget: "text", required: false }
+              - label: "Small Label"
+                name: "eyebrow"
+                widget: "string"
+                required: false
+              - label: "Heading"
+                name: "heading"
+                widget: "string"
+                required: false
+              - label: "Description"
+                name: "description"
+                widget: "text"
+                required: false
 
       - label: "4. Page Cards"
         name: "cards"
@@ -176,8 +222,13 @@ collections:
             collapsed: true
             summary: "{{fields.title}}"
             fields:
-              - { label: "Card Title", name: "title", widget: "string" }
-              - { label: "Card Description", name: "description", widget: "text" }
+              - label: "Card Title"
+                name: "title"
+                widget: "string"
+              - label: "Card Description"
+                name: "description"
+                widget: "text"
+
           - label: "Method Cards"
             name: "method"
             widget: "list"
@@ -185,8 +236,13 @@ collections:
             collapsed: true
             summary: "{{fields.title}}"
             fields:
-              - { label: "Card Title", name: "title", widget: "string" }
-              - { label: "Card Description", name: "description", widget: "text" }
+              - label: "Card Title"
+                name: "title"
+                widget: "string"
+              - label: "Card Description"
+                name: "description"
+                widget: "text"
+
           - label: "Curriculum Cards"
             name: "curriculum"
             widget: "list"
@@ -194,8 +250,13 @@ collections:
             collapsed: true
             summary: "{{fields.title}}"
             fields:
-              - { label: "Card Title", name: "title", widget: "string" }
-              - { label: "Card Description", name: "description", widget: "text" }
+              - label: "Card Title"
+                name: "title"
+                widget: "string"
+              - label: "Card Description"
+                name: "description"
+                widget: "text"
+
           - label: "Pathway Cards With Buttons"
             name: "pathways"
             widget: "list"
@@ -203,9 +264,16 @@ collections:
             collapsed: true
             summary: "{{fields.title}}"
             fields:
-              - { label: "Card Title", name: "title", widget: "string" }
-              - { label: "Card Description", name: "description", widget: "text" }
-              - { label: "Button Text", name: "buttonText", widget: "string", required: false }
+              - label: "Card Title"
+                name: "title"
+                widget: "string"
+              - label: "Card Description"
+                name: "description"
+                widget: "text"
+              - label: "Button Text"
+                name: "buttonText"
+                widget: "string"
+                required: false
               - label: "Button Link"
                 name: "buttonLink"
                 widget: "string"
@@ -225,10 +293,22 @@ collections:
             required: false
             collapsed: true
             fields:
-              - { label: "Primary Button Text", name: "primaryText", widget: "string", required: false }
-              - { label: "Primary Button Link", name: "primaryLink", widget: "string", required: false }
-              - { label: "Secondary Button Text", name: "secondaryText", widget: "string", required: false }
-              - { label: "Secondary Button Link", name: "secondaryLink", widget: "string", required: false }
+              - label: "Primary Button Text"
+                name: "primaryText"
+                widget: "string"
+                required: false
+              - label: "Primary Button Link"
+                name: "primaryLink"
+                widget: "string"
+                required: false
+              - label: "Secondary Button Text"
+                name: "secondaryText"
+                widget: "string"
+                required: false
+              - label: "Secondary Button Link"
+                name: "secondaryLink"
+                widget: "string"
+                required: false
 
       - label: "Extra Page Notes / Body Text"
         name: "body"
@@ -249,18 +329,23 @@ collections:
     editor:
       preview: false
     fields:
-      - { label: "Article Title", name: "title", widget: "string" }
+      - label: "Article Title"
+        name: "title"
+        widget: "string"
+
       - label: "Short Description"
         name: "description"
         widget: "text"
         required: false
         hint: "One or two sentences shown on blog cards."
+
       - label: "Publish Date"
         name: "date"
         widget: "datetime"
         required: false
         date_format: "DD/MM/YYYY"
         time_format: "HH:mm"
+
       - label: "Category"
         name: "category"
         widget: "select"
@@ -273,7 +358,13 @@ collections:
           - "Legal Skills"
           - "AI and Legal Technology"
           - "LawBridge News"
-      - { label: "Author", name: "author", widget: "string", required: false, default: "LawBridge" }
+
+      - label: "Author"
+        name: "author"
+        widget: "string"
+        required: false
+        default: "LawBridge"
+
       - label: "Article Body"
         name: "body"
         widget: "markdown"
@@ -293,14 +384,22 @@ collections:
     editor:
       preview: false
     fields:
-      - { label: "Webinar Title", name: "title", widget: "string" }
-      - { label: "Short Description", name: "description", widget: "text", required: false }
+      - label: "Webinar Title"
+        name: "title"
+        widget: "string"
+
+      - label: "Short Description"
+        name: "description"
+        widget: "text"
+        required: false
+
       - label: "Date and Time"
         name: "date"
         widget: "datetime"
         required: false
         date_format: "DD/MM/YYYY"
         time_format: "HH:mm"
+
       - label: "Status"
         name: "status"
         widget: "select"
@@ -311,12 +410,17 @@ collections:
           - "Fully booked"
           - "Completed"
           - "Draft"
+
       - label: "Location / Format"
         name: "location"
         widget: "string"
         required: false
         hint: "Example: Online, Zoom, London, University partner event."
-      - { label: "Full Details", name: "body", widget: "markdown", required: false }
+
+      - label: "Full Details"
+        name: "body"
+        widget: "markdown"
+        required: false
 
   - name: "workshops"
     label: "4. Workshops"
@@ -331,14 +435,22 @@ collections:
     editor:
       preview: false
     fields:
-      - { label: "Workshop Title", name: "title", widget: "string" }
-      - { label: "Short Description", name: "description", widget: "text", required: false }
+      - label: "Workshop Title"
+        name: "title"
+        widget: "string"
+
+      - label: "Short Description"
+        name: "description"
+        widget: "text"
+        required: false
+
       - label: "Date and Time"
         name: "date"
         widget: "datetime"
         required: false
         date_format: "DD/MM/YYYY"
         time_format: "HH:mm"
+
       - label: "Status"
         name: "status"
         widget: "select"
@@ -349,12 +461,17 @@ collections:
           - "Fully booked"
           - "Completed"
           - "Draft"
+
       - label: "Location / Format"
         name: "location"
         widget: "string"
         required: false
         hint: "Example: Online, London, University partner event."
-      - { label: "Full Details", name: "body", widget: "markdown", required: false }
+
+      - label: "Full Details"
+        name: "body"
+        widget: "markdown"
+        required: false
 
   - name: "resources"
     label: "5. Resource Entries"
@@ -369,8 +486,15 @@ collections:
     editor:
       preview: false
     fields:
-      - { label: "Resource Title", name: "title", widget: "string" }
-      - { label: "Short Description", name: "description", widget: "text", required: false }
+      - label: "Resource Title"
+        name: "title"
+        widget: "string"
+
+      - label: "Short Description"
+        name: "description"
+        widget: "text"
+        required: false
+
       - label: "Category"
         name: "category"
         widget: "select"
@@ -382,6 +506,7 @@ collections:
           - "Commercial Awareness"
           - "Legal Skills"
           - "Applications"
+
       - label: "Resource Type"
         name: "type"
         widget: "select"
@@ -393,6 +518,7 @@ collections:
           - "Checklist"
           - "Guide"
           - "Exercise"
+
       - label: "Skill Area"
         name: "skill"
         widget: "select"
@@ -407,6 +533,7 @@ collections:
           - "Attendance Notes"
           - "Commercial Awareness"
           - "Applications"
+
       - label: "Difficulty"
         name: "difficulty"
         widget: "select"
@@ -415,9 +542,14 @@ collections:
           - "Beginner"
           - "Intermediate"
           - "Advanced"
+
       - label: "Download Link"
         name: "downloadLink"
         widget: "string"
         required: false
         hint: "Example: /resources/student/File Name.docx"
-      - { label: "Extra Notes", name: "body", widget: "markdown", required: false }
+
+      - label: "Extra Notes"
+        name: "body"
+        widget: "markdown"
+        required: false
