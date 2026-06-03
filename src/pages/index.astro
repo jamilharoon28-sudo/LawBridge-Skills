@@ -9,6 +9,19 @@ const hero = data?.hero ?? {};
 const sections = data?.sections ?? {};
 const cards = data?.cards ?? {};
 const buttons = data?.buttons ?? {};
+
+const dashboard = data?.dashboard ?? {
+  label: "LawBridge Platform",
+  heading: "Practical legal development",
+  description:
+    "Workshops, webinars, mentoring and resources designed to support aspiring lawyers.",
+  items: [
+    "SQE readiness",
+    "QWE preparation",
+    "Commercial awareness",
+    "AI-era legal skills",
+  ],
+};
 ---
 
 <BaseLayout title={data?.title ?? "LawBridge | Practical Legal Development"}>
@@ -40,18 +53,19 @@ const buttons = data?.buttons ?? {};
         </div>
       </div>
 
-      <div class="dashboard-card">
-        <span class="pill">LawBridge Platform</span>
-        <h2>Practical legal development</h2>
-        <p>Workshops, webinars, mentoring and resources designed to support aspiring lawyers.</p>
+      {dashboard.heading && (
+        <div class="dashboard-card">
+          <span class="pill">{dashboard.label}</span>
+          <h2>{dashboard.heading}</h2>
+          <p>{dashboard.description}</p>
 
-        <div class="dashboard-list">
-          <span>SQE readiness</span>
-          <span>QWE preparation</span>
-          <span>Commercial awareness</span>
-          <span>AI-era legal skills</span>
+          <div class="dashboard-list">
+            {dashboard.items?.map((item) => (
+              <span>{item}</span>
+            ))}
+          </div>
         </div>
-      </div>
+      )}
     </div>
   </section>
 
