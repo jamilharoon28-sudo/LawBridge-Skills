@@ -56,11 +56,11 @@ const initialData = JSON.stringify({
 });
 
 const sectionMeta = [
-  { key: "problem", tone: "cream", grid: "g3" },
-  { key: "method", tone: "light", grid: "g4" },
-  { key: "curriculum", tone: "navy", grid: "g4" },
-  { key: "pathways", tone: "cream", grid: "g2" },
-  { key: "cta", tone: "light", grid: "" },
+  { key: "problem", label: "Problem cards", tone: "cream", grid: "g3" },
+  { key: "method", label: "Method cards", tone: "light", grid: "g4" },
+  { key: "curriculum", label: "Curriculum cards", tone: "navy", grid: "g4" },
+  { key: "pathways", label: "Pathway cards", tone: "cream", grid: "g2" },
+  { key: "cta", label: "Final call to action", tone: "light", grid: "" },
 ];
 ---
 
@@ -68,7 +68,7 @@ const sectionMeta = [
   <div class="visual-editor-bar">
     <div>
       <strong>Editing: {pageMeta.label}</strong>
-      <span>Click directly on a highlighted section, update the content, then publish.</span>
+      <span>Click directly on highlighted content, make changes, then publish.</span>
     </div>
 
     <div class="visual-editor-actions">
@@ -160,29 +160,49 @@ const sectionMeta = [
         </p>
 
         {section.key !== "cta" && (
-          <div class={`grid ${section.grid}`}>
-            {(cards[section.key] ?? []).map((card, index) => (
-              <article
-                class={section.key === "curriculum" ? "curric visual-edit-card" : "card visual-edit-card"}
-                data-card-group={section.key}
-                data-card-index={index}
-              >
-                <h3 class="editable-text" contenteditable="true" data-card-field="title">
-                  {card.title}
-                </h3>
+          <>
+            <div class="visual-card-tools">
+              <span>{section.label}</span>
+              <button type="button" data-add-card={section.key}>
+                Add card
+              </button>
+            </div>
 
-                <p class="editable-text" contenteditable="true" data-card-field="description">
-                  {card.description}
-                </p>
+            <div class={`grid ${section.grid}`} data-card-list={section.key}>
+              {(cards[section.key] ?? []).map((card, index) => (
+                <article
+                  class={section.key === "curriculum" ? "curric visual-edit-card" : "card visual-edit-card"}
+                  data-card-group={section.key}
+                  data-card-index={index}
+                >
+                  <button type="button" class="remove-card-button" data-remove-card>
+                    Remove
+                  </button>
 
-                {section.key === "pathways" && card.buttonText && (
-                  <span class="btn secondary editable-text" contenteditable="true" data-card-field="buttonText">
-                    {card.buttonText}
-                  </span>
-                )}
-              </article>
-            ))}
-          </div>
+                  <h3 class="editable-text" contenteditable="true" data-card-field="title">
+                    {card.title}
+                  </h3>
+
+                  <p class="editable-text" contenteditable="true" data-card-field="description">
+                    {card.description}
+                  </p>
+
+                  {section.key === "pathways" && (
+                    <div class="visual-card-link-fields">
+                      <span class="btn secondary editable-text" contenteditable="true" data-card-field="buttonText">
+                        {card.buttonText}
+                      </span>
+
+                      <label>
+                        Button link
+                        <input data-card-field="buttonLink" value={card.buttonLink ?? ""} />
+                      </label>
+                    </div>
+                  )}
+                </article>
+              ))}
+            </div>
+          </>
         )}
 
         {section.key === "cta" && (
@@ -238,21 +258,24 @@ const sectionMeta = [
           <input data-value-field="buttons.cta.secondaryLink" value={buttons.cta?.secondaryLink ?? ""} />
         </label>
       </div>
-
-      {(cards.pathways ?? []).length > 0 && (
-        <div class="visual-pathway-links">
-          <h3>Pathway card button links</h3>
-
-          {(cards.pathways ?? []).map((card, index) => (
-            <label>
-              {card.title}
-              <input data-card-link-index={index} value={card.buttonLink ?? ""} />
-            </label>
-          ))}
-        </div>
-      )}
     </div>
   </section>
+
+  <div id="publish-modal" class="publish-modal" hidden>
+    <div class="publish-modal-card">
+      <p class="eyebrow">Published</p>
+      <h2>Changes sent to GitHub</h2>
+      <p>
+        Netlify will now rebuild the website. The live page usually updates shortly after the deployment finishes.
+      </p>
+
+      <div class="publish-modal-actions">
+        <a href="/admin" class="editor-secondary">Back to Admin</a>
+        <a href={pageMeta.previewPath} class="editor-primary" target="_blank">Open Live Page</a>
+        <button id="close-publish-modal" type="button" class="editor-secondary">Continue Editing</button>
+      </div>
+    </div>
+  </div>
 
   <style is:inline>
     .visual-editor-bar {
@@ -299,6 +322,9 @@ const sectionMeta = [
       text-decoration: none;
       cursor: pointer;
       font-size: 0.9rem;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
     }
 
     .editor-primary {
@@ -317,7 +343,7 @@ const sectionMeta = [
       right: 1.2rem;
       bottom: 1.2rem;
       z-index: 9999;
-      max-width: 360px;
+      max-width: 380px;
       padding: 0.85rem 1rem;
       border-radius: 18px;
       background: #061b31;
@@ -353,22 +379,60 @@ const sectionMeta = [
       position: relative;
     }
 
-    .visual-link-panel {
-      padding: 2rem;
-      border-radius: 28px;
-      background: rgba(255, 255, 255, 0.78);
-      border: 1px solid rgba(201, 150, 82, 0.28);
-      box-shadow: 0 24px 70px rgba(6, 27, 49, 0.1);
-    }
-
-    .visual-link-grid,
-    .visual-pathway-links {
-      display: grid;
-      grid-template-columns: repeat(2, minmax(0, 1fr));
+    .visual-card-tools {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
       gap: 1rem;
-      margin-top: 1.25rem;
+      margin: 1.4rem 0 1rem;
+      padding: 0.9rem 1rem;
+      border-radius: 18px;
+      background: rgba(255, 255, 255, 0.72);
+      border: 1px solid rgba(201, 150, 82, 0.26);
+      box-shadow: 0 14px 38px rgba(6, 27, 49, 0.08);
     }
 
+    .visual-card-tools span {
+      color: #061b31;
+      font-weight: 900;
+    }
+
+    .visual-card-tools button,
+    .remove-card-button {
+      border: 0;
+      border-radius: 999px;
+      cursor: pointer;
+      font-weight: 900;
+      font-size: 0.88rem;
+    }
+
+    .visual-card-tools button {
+      padding: 0.68rem 1rem;
+      background: linear-gradient(135deg, #e7b65f, #d39b45);
+      color: #061b31;
+    }
+
+    .remove-card-button {
+      position: absolute;
+      right: 0.9rem;
+      top: 0.9rem;
+      padding: 0.48rem 0.78rem;
+      background: rgba(6, 27, 49, 0.08);
+      color: #061b31;
+      border: 1px solid rgba(6, 27, 49, 0.12);
+    }
+
+    .remove-card-button:hover {
+      background: rgba(211, 155, 69, 0.16);
+    }
+
+    .visual-card-link-fields {
+      display: grid;
+      gap: 0.75rem;
+      margin-top: 1rem;
+    }
+
+    .visual-card-link-fields label,
     .visual-link-panel label {
       display: grid;
       gap: 0.45rem;
@@ -376,6 +440,7 @@ const sectionMeta = [
       font-weight: 900;
     }
 
+    .visual-card-link-fields input,
     .visual-link-panel input {
       width: 100%;
       border: 1px solid rgba(201, 150, 82, 0.34);
@@ -386,16 +451,68 @@ const sectionMeta = [
       background: #ffffff;
     }
 
-    .visual-pathway-links {
-      grid-column: 1 / -1;
+    .visual-link-panel {
+      padding: 2rem;
+      border-radius: 28px;
+      background: rgba(255, 255, 255, 0.78);
+      border: 1px solid rgba(201, 150, 82, 0.28);
+      box-shadow: 0 24px 70px rgba(6, 27, 49, 0.1);
     }
 
-    .visual-pathway-links h3 {
-      grid-column: 1 / -1;
-      margin: 0.5rem 0 0;
-      font-family: Georgia, "Times New Roman", serif;
+    .visual-link-grid {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 1rem;
+      margin-top: 1.25rem;
+    }
+
+    .publish-modal {
+      position: fixed;
+      inset: 0;
+      z-index: 10000;
+      display: grid;
+      place-items: center;
+      padding: 1.5rem;
+      background: rgba(6, 27, 49, 0.55);
+      backdrop-filter: blur(10px);
+    }
+
+    .publish-modal[hidden] {
+      display: none;
+    }
+
+    .publish-modal-card {
+      width: min(620px, 100%);
+      padding: 2rem;
+      border-radius: 28px;
+      background: #fbf7ef;
+      border: 1px solid rgba(201, 150, 82, 0.32);
+      box-shadow: 0 30px 90px rgba(6, 27, 49, 0.25);
       color: #061b31;
-      font-size: 1.6rem;
+    }
+
+    .publish-modal-card h2 {
+      margin: 0;
+      font-family: Georgia, "Times New Roman", serif;
+      font-size: clamp(2rem, 4vw, 3rem);
+      color: #061b31;
+    }
+
+    .publish-modal-card p:not(.eyebrow) {
+      color: #334155;
+      line-height: 1.65;
+    }
+
+    .publish-modal-actions {
+      display: flex;
+      gap: 0.75rem;
+      flex-wrap: wrap;
+      margin-top: 1.4rem;
+    }
+
+    .publish-modal-actions .editor-secondary {
+      background: #061b31;
+      color: #ffffff;
     }
 
     @media (max-width: 860px) {
@@ -404,8 +521,7 @@ const sectionMeta = [
         flex-direction: column;
       }
 
-      .visual-link-grid,
-      .visual-pathway-links {
+      .visual-link-grid {
         grid-template-columns: 1fr;
       }
 
@@ -414,6 +530,11 @@ const sectionMeta = [
         right: 1rem;
         bottom: 1rem;
       }
+
+      .visual-card-tools {
+        align-items: flex-start;
+        flex-direction: column;
+      }
     }
   </style>
 
@@ -421,6 +542,8 @@ const sectionMeta = [
     const state = JSON.parse(initialData);
     const statusBox = document.getElementById("editor-status");
     const publishButton = document.getElementById("publish-page");
+    const publishModal = document.getElementById("publish-modal");
+    const closePublishModal = document.getElementById("close-publish-modal");
 
     function setStatus(message) {
       if (statusBox) {
@@ -448,6 +571,40 @@ const sectionMeta = [
 
     function getText(element) {
       return (element?.innerText || "").replace(/\s+\n/g, "\n").trim();
+    }
+
+    function markUnsaved(message = "Unsaved changes. Press Publish Changes to update the website.") {
+      setStatus(message);
+    }
+
+    function attachEditableListeners(root = document) {
+      root.querySelectorAll("[contenteditable='true']").forEach((element) => {
+        if (element.dataset.editorListenerAttached === "true") {
+          return;
+        }
+
+        element.dataset.editorListenerAttached = "true";
+
+        element.addEventListener("focus", () => {
+          setStatus("Editing selected text. Press Publish Changes when finished.");
+        });
+
+        element.addEventListener("input", () => {
+          markUnsaved();
+        });
+      });
+
+      root.querySelectorAll("input").forEach((input) => {
+        if (input.dataset.editorListenerAttached === "true") {
+          return;
+        }
+
+        input.dataset.editorListenerAttached = "true";
+
+        input.addEventListener("input", () => {
+          markUnsaved("Unsaved link changes. Press Publish Changes to update the website.");
+        });
+      });
     }
 
     function collectTextFields() {
@@ -486,9 +643,7 @@ const sectionMeta = [
 
           if (group === "pathways") {
             card.buttonText = getText(cardElement.querySelector('[data-card-field="buttonText"]'));
-
-            const linkInput = document.querySelector(`[data-card-link-index="${cardElement.dataset.cardIndex}"]`);
-            card.buttonLink = linkInput ? linkInput.value.trim() : "";
+            card.buttonLink = cardElement.querySelector('[data-card-field="buttonLink"]')?.value.trim() || "";
           }
 
           return card;
@@ -503,21 +658,114 @@ const sectionMeta = [
       return state;
     }
 
-    document.querySelectorAll("[contenteditable='true']").forEach((element) => {
-      element.addEventListener("focus", () => {
-        setStatus("Editing selected text. Press Publish Changes when finished.");
-      });
+    function renumberCards(group) {
+      const cardElements = Array.from(document.querySelectorAll(`[data-card-group="${group}"]`));
 
-      element.addEventListener("input", () => {
-        setStatus("Unsaved changes. Press Publish Changes to update the website.");
+      cardElements.forEach((cardElement, index) => {
+        cardElement.dataset.cardIndex = index.toString();
+      });
+    }
+
+    function createEditableText(tagName, className, fieldName, text) {
+      const element = document.createElement(tagName);
+      element.className = className;
+      element.contentEditable = "true";
+      element.dataset.cardField = fieldName;
+      element.textContent = text;
+      return element;
+    }
+
+    function createCard(group) {
+      const list = document.querySelector(`[data-card-list="${group}"]`);
+
+      if (!list) {
+        return;
+      }
+
+      const article = document.createElement("article");
+      article.className = group === "curriculum" ? "curric visual-edit-card" : "card visual-edit-card";
+      article.dataset.cardGroup = group;
+
+      const removeButton = document.createElement("button");
+      removeButton.type = "button";
+      removeButton.className = "remove-card-button";
+      removeButton.dataset.removeCard = "";
+      removeButton.textContent = "Remove";
+
+      const title = createEditableText("h3", "editable-text", "title", "New card title");
+      const description = createEditableText(
+        "p",
+        "editable-text",
+        "description",
+        "Add a short description for this card."
+      );
+
+      article.appendChild(removeButton);
+      article.appendChild(title);
+      article.appendChild(description);
+
+      if (group === "pathways") {
+        const linkFields = document.createElement("div");
+        linkFields.className = "visual-card-link-fields";
+
+        const buttonText = createEditableText(
+          "span",
+          "btn secondary editable-text",
+          "buttonText",
+          "Button text"
+        );
+
+        const label = document.createElement("label");
+        label.textContent = "Button link";
+
+        const input = document.createElement("input");
+        input.dataset.cardField = "buttonLink";
+        input.value = "/contact";
+
+        label.appendChild(input);
+        linkFields.appendChild(buttonText);
+        linkFields.appendChild(label);
+        article.appendChild(linkFields);
+      }
+
+      list.appendChild(article);
+      renumberCards(group);
+      attachEditableListeners(article);
+      markUnsaved("New card added. Press Publish Changes to update the website.");
+    }
+
+    document.querySelectorAll("[data-add-card]").forEach((button) => {
+      button.addEventListener("click", () => {
+        createCard(button.dataset.addCard);
       });
     });
 
-    document.querySelectorAll("input").forEach((input) => {
-      input.addEventListener("input", () => {
-        setStatus("Unsaved link changes. Press Publish Changes to update the website.");
-      });
+    document.addEventListener("click", (event) => {
+      const button = event.target.closest("[data-remove-card]");
+
+      if (!button) {
+        return;
+      }
+
+      const card = button.closest("[data-card-group]");
+      const group = card?.dataset.cardGroup;
+
+      if (!card || !group) {
+        return;
+      }
+
+      card.remove();
+      renumberCards(group);
+      markUnsaved("Card removed. Press Publish Changes to update the website.");
     });
+
+    attachEditableListeners();
+
+    if (closePublishModal && publishModal) {
+      closePublishModal.addEventListener("click", () => {
+        publishModal.hidden = true;
+      });
+    }
 
     if (publishButton) {
       publishButton.addEventListener("click", async () => {
@@ -560,8 +808,12 @@ const sectionMeta = [
             throw new Error(result.error || "Could not publish changes.");
           }
 
-          setStatus("Published. The website will update after the deployment finishes.");
+          setStatus("Published. Netlify is redeploying the website.");
           publishButton.textContent = "Published";
+
+          if (publishModal) {
+            publishModal.hidden = false;
+          }
         } catch (error) {
           setStatus(error.message || "Something went wrong.");
           publishButton.disabled = false;
