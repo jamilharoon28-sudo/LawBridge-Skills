@@ -2,19 +2,19 @@
 import BaseLayout from "../../../layouts/BaseLayout.astro";
 import { getEntry } from "astro:content";
 
-const editablePages = [
-  { slug: "home", label: "Homepage", previewPath: "/" },
-  { slug: "about", label: "About", previewPath: "/about" },
-  { slug: "students", label: "Students", previewPath: "/students" },
-  { slug: "mentors", label: "Mentors", previewPath: "/mentors" },
-  { slug: "resources", label: "Resources", previewPath: "/resources" },
-  { slug: "blog", label: "Blog", previewPath: "/blog" },
-  { slug: "webinars", label: "Webinars", previewPath: "/webinars" },
-  { slug: "workshops", label: "Workshops", previewPath: "/workshops" },
-];
-
 export function getStaticPaths() {
-  return editablePages.map((page) => ({
+  const pages = [
+    { slug: "home", label: "Homepage", previewPath: "/" },
+    { slug: "about", label: "About", previewPath: "/about" },
+    { slug: "students", label: "Students", previewPath: "/students" },
+    { slug: "mentors", label: "Mentors", previewPath: "/mentors" },
+    { slug: "resources", label: "Resources", previewPath: "/resources" },
+    { slug: "blog", label: "Blog", previewPath: "/blog" },
+    { slug: "webinars", label: "Webinars", previewPath: "/webinars" },
+    { slug: "workshops", label: "Workshops", previewPath: "/workshops" },
+  ];
+
+  return pages.map((page) => ({
     params: { slug: page.slug },
     props: { pageMeta: page },
   }));
