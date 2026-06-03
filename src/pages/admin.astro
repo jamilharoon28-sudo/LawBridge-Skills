@@ -1,16 +1,96 @@
 ---
 import BaseLayout from "../layouts/BaseLayout.astro";
 
-// Mock CMS collections for demo; replace with your content source
+// LawBridge admin dashboard.
+// This keeps the existing simple card design, but the buttons now open real CMS editing screens.
 const pages = [
-  { id: "homepage", title: "Homepage", editableFields: ["hero", "sections", "buttons", "dashboard"] },
-  { id: "about", title: "About", editableFields: ["heading", "description", "team", "values"] },
-  { id: "students", title: "Students", editableFields: ["hero", "curriculum", "resources"] },
-  { id: "mentors", title: "Mentors", editableFields: ["hero", "mentorshipProgram", "testimonials"] },
-  { id: "resources", title: "Resources", editableFields: ["hero", "filters", "downloads"] },
-  { id: "blog", title: "Blog", editableFields: ["posts", "featured", "categories"] },
-  { id: "workshops", title: "Workshops", editableFields: ["upcoming", "past", "details"] },
-  { id: "webinars", title: "Webinars", editableFields: ["upcoming", "past", "speakers"] },
+  {
+    id: "home",
+    title: "Homepage",
+    editableFields: ["hero", "sections", "buttons", "dashboard"],
+    editPath: "/cms/#/collections/pages/entries/home",
+    previewPath: "/",
+  },
+  {
+    id: "about",
+    title: "About",
+    editableFields: ["heading", "description", "team", "values"],
+    editPath: "/cms/#/collections/pages/entries/about",
+    previewPath: "/about",
+  },
+  {
+    id: "students",
+    title: "Students",
+    editableFields: ["hero", "curriculum", "resources"],
+    editPath: "/cms/#/collections/pages/entries/students",
+    previewPath: "/students",
+  },
+  {
+    id: "mentors",
+    title: "Mentors",
+    editableFields: ["hero", "mentorshipProgram", "testimonials"],
+    editPath: "/cms/#/collections/pages/entries/mentors",
+    previewPath: "/mentors",
+  },
+  {
+    id: "resources",
+    title: "Resources",
+    editableFields: ["hero", "filters", "downloads"],
+    editPath: "/cms/#/collections/pages/entries/resources",
+    previewPath: "/resources",
+  },
+  {
+    id: "blog",
+    title: "Blog",
+    editableFields: ["posts", "featured", "categories"],
+    editPath: "/cms/#/collections/pages/entries/blog",
+    previewPath: "/blog",
+  },
+  {
+    id: "workshops",
+    title: "Workshops",
+    editableFields: ["upcoming", "past", "details"],
+    editPath: "/cms/#/collections/pages/entries/workshops",
+    previewPath: "/workshops",
+  },
+  {
+    id: "webinars",
+    title: "Webinars",
+    editableFields: ["upcoming", "past", "speakers"],
+    editPath: "/cms/#/collections/pages/entries/webinars",
+    previewPath: "/webinars",
+  },
+];
+
+const collections = [
+  {
+    id: "blog-posts",
+    title: "Blog Posts",
+    editableFields: ["articles", "dates", "authors", "body"],
+    editPath: "/cms/#/collections/blog",
+    previewPath: "/blog",
+  },
+  {
+    id: "webinar-entries",
+    title: "Webinar Entries",
+    editableFields: ["title", "date", "status", "location"],
+    editPath: "/cms/#/collections/webinars",
+    previewPath: "/webinars",
+  },
+  {
+    id: "workshop-entries",
+    title: "Workshop Entries",
+    editableFields: ["title", "date", "status", "location"],
+    editPath: "/cms/#/collections/workshops",
+    previewPath: "/workshops",
+  },
+  {
+    id: "resource-entries",
+    title: "Resource Entries",
+    editableFields: ["title", "category", "difficulty", "downloadLink"],
+    editPath: "/cms/#/collections/resources",
+    previewPath: "/resources",
+  },
 ];
 ---
 
@@ -20,17 +100,36 @@ const pages = [
       <h1>LawBridge Admin Panel</h1>
       <p>Manage all editable pages and collections of the LawBridge site from here.</p>
 
-      <div class="admin-page-cards">
-        {pages.map((page) => (
-          <article class="admin-card">
-            <h2>{page.title}</h2>
-            <p>Editable fields: {page.editableFields.join(", ")}</p>
-            <div class="admin-actions">
-              <a class="btn primary" href={`/admin/edit/${page.id}`}>Edit {page.title}</a>
-              <a class="btn secondary" href={`/preview/${page.id}`} target="_blank">Preview {page.title}</a>
-            </div>
-          </article>
-        ))}
+      <div id="admin-lock-message" class="admin-lock-message" hidden>
+        <h2>Admin login required</h2>
+        <p>Please log in with your invited LawBridge admin account.</p>
+        <button id="admin-login-button" class="btn primary" type="button">Log in</button>
+      </div>
+
+      <div id="admin-content" hidden>
+        <div class="admin-page-cards">
+          {pages.map((page) => (
+            <article class="admin-card">
+              <h2>{page.title}</h2>
+              <p>Editable fields: {page.editableFields.join(", ")}</p>
+              <div class="admin-actions">
+                <a class="btn primary" href={page.editPath}>Edit {page.title}</a>
+                <a class="btn secondary" href={page.previewPath} target="_blank">Preview {page.title}</a>
+              </div>
+            </article>
+          ))}
+
+          {collections.map((collection) => (
+            <article class="admin-card">
+              <h2>{collection.title}</h2>
+              <p>Editable fields: {collection.editableFields.join(", ")}</p>
+              <div class="admin-actions">
+                <a class="btn primary" href={collection.editPath}>Edit {collection.title}</a>
+                <a class="btn secondary" href={collection.previewPath} target="_blank">Preview {collection.title}</a>
+              </div>
+            </article>
+          ))}
+        </div>
       </div>
     </div>
   </section>
@@ -43,7 +142,8 @@ const pages = [
       margin-top: 2rem;
     }
 
-    .admin-card {
+    .admin-card,
+    .admin-lock-message {
       padding: 1.5rem;
       border-radius: 20px;
       background: linear-gradient(145deg, #ffffff, #fdfaf4);
@@ -55,14 +155,21 @@ const pages = [
       gap: 1rem;
     }
 
-    .admin-card h2 {
+    .admin-lock-message {
+      margin-top: 2rem;
+      max-width: 720px;
+    }
+
+    .admin-card h2,
+    .admin-lock-message h2 {
       font-family: Georgia, "Times New Roman", serif;
       font-size: clamp(1.5rem, 2vw, 2rem);
       color: #041b32;
       margin-bottom: 0.5rem;
     }
 
-    .admin-card p {
+    .admin-card p,
+    .admin-lock-message p {
       color: #334155;
       font-size: 0.95rem;
     }
@@ -74,20 +181,25 @@ const pages = [
       margin-top: 1rem;
     }
 
-    .admin-actions a {
+    .admin-actions a,
+    .admin-lock-message button {
       text-decoration: none;
       padding: 0.75rem 1rem;
       border-radius: 999px;
       font-weight: 800;
       transition: all 0.25s ease;
+      border: 0;
+      cursor: pointer;
     }
 
-    .admin-actions .btn.primary {
+    .admin-actions .btn.primary,
+    .admin-lock-message .btn.primary {
       background: linear-gradient(135deg, #e7b65f, #c99652);
       color: #041b32;
     }
 
-    .admin-actions .btn.primary:hover {
+    .admin-actions .btn.primary:hover,
+    .admin-lock-message .btn.primary:hover {
       transform: translateY(-2px);
       box-shadow: 0 12px 34px rgba(201, 150, 82, 0.28);
     }
@@ -109,4 +221,47 @@ const pages = [
       }
     }
   </style>
+
+  <script is:inline>
+    const adminContent = document.getElementById("admin-content");
+    const lockMessage = document.getElementById("admin-lock-message");
+    const loginButton = document.getElementById("admin-login-button");
+
+    function showAdmin() {
+      if (adminContent) adminContent.hidden = false;
+      if (lockMessage) lockMessage.hidden = true;
+    }
+
+    function showLogin() {
+      if (adminContent) adminContent.hidden = true;
+      if (lockMessage) lockMessage.hidden = false;
+    }
+
+    if (window.netlifyIdentity) {
+      window.netlifyIdentity.on("init", (user) => {
+        if (user) {
+          showAdmin();
+        } else {
+          showLogin();
+        }
+      });
+
+      window.netlifyIdentity.on("login", () => {
+        showAdmin();
+        window.netlifyIdentity.close();
+      });
+
+      window.netlifyIdentity.on("logout", () => {
+        showLogin();
+      });
+
+      if (loginButton) {
+        loginButton.addEventListener("click", () => {
+          window.netlifyIdentity.open("login");
+        });
+      }
+    } else {
+      showLogin();
+    }
+  </script>
 </BaseLayout>
