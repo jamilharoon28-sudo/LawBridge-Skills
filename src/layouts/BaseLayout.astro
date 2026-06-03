@@ -16,6 +16,7 @@ const {
     <meta name="description" content={description} />
     <meta name="theme-color" content="#041b32" />
     <link rel="icon" href="/images/lawbridge-logo.png" type="image/png" />
+    <script is:inline src="https://identity.netlify.com/v1/netlify-identity-widget.js"></script>
   </head>
 
   <body>
@@ -162,6 +163,36 @@ const {
       );
 
       revealItems.forEach((item) => observer.observe(item));
+    </script>
+
+    <script is:inline>
+      if (window.netlifyIdentity) {
+        window.netlifyIdentity.on("init", (user) => {
+          const hash = window.location.hash || "";
+          const hasIdentityToken =
+            hash.includes("invite_token") ||
+            hash.includes("confirmation_token") ||
+            hash.includes("recovery_token");
+
+          if (!user && hasIdentityToken) {
+            window.netlifyIdentity.open(hash.includes("invite_token") ? "signup" : undefined);
+          }
+        });
+
+        window.netlifyIdentity.on("login", () => {
+          const hash = window.location.hash || "";
+          const isIdentityCallback =
+            hash.includes("invite_token") ||
+            hash.includes("confirmation_token") ||
+            hash.includes("recovery_token");
+
+          if (isIdentityCallback || window.location.pathname.startsWith("/login")) {
+            document.location.href = "/admin/";
+          }
+        });
+
+        window.netlifyIdentity.init();
+      }
     </script>
   </body>
 </html>
