@@ -124,17 +124,42 @@ function json(statusCode, body) {
   };
 }
 
+function getAllowedAdminEmails() {
+  return String(process.env.ADMIN_EMAIL || "")
+    .split(",")
+    .map((email) => email.trim().toLowerCase())
+    .filter(Boolean);
+}
+
+function isAllowedAdmin(user) {
+  const allowedEmails = getAllowedAdminEmails();
+  const userEmail = String(user?.email || "").trim().toLowerCase();
+
+  if (!userEmail || allowedEmails.length === 0) {
+    return false;
+  }
+
+  return allowedEmails.includes(userEmail);
+}
+
 export async function handler(event, context) {
   if (event.httpMethod !== "POST") {
     return json(405, { error: "Method not allowed" });
   }
 
   const user = context.clientContext?.user;
-  const roles = user?.app_metadata?.roles ?? [];
 
-  if (!user || !roles.includes("admin")) {
+  if (!user) {
     return json(401, {
-      error: "You must be signed in with the admin role to publish changes.",
+      error: "Please sign in before publishing changes.",
+    });
+  }
+
+  if (!isAllowedAdmin(user)) {
+    return json(403, {
+      error:
+        "This signed-in account is not authorised to publish changes. Check that ADMIN_EMAIL in Netlify matches your login email exactly.",
+      signedInEmail: user.email || null,
     });
   }
 
