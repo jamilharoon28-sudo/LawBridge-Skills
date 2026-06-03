@@ -1,1 +1,26 @@
+---
+import BaseLayout from "../../layouts/BaseLayout.astro";
+import { getCollection } from "astro:content";
 
+export async function getStaticPaths() {
+  const resources = await getCollection("resources");
+
+  return resources.map((resource) => ({
+    params: { slug: resource.slug },
+    props: { resource }
+  }));
+}
+
+const { resource } = Astro.props;
+const { Content } = await resource.render();
+---
+
+<BaseLayout title={`${resource.data.title} | LawBridge`}>
+  <main>
+    <article>
+      <h1>{resource.data.title}</h1>
+      <p>{resource.data.type}</p>
+      <Content />
+    </article>
+  </main>
+</BaseLayout>
