@@ -4,86 +4,86 @@ import BaseLayout from "../layouts/BaseLayout.astro";
 const pageCards = [
   {
     title: "Homepage",
-    description: "Edit the main hero text, homepage sections, cards and call-to-action buttons.",
+    description: "Manage the main landing page, hero messaging and key content sections.",
     editPath: "/cms/#/collections/pages/entries/home",
     previewPath: "/",
   },
   {
-    title: "About Page",
-    description: "Edit the LawBridge purpose, approach, support sections and page cards.",
+    title: "About",
+    description: "Update the LawBridge story, mission and platform explanation.",
     editPath: "/cms/#/collections/pages/entries/about",
     previewPath: "/about",
   },
   {
-    title: "Students Page",
-    description: "Edit student pathway text, benefits, cards and student-facing buttons.",
+    title: "Students",
+    description: "Edit student-facing messaging, pathway content and support sections.",
     editPath: "/cms/#/collections/pages/entries/students",
     previewPath: "/students",
   },
   {
-    title: "Mentors Page",
-    description: "Edit mentor-facing text, mentor value, pathway cards and calls to action.",
+    title: "Mentors",
+    description: "Manage mentor-facing content, guidance sections and calls to action.",
     editPath: "/cms/#/collections/pages/entries/mentors",
     previewPath: "/mentors",
   },
   {
-    title: "Resources Page",
-    description: "Edit the resources page hero, section text and page cards.",
+    title: "Resources",
+    description: "Update the resources landing page and supporting content blocks.",
     editPath: "/cms/#/collections/pages/entries/resources",
     previewPath: "/resources",
   },
   {
-    title: "Blog Page",
-    description: "Edit the main blog landing page text and content blocks.",
+    title: "Blog",
+    description: "Edit the blog landing page and related introduction content.",
     editPath: "/cms/#/collections/pages/entries/blog",
     previewPath: "/blog",
   },
   {
-    title: "Webinars Page",
-    description: "Edit the webinar landing page text, sections and buttons.",
+    title: "Webinars",
+    description: "Update webinar page messaging, page sections and buttons.",
     editPath: "/cms/#/collections/pages/entries/webinars",
     previewPath: "/webinars",
   },
   {
-    title: "Workshops Page",
-    description: "Edit the workshops landing page text, sections and buttons.",
+    title: "Workshops",
+    description: "Manage workshop page messaging, page sections and buttons.",
     editPath: "/cms/#/collections/pages/entries/workshops",
     previewPath: "/workshops",
   },
 ];
 
-const contentCards = [
+const collectionCards = [
   {
     title: "Blog Posts",
-    description: "Create or edit LawBridge articles.",
+    description: "Create, edit and manage published LawBridge articles.",
     managePath: "/cms/#/collections/blog",
     previewPath: "/blog",
   },
   {
     title: "Webinars",
-    description: "Create or edit webinar entries, dates, status and location.",
+    description: "Create and manage webinar listings, dates, status and details.",
     managePath: "/cms/#/collections/webinars",
     previewPath: "/webinars",
   },
   {
     title: "Workshops",
-    description: "Create or edit workshop entries, dates, status and location.",
+    description: "Create and manage workshop listings, dates, status and details.",
     managePath: "/cms/#/collections/workshops",
     previewPath: "/workshops",
   },
   {
     title: "Resource Entries",
-    description: "Create or edit resource cards, categories, skills, difficulty and download links.",
+    description: "Create and manage resource cards, categories and download links.",
     managePath: "/cms/#/collections/resources",
     previewPath: "/resources",
   },
 ];
 
-const editingSteps = [
-  "Click the page or content type you want to edit.",
-  "Update the labelled fields in the CMS form.",
-  "Click Save or Publish in the CMS.",
-  "Netlify rebuilds and updates the live website.",
+const workflowSteps = [
+  "Choose a page or collection.",
+  "Edit the relevant content fields.",
+  "Save and publish your changes.",
+  "Review the live page after deployment.",
 ];
 ---
 
@@ -104,18 +104,17 @@ const editingSteps = [
 
       <header class="admin-hero-panel">
         <div>
-          <p class="admin-eyebrow">Private LawBridge Editing Area</p>
-          <h1>Edit the website without touching code.</h1>
+          <p class="admin-eyebrow">Private LawBridge Area</p>
+          <h1>LawBridge Admin Dashboard</h1>
           <p>
-            Use this simple dashboard as your editing home. The buttons take you directly
-            to the correct CMS forms, which have now been simplified into clearer sections.
+            Manage LawBridge website pages, published content and key platform updates from one central dashboard.
           </p>
         </div>
 
         <aside class="admin-guide-card">
-          <h2>Editing workflow</h2>
+          <h2>Publishing workflow</h2>
           <ol>
-            {editingSteps.map((step) => (
+            {workflowSteps.map((step) => (
               <li>{step}</li>
             ))}
           </ol>
@@ -152,13 +151,13 @@ const editingSteps = [
       <section class="admin-section-block">
         <div class="admin-section-heading">
           <div>
-            <p class="admin-eyebrow">Add and manage content</p>
-            <h2>Collections</h2>
+            <p class="admin-eyebrow">Content collections</p>
+            <h2>Manage content</h2>
           </div>
         </div>
 
         <div class="admin-card-grid content-grid">
-          {contentCards.map((card) => (
+          {collectionCards.map((card) => (
             <article class="admin-card feature-card">
               <div>
                 <h3>{card.title}</h3>
@@ -171,28 +170,6 @@ const editingSteps = [
               </div>
             </article>
           ))}
-        </div>
-      </section>
-
-      <section class="admin-help-panel">
-        <div>
-          <p class="admin-eyebrow">CMS made simpler</p>
-          <h2>What changed?</h2>
-        </div>
-
-        <div class="admin-help-grid">
-          <div>
-            <strong>Clearer field names</strong>
-            <p>Fields are labelled as hero text, section text, cards, buttons, dates and download links.</p>
-          </div>
-          <div>
-            <strong>Less clutter</strong>
-            <p>The preview panel is switched off, so the CMS focuses on the editable form.</p>
-          </div>
-          <div>
-            <strong>Drop-down choices</strong>
-            <p>Status, category, type, skill area and difficulty now use easier select menus.</p>
-          </div>
         </div>
       </section>
     </div>
@@ -292,8 +269,7 @@ const editingSteps = [
     }
 
     .admin-hero-panel p:not(.admin-eyebrow),
-    .admin-card p,
-    .admin-help-panel p {
+    .admin-card p {
       color: #334155;
       line-height: 1.65;
     }
@@ -339,8 +315,7 @@ const editingSteps = [
       margin-bottom: 1rem;
     }
 
-    .admin-section-heading h2,
-    .admin-help-panel h2 {
+    .admin-section-heading h2 {
       margin: 0;
       font-family: Georgia, "Times New Roman", serif;
       font-size: clamp(2rem, 3vw, 3rem);
@@ -431,53 +406,13 @@ const editingSteps = [
       margin-top: 1.25rem;
     }
 
-    .admin-help-panel {
-      margin-top: 2rem;
-      padding: 1.5rem;
-      border-radius: 28px;
-      background: #061b31;
-      color: #ffffff;
-      box-shadow: 0 28px 90px rgba(6, 27, 49, 0.14);
-    }
-
-    .admin-help-panel h2,
-    .admin-help-panel .admin-eyebrow {
-      color: #ffffff;
-    }
-
-    .admin-help-grid {
-      display: grid;
-      grid-template-columns: repeat(3, minmax(0, 1fr));
-      gap: 1rem;
-      margin-top: 1rem;
-    }
-
-    .admin-help-grid > div {
-      padding: 1rem;
-      border-radius: 20px;
-      background: rgba(255, 255, 255, 0.08);
-      border: 1px solid rgba(255, 255, 255, 0.12);
-    }
-
-    .admin-help-grid strong {
-      color: #e7b65f;
-      display: block;
-      margin-bottom: 0.45rem;
-    }
-
-    .admin-help-panel p {
-      color: rgba(255, 255, 255, 0.78);
-      margin: 0;
-    }
-
     @media (max-width: 1180px) {
       .pages-grid,
       .content-grid {
         grid-template-columns: repeat(2, minmax(0, 1fr));
       }
 
-      .admin-hero-panel,
-      .admin-help-grid {
+      .admin-hero-panel {
         grid-template-columns: 1fr;
       }
     }
