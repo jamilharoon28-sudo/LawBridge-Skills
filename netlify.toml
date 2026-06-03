@@ -7,38 +7,26 @@
 
 [[redirects]]
   from = "/admin"
-  to = "/admin/"
-  status = 301
-  force = true
-
-[[redirects]]
-  from = "/cms"
-  to = "/cms/"
-  status = 301
-  force = true
-
-[[redirects]]
-  from = "/admin/*"
-  to = "/admin/:splat"
+  to = "/admin/index.html"
   status = 200
   force = true
   conditions = { Role = ["admin"] }
 
 [[redirects]]
-  from = "/cms/*"
-  to = "/cms/:splat"
+  from = "/admin"
+  to = "/login"
+  status = 302
+  force = true
+
+[[redirects]]
+  from = "/admin/"
+  to = "/admin/index.html"
   status = 200
   force = true
   conditions = { Role = ["admin"] }
 
 [[redirects]]
-  from = "/admin/*"
-  to = "/login/"
-  status = 401
-  force = true
-
-[[redirects]]
-  from = "/cms/*"
-  to = "/login/"
-  status = 401
+  from = "/admin/"
+  to = "/login"
+  status = 302
   force = true
