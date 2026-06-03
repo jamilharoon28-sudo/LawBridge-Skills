@@ -404,34 +404,41 @@ const workflowSteps = [
 
     if (window.netlifyIdentity) {
       window.netlifyIdentity.on("init", (user) => {
-        if (!user) {
-          window.location.href = "/login/";
-          return;
-        }
+<script is:inline>
+  const adminStatus = document.getElementById("admin-status");
+  const logoutButton = document.getElementById("admin-logout");
 
-        const roles = user.app_metadata?.roles || [];
-
-        if (!roles.includes("admin")) {
-          if (adminStatus) {
-            adminStatus.textContent =
-              "You are signed in, but this account does not have the admin role.";
-          }
-          return;
-        }
-
-        if (adminStatus) {
-          adminStatus.textContent = `Signed in as ${user.email}`;
-        }
-      });
-
-      if (logoutButton) {
-        logoutButton.addEventListener("click", () => {
-          window.netlifyIdentity.logout();
-          window.location.href = "/login/";
-        });
-      }
-    } else if (adminStatus) {
-      adminStatus.textContent = "Netlify Identity is not loaded.";
+  function showAdminWarning(message) {
+    if (adminStatus) {
+      adminStatus.textContent = message;
     }
-  </script>
-</BaseLayout>
+  }
+
+  if (window.netlifyIdentity) {
+    window.netlifyIdentity.on("init", (user) => {
+      if (!user) {
+        showAdminWarning("You are not signed in. Please log in to access the admin dashboard.");
+        return;
+      }
+
+      const roles = user.app_metadata?.roles || [];
+
+      if (!roles.includes("admin")) {
+        showAdminWarning("You are signed in, but this account does not have the admin role.");
+        return;
+      }
+
+      showAdminWarning(`Signed in as ${user.email}`);
+    });
+
+    if (logoutButton) {
+      logoutButton.addEventListener("click", () => {
+        window.netlifyIdentity.logout();
+        window.location.href = "/login";
+      });
+    }
+  } else {
+    showAdminWarning("Netlify Identity is not loaded.");
+  }
+</script>        
+
