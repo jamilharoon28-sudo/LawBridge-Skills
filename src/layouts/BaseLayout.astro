@@ -1,1 +1,167 @@
+---
+import "../styles/global.css";
 
+const {
+  title = "LawBridge | Practical Legal Development",
+  description = "LawBridge helps aspiring lawyers build practical legal capability through structured learning, real-world exercises, mentor guidance, workshops, webinars and commercial awareness training.",
+} = Astro.props;
+---
+
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>{title}</title>
+    <meta name="description" content={description} />
+    <meta name="theme-color" content="#041b32" />
+    <link rel="icon" href="/images/lawbridge-logo.png" type="image/png" />
+  </head>
+
+  <body>
+    <a class="skip" href="#main">Skip to content</a>
+
+    <header class="header" data-header>
+      <div class="container header-inner">
+        <a class="brand" href="/" aria-label="LawBridge home">
+          <img
+            src="/images/lawbridge-logo.png"
+            alt="LawBridge"
+            class="brand-logo"
+          />
+        </a>
+
+        <button class="menu" data-menu-btn aria-label="Open menu" aria-expanded="false">
+          <span></span>
+          <span></span>
+          <span></span>
+        </button>
+
+        <nav class="nav" data-nav aria-label="Main navigation">
+          <a href="/">Home</a>
+          <a href="/about">About</a>
+          <a href="/students">Students</a>
+          <a href="/mentors">Mentors</a>
+          <a href="/workshops">Workshops</a>
+          <a href="/webinars">Webinars</a>
+          <a href="/resources">Resources</a>
+          <a href="/blog">Blog</a>
+          <a href="/contact" class="nav-cta">Join LawBridge</a>
+        </nav>
+      </div>
+    </header>
+
+    <main id="main">
+      <slot />
+    </main>
+
+    <footer class="footer">
+      <div class="container footer-grid">
+        <div>
+          <a class="brand" href="/" aria-label="LawBridge home">
+            <img
+              src="/images/lawbridge-logo.png"
+              alt="LawBridge"
+              class="brand-logo footer-logo"
+            />
+          </a>
+
+          <p>
+            Practical legal development for aspiring lawyers preparing for modern
+            legal practice.
+          </p>
+
+          <p class="disclaimer">
+            Mentorship is for career guidance and educational purposes only.
+          </p>
+        </div>
+
+        <div>
+          <h3>Platform</h3>
+          <a href="/about">About</a>
+          <a href="/students">Students</a>
+          <a href="/workshops">Workshops</a>
+          <a href="/resources">Resources</a>
+        </div>
+
+        <div>
+          <h3>Get involved</h3>
+          <a href="/contact?tab=student">Join as a Student</a>
+          <a href="/contact?tab=mentor">Become a Mentor</a>
+          <a href="/contact?tab=partner">Partnerships</a>
+          <a href="/webinars">Webinars</a>
+        </div>
+
+        <div>
+          <h3>Legal</h3>
+          <a href="/privacy">Privacy Policy</a>
+          <a href="/terms">Terms</a>
+          <a href="/disclaimer">Disclaimer</a>
+        </div>
+      </div>
+
+      <div class="container footer-bottom">
+        <span>© <span data-year></span> LawBridge.</span>
+        <span>UK-focused practical legal development.</span>
+      </div>
+    </footer>
+
+    <script>
+      const menuButton = document.querySelector("[data-menu-btn]");
+      const nav = document.querySelector("[data-nav]");
+      const header = document.querySelector("[data-header]");
+      const year = document.querySelector("[data-year]");
+
+      if (year) {
+        year.textContent = new Date().getFullYear().toString();
+      }
+
+      if (menuButton && nav) {
+        menuButton.addEventListener("click", () => {
+          const isOpen = nav.classList.toggle("open");
+          menuButton.setAttribute("aria-expanded", isOpen.toString());
+        });
+
+        nav.querySelectorAll("a").forEach((link) => {
+          link.addEventListener("click", () => {
+            nav.classList.remove("open");
+            menuButton.setAttribute("aria-expanded", "false");
+          });
+        });
+      }
+
+      document.addEventListener(
+        "scroll",
+        () => {
+          if (header) {
+            header.classList.toggle("scrolled", window.scrollY > 20);
+          }
+        },
+        { passive: true }
+      );
+
+      const revealItems = document.querySelectorAll(".section, .hero, .page-hero");
+
+      revealItems.forEach((item) => {
+        item.classList.add("reveal-ready");
+      });
+
+      const observer = new IntersectionObserver(
+        (entries) => {
+          entries.forEach((entry) => {
+            if (entry.isIntersecting) {
+              entry.target.classList.add("reveal-in");
+              observer.unobserve(entry.target);
+            }
+          });
+        },
+        {
+          threshold: 0.12,
+          rootMargin: "0px 0px -8% 0px",
+        }
+      );
+
+      revealItems.forEach((item) => observer.observe(item));
+    </script>
+  </body>
+</html>
