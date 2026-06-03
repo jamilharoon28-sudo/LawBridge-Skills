@@ -5,49 +5,49 @@ const pageCards = [
   {
     title: "Homepage",
     description: "Manage the main landing page, hero messaging and key content sections.",
-    editPath: "/cms/#/collections/pages/entries/home",
+    editPath: "/admin/edit/home",
     previewPath: "/",
   },
   {
     title: "About",
     description: "Update the LawBridge story, mission and platform explanation.",
-    editPath: "/cms/#/collections/pages/entries/about",
+    editPath: "/admin/edit/about",
     previewPath: "/about",
   },
   {
     title: "Students",
     description: "Edit student-facing messaging, pathway content and support sections.",
-    editPath: "/cms/#/collections/pages/entries/students",
+    editPath: "/admin/edit/students",
     previewPath: "/students",
   },
   {
     title: "Mentors",
     description: "Manage mentor-facing content, guidance sections and calls to action.",
-    editPath: "/cms/#/collections/pages/entries/mentors",
+    editPath: "/admin/edit/mentors",
     previewPath: "/mentors",
   },
   {
     title: "Resources",
     description: "Update the resources landing page and supporting content blocks.",
-    editPath: "/cms/#/collections/pages/entries/resources",
+    editPath: "/admin/edit/resources",
     previewPath: "/resources",
   },
   {
     title: "Blog",
     description: "Edit the blog landing page and related introduction content.",
-    editPath: "/cms/#/collections/pages/entries/blog",
+    editPath: "/admin/edit/blog",
     previewPath: "/blog",
   },
   {
     title: "Webinars",
     description: "Update webinar page messaging, page sections and buttons.",
-    editPath: "/cms/#/collections/pages/entries/webinars",
+    editPath: "/admin/edit/webinars",
     previewPath: "/webinars",
   },
   {
     title: "Workshops",
     description: "Manage workshop page messaging, page sections and buttons.",
-    editPath: "/cms/#/collections/pages/entries/workshops",
+    editPath: "/admin/edit/workshops",
     previewPath: "/workshops",
   },
 ];
@@ -81,8 +81,8 @@ const collectionCards = [
 
 const workflowSteps = [
   "Choose a page or collection.",
-  "Edit the relevant content fields.",
-  "Save and publish your changes.",
+  "Edit the relevant content.",
+  "Publish your changes.",
   "Review the live page after deployment.",
 ];
 ---
@@ -107,7 +107,7 @@ const workflowSteps = [
           <p class="admin-eyebrow">Private LawBridge Area</p>
           <h1>LawBridge Admin Dashboard</h1>
           <p>
-            Manage LawBridge website pages, published content and key platform updates from one central dashboard.
+            Manage website pages, published content and key platform updates from one central dashboard.
           </p>
         </div>
 
@@ -126,7 +126,7 @@ const workflowSteps = [
         <div class="admin-section-heading">
           <div>
             <p class="admin-eyebrow">Main website pages</p>
-            <h2>Quick edit pages</h2>
+            <h2>Visual page editor</h2>
           </div>
           <a href="/" class="admin-button secondary" target="_blank">Preview Website</a>
         </div>
@@ -140,7 +140,7 @@ const workflowSteps = [
               </div>
 
               <div class="admin-actions">
-                <a href={card.editPath} class="admin-button primary">Edit</a>
+                <a href={card.editPath} class="admin-button primary">Edit Visually</a>
                 <a href={card.previewPath} class="admin-button secondary" target="_blank">Preview</a>
               </div>
             </article>
@@ -152,7 +152,7 @@ const workflowSteps = [
         <div class="admin-section-heading">
           <div>
             <p class="admin-eyebrow">Content collections</p>
-            <h2>Manage content</h2>
+            <h2>Manage listings</h2>
           </div>
         </div>
 
