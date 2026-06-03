@@ -20,13 +20,17 @@ import BaseLayout from "../layouts/BaseLayout.astro";
     </div>
   </section>
 
-  <script is:inline>
-    const loginButton = document.getElementById("admin-login-button");
+<script is:inline>
+  const loginButton = document.getElementById("admin-login-button");
 
-    if (loginButton && window.netlifyIdentity) {
-      loginButton.addEventListener("click", () => {
-        window.netlifyIdentity.open("login");
-      });
-    }
-  </script>
+  if (loginButton && window.netlifyIdentity) {
+    loginButton.addEventListener("click", () => {
+      window.netlifyIdentity.open("login");
+    });
+
+    window.netlifyIdentity.on("login", () => {
+      window.location.href = "/admin";
+    });
+  }
+</script>
 </BaseLayout>
