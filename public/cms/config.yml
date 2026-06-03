@@ -5,6 +5,8 @@ backend:
 media_folder: "public/uploads"
 public_folder: "/uploads"
 
+editor:
+  preview: false
 # Keeps the CMS focused on editing instead of showing a confusing preview panel.
 editor:
   preview: false
