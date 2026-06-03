@@ -4,29 +4,3 @@
 
 [build.environment]
   NODE_VERSION = "20"
-
-[[redirects]]
-  from = "/admin"
-  to = "/admin/index.html"
-  status = 200
-  force = true
-  conditions = { Role = ["admin"] }
-
-[[redirects]]
-  from = "/admin"
-  to = "/login"
-  status = 302
-  force = true
-
-[[redirects]]
-  from = "/admin/"
-  to = "/admin/index.html"
-  status = 200
-  force = true
-  conditions = { Role = ["admin"] }
-
-[[redirects]]
-  from = "/admin/"
-  to = "/login"
-  status = 302
-  force = true
