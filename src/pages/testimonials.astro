@@ -1,0 +1,28 @@
+---
+import BaseLayout from "../layouts/BaseLayout.astro";
+import { getCollection } from "astro:content";
+
+const testimonials = await getCollection("testimonials");
+---
+
+<BaseLayout title="Testimonials | LawBridge">
+  <main>
+    <h1>Testimonials</h1>
+
+    {await Promise.all(
+      testimonials.map(async (testimonial) => {
+        const { Content } = await testimonial.render();
+
+        return (
+          <article>
+            <blockquote>
+              <Content />
+            </blockquote>
+            <p>{testimonial.data.name}</p>
+            {testimonial.data.role && <p>{testimonial.data.role}</p>}
+          </article>
+        );
+      })
+    )}
+  </main>
+</BaseLayout>
