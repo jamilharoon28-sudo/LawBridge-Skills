@@ -1,0 +1,32 @@
+---
+import BaseLayout from "../layouts/BaseLayout.astro";
+---
+
+<BaseLayout title="LawBridge Admin Login">
+  <section class="section cream">
+    <div class="container" style="max-width: 760px; text-align: center;">
+      <p class="eyebrow">Private LawBridge Area</p>
+      <h1>Admin Login</h1>
+      <p>
+        Sign in with your invited LawBridge admin account to access the private
+        admin dashboard and CMS editor.
+      </p>
+
+      <div style="margin-top: 1.5rem; display: flex; justify-content: center; gap: 1rem; flex-wrap: wrap;">
+        <button id="admin-login-button" class="btn primary" type="button">
+          Log in to Admin
+        </button>
+      </div>
+    </div>
+  </section>
+
+  <script is:inline>
+    const loginButton = document.getElementById("admin-login-button");
+
+    if (loginButton && window.netlifyIdentity) {
+      loginButton.addEventListener("click", () => {
+        window.netlifyIdentity.open("login");
+      });
+    }
+  </script>
+</BaseLayout>
