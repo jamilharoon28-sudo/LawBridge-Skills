@@ -1,0 +1,370 @@
+---
+import BaseLayout from "../layouts/BaseLayout.astro";
+
+const skillPriorities = [
+  "Legal Research",
+  "Legal Drafting",
+  "Client Interviewing",
+  "Matter Analysis",
+  "Negotiation",
+  "Commercial Awareness",
+  "Responsible AI",
+  "Professional Readiness",
+];
+
+const resources = [
+  "Contract Breakdown Guide",
+  "Commercial Awareness Starter Pack",
+  "Legal Career Roadmap",
+  "SQE-to-Practice Explainer",
+  "Responsible AI Learning Guide",
+  "Interview Preparation Checklist",
+];
+---
+
+<BaseLayout title="Contact / Partnership Hub | LawBridge">
+  <section class="page-hero">
+    <div class="container page-grid">
+      <div>
+        <p class="eyebrow">Contact / Partnership Hub</p>
+        <h1>Connect with LawBridge.</h1>
+        <p>
+          Whether you are a student, mentor, university, law society, law firm,
+          in-house legal team or legal technology organisation, LawBridge is open
+          to meaningful conversations.
+        </p>
+
+        <div class="actions">
+          <a class="btn primary" href="#student">Join as a Student</a>
+          <a class="btn ghost" href="#mentor">Become a Mentor</a>
+        </div>
+      </div>
+
+      <div class="dashboard mini">
+        <div class="dots">
+          <span></span>
+          <span></span>
+          <span></span>
+        </div>
+
+        <div class="mini-card">
+          <strong>Students</strong>
+          <span>Register interest in LawBridge support.</span>
+        </div>
+
+        <div class="mini-card">
+          <strong>Mentors</strong>
+          <span>Apply to support aspiring lawyers.</span>
+        </div>
+
+        <div class="mini-card">
+          <strong>Partners</strong>
+          <span>Start a collaboration conversation.</span>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="section cream">
+    <div class="container">
+      <div class="tabs">
+        <button class="active" type="button" data-tab="student">Student</button>
+        <button type="button" data-tab="mentor">Mentor</button>
+        <button type="button" data-tab="partner">Partner</button>
+        <button type="button" data-tab="resource">Resource</button>
+      </div>
+
+      <section class="form-panel active" id="student" data-panel="student">
+        <div class="form-intro">
+          <h2>Join LawBridge as a Student</h2>
+          <p>Tell us where you are in your legal journey.</p>
+        </div>
+
+        <form class="form" name="student-registration" method="POST" data-netlify="true">
+          <input type="hidden" name="form-name" value="student-registration" />
+
+          <label class="field">
+            <span>Full name</span>
+            <input name="full_name" type="text" required />
+          </label>
+
+          <label class="field">
+            <span>Email</span>
+            <input name="email" type="email" required />
+          </label>
+
+          <label class="field">
+            <span>University or education provider</span>
+            <input name="education_provider" type="text" />
+          </label>
+
+          <label class="field">
+            <span>Study stage</span>
+            <select name="study_stage" required>
+              <option value="">Select an option</option>
+              <option>Law student</option>
+              <option>Recent graduate</option>
+              <option>SQE candidate</option>
+              <option>Career switcher</option>
+              <option>A-Level student</option>
+              <option>Junior lawyer</option>
+            </select>
+          </label>
+
+          <label class="field">
+            <span>Career goal</span>
+            <input name="career_goal" type="text" />
+          </label>
+
+          <label class="field">
+            <span>Skills priority</span>
+            <select name="skills_priority">
+              <option value="">Select an option</option>
+              {skillPriorities.map((skill) => <option>{skill}</option>)}
+            </select>
+          </label>
+
+          <label class="field">
+            <span>Mentorship interest</span>
+            <select name="mentorship_interest">
+              <option value="">Select an option</option>
+              <option>One-to-one</option>
+              <option>Group</option>
+              <option>Both</option>
+              <option>Not sure</option>
+            </select>
+          </label>
+
+          <label class="consent">
+            <input type="checkbox" name="consent" required />
+            <span>I agree to be contacted by LawBridge about my enquiry.</span>
+          </label>
+
+          <div class="actions">
+            <button class="btn primary" type="submit">Submit Student Registration</button>
+          </div>
+        </form>
+      </section>
+
+      <section class="form-panel" id="mentor" data-panel="mentor">
+        <div class="form-intro">
+          <h2>Apply to Become a Mentor</h2>
+          <p>Tell us how you would like to support LawBridge.</p>
+        </div>
+
+        <form class="form" name="mentor-application" method="POST" data-netlify="true">
+          <input type="hidden" name="form-name" value="mentor-application" />
+
+          <label class="field">
+            <span>Full name</span>
+            <input name="full_name" type="text" required />
+          </label>
+
+          <label class="field">
+            <span>Email</span>
+            <input name="email" type="email" required />
+          </label>
+
+          <label class="field">
+            <span>Current role</span>
+            <input name="current_role" type="text" />
+          </label>
+
+          <label class="field">
+            <span>Organisation</span>
+            <input name="organisation" type="text" />
+          </label>
+
+          <label class="field">
+            <span>Practice area</span>
+            <input name="practice_area" type="text" />
+          </label>
+
+          <label class="field">
+            <span>LinkedIn profile</span>
+            <input name="linkedin" type="url" />
+          </label>
+
+          <label class="field full">
+            <span>Contribution preference</span>
+            <select name="contribution_preference">
+              <option value="">Select an option</option>
+              <option>One-to-one mentorship</option>
+              <option>Group mentorship</option>
+              <option>Webinars</option>
+              <option>Workshops</option>
+              <option>Content</option>
+              <option>Short videos</option>
+            </select>
+          </label>
+
+          <label class="consent">
+            <input type="checkbox" name="consent" required />
+            <span>I agree to be contacted by LawBridge about my enquiry.</span>
+          </label>
+
+          <div class="actions">
+            <button class="btn primary" type="submit">Submit Mentor Application</button>
+          </div>
+        </form>
+      </section>
+
+      <section class="form-panel" id="partner" data-panel="partner">
+        <div class="form-intro">
+          <h2>Submit Partnership Enquiry</h2>
+          <p>For universities, law societies, firms and organisations.</p>
+        </div>
+
+        <form class="form" name="partnership-enquiry" method="POST" data-netlify="true">
+          <input type="hidden" name="form-name" value="partnership-enquiry" />
+
+          <label class="field">
+            <span>Organisation name</span>
+            <input name="organisation_name" type="text" required />
+          </label>
+
+          <label class="field">
+            <span>Organisation type</span>
+            <select name="organisation_type">
+              <option value="">Select an option</option>
+              <option>University</option>
+              <option>Law society</option>
+              <option>Law firm</option>
+              <option>In-house legal team</option>
+              <option>Legal technology</option>
+              <option>Training partner</option>
+              <option>Other</option>
+            </select>
+          </label>
+
+          <label class="field">
+            <span>Contact name</span>
+            <input name="contact_name" type="text" required />
+          </label>
+
+          <label class="field">
+            <span>Email</span>
+            <input name="email" type="email" required />
+          </label>
+
+          <label class="field full">
+            <span>Partnership interest</span>
+            <select name="partnership_interest">
+              <option value="">Select an option</option>
+              <option>Events</option>
+              <option>Workshops</option>
+              <option>Student support</option>
+              <option>Mentorship</option>
+              <option>Resources</option>
+              <option>Sponsorship</option>
+            </select>
+          </label>
+
+          <label class="field full">
+            <span>Message</span>
+            <textarea name="message" rows="6"></textarea>
+          </label>
+
+          <label class="consent">
+            <input type="checkbox" name="consent" required />
+            <span>I agree to be contacted by LawBridge about my enquiry.</span>
+          </label>
+
+          <div class="actions">
+            <button class="btn primary" type="submit">Submit Partnership Enquiry</button>
+          </div>
+        </form>
+      </section>
+
+      <section class="form-panel" id="resource" data-panel="resource">
+        <div class="form-intro">
+          <h2>Download a LawBridge Resource</h2>
+          <p>Request a practical resource.</p>
+        </div>
+
+        <form class="form" name="resource-request" method="POST" data-netlify="true">
+          <input type="hidden" name="form-name" value="resource-request" />
+
+          <label class="field">
+            <span>Full name</span>
+            <input name="full_name" type="text" required />
+          </label>
+
+          <label class="field">
+            <span>Email</span>
+            <input name="email" type="email" required />
+          </label>
+
+          <label class="field">
+            <span>Current stage</span>
+            <select name="current_stage">
+              <option value="">Select an option</option>
+              <option>Student</option>
+              <option>Graduate</option>
+              <option>SQE candidate</option>
+              <option>Junior lawyer</option>
+              <option>Other</option>
+            </select>
+          </label>
+
+          <label class="field">
+            <span>Resource requested</span>
+            <select name="resource_requested">
+              <option value="">Select an option</option>
+              {resources.map((resource) => <option>{resource}</option>)}
+            </select>
+          </label>
+
+          <label class="field full">
+            <span>Main legal interest</span>
+            <input name="main_legal_interest" type="text" />
+          </label>
+
+          <label class="consent">
+            <input type="checkbox" name="consent" required />
+            <span>I agree to be contacted by LawBridge about my enquiry.</span>
+          </label>
+
+          <div class="actions">
+            <button class="btn primary" type="submit">Download Resource</button>
+          </div>
+        </form>
+      </section>
+    </div>
+  </section>
+
+  <script>
+    const tabs = document.querySelectorAll("[data-tab]");
+    const panels = document.querySelectorAll("[data-panel]");
+
+    function activateTab(tabName) {
+      tabs.forEach((tab) => {
+        tab.classList.toggle("active", tab.getAttribute("data-tab") === tabName);
+      });
+
+      panels.forEach((panel) => {
+        panel.classList.toggle("active", panel.getAttribute("data-panel") === tabName);
+      });
+    }
+
+    tabs.forEach((tab) => {
+      tab.addEventListener("click", () => {
+        const tabName = tab.getAttribute("data-tab");
+        if (tabName) {
+          activateTab(tabName);
+          history.replaceState(null, "", `#${tabName}`);
+        }
+      });
+    });
+
+    const hash = window.location.hash.replace("#", "");
+    const query = new URLSearchParams(window.location.search);
+    const queryTab = query.get("tab");
+
+    if (queryTab) {
+      activateTab(queryTab);
+    } else if (hash) {
+      activateTab(hash);
+    }
+  </script>
+</BaseLayout>

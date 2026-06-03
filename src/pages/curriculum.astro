@@ -1,0 +1,19 @@
+---
+import BaseLayout from "../layouts/BaseLayout.astro";
+import { getEntry } from "astro:content";
+
+const page = await getEntry("pages", "curriculum");
+
+if (!page) {
+  throw new Error("Curriculum page content not found.");
+}
+
+const { Content } = await page.render();
+---
+
+<BaseLayout title={`${page.data.title} | LawBridge`}>
+  <main>
+    <h1>{page.data.title}</h1>
+    <Content />
+  </main>
+</BaseLayout>

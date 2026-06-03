@@ -1,0 +1,112 @@
+---
+import BaseLayout from "../layouts/BaseLayout.astro";
+
+// Mock CMS collections for demo; replace with your content source
+const pages = [
+  { id: "homepage", title: "Homepage", editableFields: ["hero", "sections", "buttons", "dashboard"] },
+  { id: "about", title: "About", editableFields: ["heading", "description", "team", "values"] },
+  { id: "students", title: "Students", editableFields: ["hero", "curriculum", "resources"] },
+  { id: "mentors", title: "Mentors", editableFields: ["hero", "mentorshipProgram", "testimonials"] },
+  { id: "resources", title: "Resources", editableFields: ["hero", "filters", "downloads"] },
+  { id: "blog", title: "Blog", editableFields: ["posts", "featured", "categories"] },
+  { id: "workshops", title: "Workshops", editableFields: ["upcoming", "past", "details"] },
+  { id: "webinars", title: "Webinars", editableFields: ["upcoming", "past", "speakers"] },
+];
+---
+
+<BaseLayout title="LawBridge Admin Panel">
+  <section class="section cream">
+    <div class="container">
+      <h1>LawBridge Admin Panel</h1>
+      <p>Manage all editable pages and collections of the LawBridge site from here.</p>
+
+      <div class="admin-page-cards">
+        {pages.map((page) => (
+          <article class="admin-card">
+            <h2>{page.title}</h2>
+            <p>Editable fields: {page.editableFields.join(", ")}</p>
+            <div class="admin-actions">
+              <a class="btn primary" href={`/admin/edit/${page.id}`}>Edit {page.title}</a>
+              <a class="btn secondary" href={`/preview/${page.id}`} target="_blank">Preview {page.title}</a>
+            </div>
+          </article>
+        ))}
+      </div>
+    </div>
+  </section>
+
+  <style is:inline>
+    .admin-page-cards {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+      gap: 1.5rem;
+      margin-top: 2rem;
+    }
+
+    .admin-card {
+      padding: 1.5rem;
+      border-radius: 20px;
+      background: linear-gradient(145deg, #ffffff, #fdfaf4);
+      border: 1px solid rgba(201, 150, 82, 0.24);
+      box-shadow: 0 22px 60px rgba(4, 27, 50, 0.1);
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      gap: 1rem;
+    }
+
+    .admin-card h2 {
+      font-family: Georgia, "Times New Roman", serif;
+      font-size: clamp(1.5rem, 2vw, 2rem);
+      color: #041b32;
+      margin-bottom: 0.5rem;
+    }
+
+    .admin-card p {
+      color: #334155;
+      font-size: 0.95rem;
+    }
+
+    .admin-actions {
+      display: flex;
+      gap: 0.85rem;
+      flex-wrap: wrap;
+      margin-top: 1rem;
+    }
+
+    .admin-actions a {
+      text-decoration: none;
+      padding: 0.75rem 1rem;
+      border-radius: 999px;
+      font-weight: 800;
+      transition: all 0.25s ease;
+    }
+
+    .admin-actions .btn.primary {
+      background: linear-gradient(135deg, #e7b65f, #c99652);
+      color: #041b32;
+    }
+
+    .admin-actions .btn.primary:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 12px 34px rgba(201, 150, 82, 0.28);
+    }
+
+    .admin-actions .btn.secondary {
+      background: #ffffff;
+      border: 1px solid rgba(201, 150, 82, 0.28);
+      color: #041b32;
+    }
+
+    .admin-actions .btn.secondary:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 12px 28px rgba(4, 27, 50, 0.12);
+    }
+
+    @media (max-width: 900px) {
+      .admin-page-cards {
+        grid-template-columns: 1fr;
+      }
+    }
+  </style>
+</BaseLayout>

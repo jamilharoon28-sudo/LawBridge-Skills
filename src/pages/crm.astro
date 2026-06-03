@@ -1,0 +1,356 @@
+---
+import BaseLayout from "../layouts/BaseLayout.astro";
+
+const leads = [
+  {
+    id: "LB-001",
+    type: "Student",
+    name: "Aisha Rahman",
+    email: "aisha@example.com",
+    organisation: "University of Manchester",
+    interest: "Student membership",
+    status: "New",
+    priority: "High",
+    owner: "Founder",
+    date: "2026-06-01",
+  },
+  {
+    id: "LB-002",
+    type: "Mentor",
+    name: "Daniel Hughes",
+    email: "daniel@example.com",
+    organisation: "Commercial Law Firm",
+    interest: "Mentor application",
+    status: "Contacted",
+    priority: "Medium",
+    owner: "Mentor Lead",
+    date: "2026-06-02",
+  },
+  {
+    id: "LB-003",
+    type: "Partner",
+    name: "Legal Skills Society",
+    email: "society@example.com",
+    organisation: "University Society",
+    interest: "Workshop partnership",
+    status: "In Progress",
+    priority: "High",
+    owner: "Partnerships Lead",
+    date: "2026-06-03",
+  },
+  {
+    id: "LB-004",
+    type: "Resource",
+    name: "Resource Request",
+    email: "student@example.com",
+    organisation: "Independent Student",
+    interest: "SQE practical drafting resource",
+    status: "New",
+    priority: "Low",
+    owner: "Content Lead",
+    date: "2026-06-03",
+  },
+];
+
+const statuses = ["New", "Contacted", "In Progress", "Closed"];
+const types = ["Student", "Mentor", "Partner", "Resource"];
+
+const totalLeads = leads.length;
+const newLeads = leads.filter((lead) => lead.status === "New").length;
+const activeLeads = leads.filter((lead) => lead.status === "Contacted" || lead.status === "In Progress").length;
+const highPriority = leads.filter((lead) => lead.priority === "High").length;
+---
+
+<BaseLayout title="CRM Dashboard | LawBridge">
+  <section class="hero">
+    <div class="container hero-grid">
+      <div>
+        <p class="eyebrow">Internal CRM</p>
+        <h1>LawBridge CRM Dashboard</h1>
+        <p class="hero-lead">
+          Track student enquiries, mentor applications, partnership leads and resource requests from one internal dashboard.
+        </p>
+
+        <div class="hero-actions">
+          <a class="btn primary" href="/contact">View Contact Forms</a>
+          <a class="btn secondary" href="/resources">View Resources</a>
+        </div>
+      </div>
+
+      <div class="dashboard-card">
+        <span class="pill">Pipeline Snapshot</span>
+        <h2>{totalLeads} active records</h2>
+        <p>Use this dashboard as the operating view for LawBridge lead follow-up and relationship tracking.</p>
+
+        <div class="dashboard-list">
+          <span>{newLeads} new leads</span>
+          <span>{activeLeads} active follow-ups</span>
+          <span>{highPriority} high priority</span>
+          <span>{types.length} lead categories</span>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="section cream">
+    <div class="container">
+      <p class="eyebrow">CRM Overview</p>
+      <h2>Manage LawBridge relationships clearly.</h2>
+      <p class="section-intro">
+        This page is currently a front-end CRM dashboard. It can later be connected to Netlify Forms, Airtable, Notion, Supabase or a dedicated CRM.
+      </p>
+
+      <div class="crm-stats">
+        <article class="crm-stat-card">
+          <span>Total</span>
+          <strong>{totalLeads}</strong>
+          <p>All CRM records</p>
+        </article>
+
+        <article class="crm-stat-card">
+          <span>New</span>
+          <strong>{newLeads}</strong>
+          <p>Needs first response</p>
+        </article>
+
+        <article class="crm-stat-card">
+          <span>Active</span>
+          <strong>{activeLeads}</strong>
+          <p>Contacted or in progress</p>
+        </article>
+
+        <article class="crm-stat-card">
+          <span>Priority</span>
+          <strong>{highPriority}</strong>
+          <p>High-priority records</p>
+        </article>
+      </div>
+    </div>
+  </section>
+
+  <section class="section light">
+    <div class="container">
+      <p class="eyebrow">Pipeline</p>
+      <h2>Lead tracker.</h2>
+      <p class="section-intro">
+        Filter by lead type, status or search term. Export the current table view as a CSV file.
+      </p>
+
+      <div class="crm-controls">
+        <input
+          id="crmSearch"
+          class="crm-search"
+          type="search"
+          placeholder="Search by name, email, organisation, interest or owner..."
+          aria-label="Search CRM records"
+        />
+
+        <select id="crmTypeFilter" aria-label="Filter CRM records by type">
+          <option value="all">All types</option>
+          {types.map((type) => (
+            <option value={type}>{type}</option>
+          ))}
+        </select>
+
+        <select id="crmStatusFilter" aria-label="Filter CRM records by status">
+          <option value="all">All statuses</option>
+          {statuses.map((status) => (
+            <option value={status}>{status}</option>
+          ))}
+        </select>
+
+        <button class="resource-filter" id="exportCrmCsv" type="button">Export CSV</button>
+      </div>
+
+      <p class="crm-results-count" aria-live="polite">
+        Showing <strong id="visibleCrmCount">{totalLeads}</strong> of <strong>{totalLeads}</strong> CRM records
+      </p>
+
+      <div class="crm-table-wrap">
+        <table class="crm-table">
+          <thead>
+            <tr>
+              <th data-sort="id">ID</th>
+              <th data-sort="type">Type</th>
+              <th data-sort="name">Name</th>
+              <th data-sort="organisation">Organisation</th>
+              <th data-sort="interest">Interest</th>
+              <th data-sort="status">Status</th>
+              <th data-sort="priority">Priority</th>
+              <th data-sort="owner">Owner</th>
+              <th data-sort="date">Date</th>
+            </tr>
+          </thead>
+
+          <tbody>
+            {leads.map((lead) => (
+              <tr
+                data-id={lead.id}
+                data-type={lead.type}
+                data-name={lead.name}
+                data-email={lead.email}
+                data-organisation={lead.organisation}
+                data-interest={lead.interest}
+                data-status={lead.status}
+                data-priority={lead.priority}
+                data-owner={lead.owner}
+                data-date={lead.date}
+                data-search={`${lead.id} ${lead.type} ${lead.name} ${lead.email} ${lead.organisation} ${lead.interest} ${lead.status} ${lead.priority} ${lead.owner} ${lead.date}`.toLowerCase()}
+              >
+                <td>{lead.id}</td>
+                <td><span class="crm-badge">{lead.type}</span></td>
+                <td>
+                  <strong>{lead.name}</strong>
+                  <small>{lead.email}</small>
+                </td>
+                <td>{lead.organisation}</td>
+                <td>{lead.interest}</td>
+                <td><span class={`crm-status crm-status-${lead.status.toLowerCase().replaceAll(" ", "-")}`}>{lead.status}</span></td>
+                <td>{lead.priority}</td>
+                <td>{lead.owner}</td>
+                <td>{lead.date}</td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
+
+      <div class="crm-empty-state" hidden>
+        <h3>No matching CRM records</h3>
+        <p>Try changing the filters or searching a different keyword.</p>
+      </div>
+    </div>
+  </section>
+
+  <section class="section navy">
+    <div class="container">
+      <p class="eyebrow">CRM Categories</p>
+      <h2>Designed around LawBridge operations.</h2>
+      <p class="section-intro">
+        The dashboard tracks the core relationship groups LawBridge needs to manage as the platform grows.
+      </p>
+
+      <div class="grid g4">
+        {types.map((type) => (
+          <article class="curric">
+            <h3>{type}</h3>
+            <p>Track enquiries, follow-up status, owner responsibility and next-step priority.</p>
+          </article>
+        ))}
+      </div>
+    </div>
+  </section>
+
+  <script is:inline>
+    const searchInput = document.querySelector("#crmSearch");
+    const typeFilter = document.querySelector("#crmTypeFilter");
+    const statusFilter = document.querySelector("#crmStatusFilter");
+    const visibleCount = document.querySelector("#visibleCrmCount");
+    const emptyState = document.querySelector(".crm-empty-state");
+    const rows = Array.from(document.querySelectorAll(".crm-table tbody tr"));
+    const sortHeaders = document.querySelectorAll(".crm-table th[data-sort]");
+    const exportButton = document.querySelector("#exportCrmCsv");
+    const tbody = document.querySelector(".crm-table tbody");
+
+    let currentSort = {
+      key: "",
+      direction: "asc",
+    };
+
+    function applyCrmFilters() {
+      const searchTerm = searchInput?.value.trim().toLowerCase() || "";
+      const selectedType = typeFilter?.value || "all";
+      const selectedStatus = statusFilter?.value || "all";
+
+      let shownCount = 0;
+
+      rows.forEach((row) => {
+        const matchesSearch = !searchTerm || row.dataset.search.includes(searchTerm);
+        const matchesType = selectedType === "all" || row.dataset.type === selectedType;
+        const matchesStatus = selectedStatus === "all" || row.dataset.status === selectedStatus;
+
+        const shouldShow = matchesSearch && matchesType && matchesStatus;
+
+        row.style.display = shouldShow ? "table-row" : "none";
+
+        if (shouldShow) shownCount += 1;
+      });
+
+      if (visibleCount) visibleCount.textContent = shownCount.toString();
+      if (emptyState) emptyState.hidden = shownCount !== 0;
+    }
+
+    function sortRows(key) {
+      if (!tbody) return;
+
+      const direction = currentSort.key === key && currentSort.direction === "asc" ? "desc" : "asc";
+
+      currentSort = { key, direction };
+
+      const sortedRows = [...rows].sort((a, b) => {
+        const aValue = a.dataset[key] || "";
+        const bValue = b.dataset[key] || "";
+
+        if (key === "date") {
+          return direction === "asc"
+            ? new Date(aValue).getTime() - new Date(bValue).getTime()
+            : new Date(bValue).getTime() - new Date(aValue).getTime();
+        }
+
+        return direction === "asc"
+          ? aValue.localeCompare(bValue)
+          : bValue.localeCompare(aValue);
+      });
+
+      sortedRows.forEach((row) => tbody.appendChild(row));
+      applyCrmFilters();
+    }
+
+    function exportVisibleRowsToCsv() {
+      const visibleRows = rows.filter((row) => row.style.display !== "none");
+
+      const headers = ["ID", "Type", "Name", "Email", "Organisation", "Interest", "Status", "Priority", "Owner", "Date"];
+
+      const records = visibleRows.map((row) => [
+        row.dataset.id,
+        row.dataset.type,
+        row.dataset.name,
+        row.dataset.email,
+        row.dataset.organisation,
+        row.dataset.interest,
+        row.dataset.status,
+        row.dataset.priority,
+        row.dataset.owner,
+        row.dataset.date,
+      ]);
+
+      const csvRows = [headers, ...records].map((cells) =>
+        cells.map((cell) => `"${String(cell || "").replaceAll('"', '""')}"`).join(",")
+      );
+
+      const blob = new Blob([csvRows.join("\n")], { type: "text/csv;charset=utf-8;" });
+      const url = URL.createObjectURL(blob);
+      const link = document.createElement("a");
+
+      link.href = url;
+      link.download = "lawbridge-crm-export.csv";
+      link.click();
+
+      URL.revokeObjectURL(url);
+    }
+
+    searchInput?.addEventListener("input", applyCrmFilters);
+    typeFilter?.addEventListener("change", applyCrmFilters);
+    statusFilter?.addEventListener("change", applyCrmFilters);
+
+    sortHeaders.forEach((header) => {
+      header.addEventListener("click", () => {
+        sortRows(header.dataset.sort);
+      });
+    });
+
+    exportButton?.addEventListener("click", exportVisibleRowsToCsv);
+
+    applyCrmFilters();
+  </script>
+</BaseLayout>

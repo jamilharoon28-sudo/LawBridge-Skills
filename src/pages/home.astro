@@ -1,0 +1,128 @@
+---
+import BaseLayout from "../layouts/BaseLayout.astro";
+import { getEntry } from "astro:content";
+
+const page = await getEntry("pages", "home");
+const data = page?.data;
+
+const hero = data?.hero ?? {};
+const sections = data?.sections ?? {};
+const cards = data?.cards ?? {};
+const buttons = data?.buttons ?? {};
+const dashboard = data?.dashboard ?? {};
+---
+
+<BaseLayout title={data?.title ?? "LawBridge | Practical Legal Development"}>
+  <section class="hero">
+    <div class="container hero-grid">
+      <div>
+        <p class="eyebrow">{hero.eyebrow}</p>
+        <h1>{hero.heading}</h1>
+        <p class="hero-lead">{hero.description}</p>
+        <div class="hero-actions">
+          {hero.primaryButtonText && (
+            <a class="btn primary" href={hero.primaryButtonLink}>{hero.primaryButtonText}</a>
+          )}
+          {hero.secondaryButtonText && (
+            <a class="btn secondary" href={hero.secondaryButtonLink}>{hero.secondaryButtonText}</a>
+          )}
+          {hero.tertiaryButtonText && (
+            <a class="btn secondary" href={hero.tertiaryButtonLink}>{hero.tertiaryButtonText}</a>
+          )}
+        </div>
+      </div>
+
+      {dashboard && (
+        <div class="dashboard-card">
+          <span class="pill">{dashboard.label}</span>
+          <h2>{dashboard.heading}</h2>
+          <p>{dashboard.description}</p>
+
+          <div class="dashboard-list">
+            {dashboard.items?.map((item) => (
+              <span>{item}</span>
+            ))}
+          </div>
+        </div>
+      )}
+    </div>
+  </section>
+
+  <!-- Sections -->
+  <section class="section cream">
+    <div class="container">
+      <p class="eyebrow">{sections.problem?.eyebrow}</p>
+      <h2>{sections.problem?.heading}</h2>
+      <p class="section-intro">{sections.problem?.description}</p>
+      <div class="grid g3">
+        {(cards.problem ?? []).map((card) => (
+          <article class="card">
+            <h3>{card.title}</h3>
+            <p>{card.description}</p>
+          </article>
+        ))}
+      </div>
+    </div>
+  </section>
+
+  <section class="section light">
+    <div class="container">
+      <p class="eyebrow">{sections.method?.eyebrow}</p>
+      <h2>{sections.method?.heading}</h2>
+      <p class="section-intro">{sections.method?.description}</p>
+      <div class="grid g3">
+        {(cards.method ?? []).map((card) => (
+          <article class="card">
+            <h3>{card.title}</h3>
+            <p>{card.description}</p>
+          </article>
+        ))}
+      </div>
+    </div>
+  </section>
+
+  <section class="section navy">
+    <div class="container">
+      <p class="eyebrow">{sections.curriculum?.eyebrow}</p>
+      <h2>{sections.curriculum?.heading}</h2>
+      <p class="section-intro">{sections.curriculum?.description}</p>
+      <div class="grid g4">
+        {(cards.curriculum ?? []).map((card) => (
+          <article class="curric">
+            <h3>{card.title}</h3>
+            <p>{card.description}</p>
+          </article>
+        ))}
+      </div>
+    </div>
+  </section>
+
+  <section class="section cream">
+    <div class="container">
+      <p class="eyebrow">{sections.pathways?.eyebrow}</p>
+      <h2>{sections.pathways?.heading}</h2>
+      <p class="section-intro">{sections.pathways?.description}</p>
+      <div class="grid g2">
+        {(cards.pathways ?? []).map((card) => (
+          <article class="card">
+            <h3>{card.title}</h3>
+            <p>{card.description}</p>
+            {card.buttonText && <a class="btn secondary" href={card.buttonLink}>{card.buttonText}</a>}
+          </article>
+        ))}
+      </div>
+    </div>
+  </section>
+
+  <section class="section light">
+    <div class="container cta-panel">
+      <p class="eyebrow">{sections.cta?.eyebrow}</p>
+      <h2>{sections.cta?.heading}</h2>
+      <p>{sections.cta?.description}</p>
+      <div class="hero-actions">
+        {buttons.cta?.primaryText && <a class="btn primary" href={buttons.cta.primaryLink}>{buttons.cta.primaryText}</a>}
+        {buttons.cta?.secondaryText && <a class="btn secondary" href={buttons.cta.secondaryLink}>{buttons.cta.secondaryText}</a>}
+      </div>
+    </div>
+  </section>
+</BaseLayout>
