@@ -5,214 +5,417 @@ backend:
 media_folder: "public/uploads"
 public_folder: "/uploads"
 
+# Keeps the CMS focused on editing instead of showing a confusing preview panel.
+editor:
+  preview: false
+
 collections:
   - name: "pages"
-    label: "Pages"
+    label: "1. Website Pages"
+    label_singular: "Website Page"
+    description: "Edit the main website pages. Start with the Hero section, then update section text, cards and buttons."
     folder: "src/content/pages"
     create: false
+    delete: false
     slug: "{{slug}}"
-
+    identifier_field: "title"
+    summary: "{{title}}"
+    editor:
+      preview: false
     fields:
-      - label: "Page Title"
+      - label: "Page Browser Title"
         name: "title"
         widget: "string"
+        hint: "This appears as the page title in the browser/CMS. Keep it short and professional."
 
-      - label: "Hero"
+      - label: "1. Top Hero Section"
         name: "hero"
         widget: "object"
         required: false
         collapsed: false
+        hint: "The first large section visitors see at the top of the page."
         fields:
-          - { label: "Eyebrow", name: "eyebrow", widget: "string", required: false }
-          - { label: "Heading", name: "heading", widget: "string", required: false }
-          - { label: "Description", name: "description", widget: "text", required: false }
-          - { label: "Primary Button Text", name: "primaryButtonText", widget: "string", required: false }
-          - { label: "Primary Button Link", name: "primaryButtonLink", widget: "string", required: false }
-          - { label: "Secondary Button Text", name: "secondaryButtonText", widget: "string", required: false }
-          - { label: "Secondary Button Link", name: "secondaryButtonLink", widget: "string", required: false }
-          - { label: "Tertiary Button Text", name: "tertiaryButtonText", widget: "string", required: false }
-          - { label: "Tertiary Button Link", name: "tertiaryButtonLink", widget: "string", required: false }
+          - label: "Small Label Above Heading"
+            name: "eyebrow"
+            widget: "string"
+            required: false
+            hint: "Example: Students, Resources, Practical Legal Development."
+          - label: "Main Page Heading"
+            name: "heading"
+            widget: "string"
+            required: false
+            hint: "This is the biggest heading on the page."
+          - label: "Intro Paragraph"
+            name: "description"
+            widget: "text"
+            required: false
+            hint: "A short paragraph explaining the page."
+          - label: "Primary Button Text"
+            name: "primaryButtonText"
+            widget: "string"
+            required: false
+          - label: "Primary Button Link"
+            name: "primaryButtonLink"
+            widget: "string"
+            required: false
+            hint: "Use an internal link such as /students or /contact?tab=student."
+          - label: "Secondary Button Text"
+            name: "secondaryButtonText"
+            widget: "string"
+            required: false
+          - label: "Secondary Button Link"
+            name: "secondaryButtonLink"
+            widget: "string"
+            required: false
+            hint: "Use an internal link such as /mentors or /resources."
+          - label: "Third Button Text"
+            name: "tertiaryButtonText"
+            widget: "string"
+            required: false
+          - label: "Third Button Link"
+            name: "tertiaryButtonLink"
+            widget: "string"
+            required: false
 
-      - label: "Dashboard Card"
+      - label: "2. Optional Side Dashboard Card"
         name: "dashboard"
         widget: "object"
         required: false
-        collapsed: false
+        collapsed: true
+        hint: "Only used on pages that show a side dashboard card. Leave the heading blank if you do not want the card to appear."
         fields:
-          - { label: "Label", name: "label", widget: "string", required: false }
-          - { label: "Heading", name: "heading", widget: "string", required: false }
-          - { label: "Description", name: "description", widget: "text", required: false }
-          - label: "Dashboard Items"
+          - label: "Small Card Label"
+            name: "label"
+            widget: "string"
+            required: false
+          - label: "Card Heading"
+            name: "heading"
+            widget: "string"
+            required: false
+            hint: "If this is blank, the dashboard card should not display."
+          - label: "Card Description"
+            name: "description"
+            widget: "text"
+            required: false
+          - label: "Bullet Points"
             name: "items"
             widget: "list"
             required: false
+            summary: "{{fields.item}}"
             field:
-              label: "Item"
+              label: "Bullet Point"
               name: "item"
               widget: "string"
 
-      - label: "Sections"
+      - label: "3. Main Page Sections"
         name: "sections"
         widget: "object"
         required: false
-        collapsed: false
+        collapsed: true
+        hint: "These are the main blocks of text used throughout the page."
         fields:
-          - label: "Problem Section"
+          - label: "Problem / Why This Matters Section"
             name: "problem"
             widget: "object"
             required: false
+            collapsed: true
             fields:
-              - { label: "Eyebrow", name: "eyebrow", widget: "string", required: false }
+              - { label: "Small Label", name: "eyebrow", widget: "string", required: false }
               - { label: "Heading", name: "heading", widget: "string", required: false }
               - { label: "Description", name: "description", widget: "text", required: false }
-
-          - label: "Method Section"
+          - label: "Method / How It Works Section"
             name: "method"
             widget: "object"
             required: false
+            collapsed: true
             fields:
-              - { label: "Eyebrow", name: "eyebrow", widget: "string", required: false }
+              - { label: "Small Label", name: "eyebrow", widget: "string", required: false }
               - { label: "Heading", name: "heading", widget: "string", required: false }
               - { label: "Description", name: "description", widget: "text", required: false }
-
-          - label: "Curriculum Section"
+          - label: "Curriculum / What You Build Section"
             name: "curriculum"
             widget: "object"
             required: false
+            collapsed: true
             fields:
-              - { label: "Eyebrow", name: "eyebrow", widget: "string", required: false }
+              - { label: "Small Label", name: "eyebrow", widget: "string", required: false }
               - { label: "Heading", name: "heading", widget: "string", required: false }
               - { label: "Description", name: "description", widget: "text", required: false }
-
-          - label: "Pathways Section"
+          - label: "Pathways / Options Section"
             name: "pathways"
             widget: "object"
             required: false
+            collapsed: true
             fields:
-              - { label: "Eyebrow", name: "eyebrow", widget: "string", required: false }
+              - { label: "Small Label", name: "eyebrow", widget: "string", required: false }
               - { label: "Heading", name: "heading", widget: "string", required: false }
               - { label: "Description", name: "description", widget: "text", required: false }
-
-          - label: "CTA Section"
+          - label: "Final Call-To-Action Section"
             name: "cta"
             widget: "object"
             required: false
+            collapsed: true
             fields:
-              - { label: "Eyebrow", name: "eyebrow", widget: "string", required: false }
+              - { label: "Small Label", name: "eyebrow", widget: "string", required: false }
               - { label: "Heading", name: "heading", widget: "string", required: false }
               - { label: "Description", name: "description", widget: "text", required: false }
 
-      - label: "Cards"
+      - label: "4. Page Cards"
         name: "cards"
         widget: "object"
         required: false
-        collapsed: false
+        collapsed: true
+        hint: "Cards are the small content boxes shown in groups. Keep titles short."
         fields:
           - label: "Problem Cards"
             name: "problem"
             widget: "list"
             required: false
+            collapsed: true
+            summary: "{{fields.title}}"
             fields:
-              - { label: "Title", name: "title", widget: "string" }
-              - { label: "Description", name: "description", widget: "text" }
-
+              - { label: "Card Title", name: "title", widget: "string" }
+              - { label: "Card Description", name: "description", widget: "text" }
           - label: "Method Cards"
             name: "method"
             widget: "list"
             required: false
+            collapsed: true
+            summary: "{{fields.title}}"
             fields:
-              - { label: "Title", name: "title", widget: "string" }
-              - { label: "Description", name: "description", widget: "text" }
-
+              - { label: "Card Title", name: "title", widget: "string" }
+              - { label: "Card Description", name: "description", widget: "text" }
           - label: "Curriculum Cards"
             name: "curriculum"
             widget: "list"
             required: false
+            collapsed: true
+            summary: "{{fields.title}}"
             fields:
-              - { label: "Title", name: "title", widget: "string" }
-              - { label: "Description", name: "description", widget: "text" }
-
-          - label: "Pathway Cards"
+              - { label: "Card Title", name: "title", widget: "string" }
+              - { label: "Card Description", name: "description", widget: "text" }
+          - label: "Pathway Cards With Buttons"
             name: "pathways"
             widget: "list"
             required: false
+            collapsed: true
+            summary: "{{fields.title}}"
             fields:
-              - { label: "Title", name: "title", widget: "string" }
-              - { label: "Description", name: "description", widget: "text" }
+              - { label: "Card Title", name: "title", widget: "string" }
+              - { label: "Card Description", name: "description", widget: "text" }
               - { label: "Button Text", name: "buttonText", widget: "string", required: false }
-              - { label: "Button Link", name: "buttonLink", widget: "string", required: false }
+              - label: "Button Link"
+                name: "buttonLink"
+                widget: "string"
+                required: false
+                hint: "Use an internal link such as /students, /workshops or /contact?tab=student."
 
-      - label: "CTA Buttons"
+      - label: "5. Final CTA Buttons"
         name: "buttons"
         widget: "object"
         required: false
-        collapsed: false
+        collapsed: true
+        hint: "Buttons shown near the final call-to-action section."
         fields:
-          - label: "CTA"
+          - label: "CTA Buttons"
             name: "cta"
             widget: "object"
             required: false
+            collapsed: true
             fields:
-              - { label: "Primary Text", name: "primaryText", widget: "string", required: false }
-              - { label: "Primary Link", name: "primaryLink", widget: "string", required: false }
-              - { label: "Secondary Text", name: "secondaryText", widget: "string", required: false }
-              - { label: "Secondary Link", name: "secondaryLink", widget: "string", required: false }
+              - { label: "Primary Button Text", name: "primaryText", widget: "string", required: false }
+              - { label: "Primary Button Link", name: "primaryLink", widget: "string", required: false }
+              - { label: "Secondary Button Text", name: "secondaryText", widget: "string", required: false }
+              - { label: "Secondary Button Link", name: "secondaryLink", widget: "string", required: false }
 
-      - label: "Body"
+      - label: "Extra Page Notes / Body Text"
         name: "body"
         widget: "markdown"
         required: false
+        hint: "Only used on simpler pages. Most main page content is edited above."
 
   - name: "blog"
-    label: "Blog Posts"
+    label: "2. Blog Posts"
+    label_singular: "Blog Post"
+    description: "Write and edit LawBridge articles."
     folder: "src/content/blog"
     create: true
+    delete: true
     slug: "{{slug}}"
+    identifier_field: "title"
+    summary: "{{title}}"
+    editor:
+      preview: false
     fields:
-      - { label: "Title", name: "title", widget: "string" }
-      - { label: "Description", name: "description", widget: "text", required: false }
-      - { label: "Date", name: "date", widget: "datetime", required: false }
-      - { label: "Category", name: "category", widget: "string", required: false }
-      - { label: "Author", name: "author", widget: "string", required: false }
-      - { label: "Body", name: "body", widget: "markdown", required: false }
+      - { label: "Article Title", name: "title", widget: "string" }
+      - label: "Short Description"
+        name: "description"
+        widget: "text"
+        required: false
+        hint: "One or two sentences shown on blog cards."
+      - label: "Publish Date"
+        name: "date"
+        widget: "datetime"
+        required: false
+        date_format: "DD/MM/YYYY"
+        time_format: "HH:mm"
+      - label: "Category"
+        name: "category"
+        widget: "select"
+        required: false
+        options:
+          - "Careers"
+          - "Commercial Awareness"
+          - "Applications"
+          - "SQE / QWE"
+          - "Legal Skills"
+          - "AI and Legal Technology"
+          - "LawBridge News"
+      - { label: "Author", name: "author", widget: "string", required: false, default: "LawBridge" }
+      - label: "Article Body"
+        name: "body"
+        widget: "markdown"
+        required: false
+        hint: "Write the main article here. Use headings and short paragraphs."
 
   - name: "webinars"
-    label: "Webinars"
+    label: "3. Webinars"
+    label_singular: "Webinar"
+    description: "Create and edit webinar cards."
     folder: "src/content/webinars"
     create: true
+    delete: true
     slug: "{{slug}}"
+    identifier_field: "title"
+    summary: "{{title}} — {{status}}"
+    editor:
+      preview: false
     fields:
-      - { label: "Title", name: "title", widget: "string" }
-      - { label: "Description", name: "description", widget: "text", required: false }
-      - { label: "Date", name: "date", widget: "datetime", required: false }
-      - { label: "Status", name: "status", widget: "string", required: false }
-      - { label: "Location", name: "location", widget: "string", required: false }
-      - { label: "Body", name: "body", widget: "markdown", required: false }
+      - { label: "Webinar Title", name: "title", widget: "string" }
+      - { label: "Short Description", name: "description", widget: "text", required: false }
+      - label: "Date and Time"
+        name: "date"
+        widget: "datetime"
+        required: false
+        date_format: "DD/MM/YYYY"
+        time_format: "HH:mm"
+      - label: "Status"
+        name: "status"
+        widget: "select"
+        required: false
+        options:
+          - "Upcoming"
+          - "Open for registration"
+          - "Fully booked"
+          - "Completed"
+          - "Draft"
+      - label: "Location / Format"
+        name: "location"
+        widget: "string"
+        required: false
+        hint: "Example: Online, Zoom, London, University partner event."
+      - { label: "Full Details", name: "body", widget: "markdown", required: false }
 
   - name: "workshops"
-    label: "Workshops"
+    label: "4. Workshops"
+    label_singular: "Workshop"
+    description: "Create and edit practical workshop entries."
     folder: "src/content/workshops"
     create: true
+    delete: true
     slug: "{{slug}}"
+    identifier_field: "title"
+    summary: "{{title}} — {{status}}"
+    editor:
+      preview: false
     fields:
-      - { label: "Title", name: "title", widget: "string" }
-      - { label: "Description", name: "description", widget: "text", required: false }
-      - { label: "Date", name: "date", widget: "datetime", required: false }
-      - { label: "Status", name: "status", widget: "string", required: false }
-      - { label: "Location", name: "location", widget: "string", required: false }
-      - { label: "Body", name: "body", widget: "markdown", required: false }
+      - { label: "Workshop Title", name: "title", widget: "string" }
+      - { label: "Short Description", name: "description", widget: "text", required: false }
+      - label: "Date and Time"
+        name: "date"
+        widget: "datetime"
+        required: false
+        date_format: "DD/MM/YYYY"
+        time_format: "HH:mm"
+      - label: "Status"
+        name: "status"
+        widget: "select"
+        required: false
+        options:
+          - "Upcoming"
+          - "Open for registration"
+          - "Fully booked"
+          - "Completed"
+          - "Draft"
+      - label: "Location / Format"
+        name: "location"
+        widget: "string"
+        required: false
+        hint: "Example: Online, London, University partner event."
+      - { label: "Full Details", name: "body", widget: "markdown", required: false }
 
   - name: "resources"
-    label: "Resource Entries"
+    label: "5. Resource Entries"
+    label_singular: "Resource Entry"
+    description: "Create and edit resource cards and download links."
     folder: "src/content/resources"
     create: true
+    delete: true
     slug: "{{slug}}"
+    identifier_field: "title"
+    summary: "{{title}} — {{difficulty}}"
+    editor:
+      preview: false
     fields:
-      - { label: "Title", name: "title", widget: "string" }
-      - { label: "Description", name: "description", widget: "text", required: false }
-      - { label: "Category", name: "category", widget: "string", required: false }
-      - { label: "Type", name: "type", widget: "string", required: false }
-      - { label: "Skill", name: "skill", widget: "string", required: false }
-      - { label: "Difficulty", name: "difficulty", widget: "string", required: false }
-      - { label: "Download Link", name: "downloadLink", widget: "string", required: false }
-      - { label: "Body", name: "body", widget: "markdown", required: false }
+      - { label: "Resource Title", name: "title", widget: "string" }
+      - { label: "Short Description", name: "description", widget: "text", required: false }
+      - label: "Category"
+        name: "category"
+        widget: "select"
+        required: false
+        options:
+          - "Student"
+          - "Tutor"
+          - "Workshop"
+          - "Commercial Awareness"
+          - "Legal Skills"
+          - "Applications"
+      - label: "Resource Type"
+        name: "type"
+        widget: "select"
+        required: false
+        options:
+          - "Student Pack"
+          - "Tutor Guide"
+          - "Template"
+          - "Checklist"
+          - "Guide"
+          - "Exercise"
+      - label: "Skill Area"
+        name: "skill"
+        widget: "select"
+        required: false
+        options:
+          - "Advocacy"
+          - "Client Interviewing"
+          - "Legal Drafting"
+          - "Legal Research"
+          - "Legal Writing"
+          - "Case and Matter Analysis"
+          - "Attendance Notes"
+          - "Commercial Awareness"
+          - "Applications"
+      - label: "Difficulty"
+        name: "difficulty"
+        widget: "select"
+        required: false
+        options:
+          - "Beginner"
+          - "Intermediate"
+          - "Advanced"
+      - label: "Download Link"
+        name: "downloadLink"
+        widget: "string"
+        required: false
+        hint: "Example: /resources/student/File Name.docx"
+      - { label: "Extra Notes", name: "body", widget: "markdown", required: false }
