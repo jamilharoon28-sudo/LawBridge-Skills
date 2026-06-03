@@ -1,0 +1,16 @@
+---
+import { getEntry } from "astro:content";
+
+const navigation = await getEntry("settings", "navigation");
+const links = navigation?.data.links || [];
+---
+
+<header>
+  <a href="/">LawBridge</a>
+
+  <nav>
+    {links.map((link) => (
+      <a href={link.url}>{link.label}</a>
+    ))}
+  </nav>
+</header>

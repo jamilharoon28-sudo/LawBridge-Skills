@@ -1,0 +1,25 @@
+---
+import { getEntry } from "astro:content";
+
+const footer = await getEntry("settings", "footer");
+const socials = await getEntry("settings", "socials");
+
+const copyright = footer?.data.copyright || "© 2026 LawBridge. All rights reserved.";
+const links = footer?.data.links || [];
+---
+
+<footer>
+  <p>{copyright}</p>
+
+  <nav>
+    {links.map((link) => (
+      <a href={link.url}>{link.label}</a>
+    ))}
+  </nav>
+
+  <nav>
+    {socials?.data.linkedin && <a href={socials.data.linkedin}>LinkedIn</a>}
+    {socials?.data.instagram && <a href={socials.data.instagram}>Instagram</a>}
+    {socials?.data.youtube && <a href={socials.data.youtube}>YouTube</a>}
+  </nav>
+</footer>
