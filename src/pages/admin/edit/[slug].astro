@@ -545,11 +545,49 @@ const sectionMeta = [
     const publishModal = document.getElementById("publish-modal");
     const closePublishModal = document.getElementById("close-publish-modal");
 
+    let hasUnsavedChanges = false;
+    let isPublishing = false;
+
     function setStatus(message) {
       if (statusBox) {
         statusBox.textContent = message;
       }
     }
+
+    function markUnsaved(message = "Unsaved changes. Press Publish Changes to update the website.") {
+      hasUnsavedChanges = true;
+      setStatus(message);
+    }
+
+    function markSaved() {
+      hasUnsavedChanges = false;
+      setStatus("Published. Netlify is redeploying the website.");
+    }
+
+    window.addEventListener("beforeunload", (event) => {
+      if (!hasUnsavedChanges || isPublishing) {
+        return;
+      }
+
+      event.preventDefault();
+      event.returnValue = "";
+    });
+
+    document.querySelectorAll("a").forEach((link) => {
+      link.addEventListener("click", (event) => {
+        if (!hasUnsavedChanges || isPublishing) {
+          return;
+        }
+
+        const shouldLeave = window.confirm(
+          "You have unpublished changes. Leave this page without publishing?"
+        );
+
+        if (!shouldLeave) {
+          event.preventDefault();
+        }
+      });
+    });
 
     function setPath(target, path, value) {
       const parts = path.split(".");
@@ -571,10 +609,6 @@ const sectionMeta = [
 
     function getText(element) {
       return (element?.innerText || "").replace(/\s+\n/g, "\n").trim();
-    }
-
-    function markUnsaved(message = "Unsaved changes. Press Publish Changes to update the website.") {
-      setStatus(message);
     }
 
     function attachEditableListeners(root = document) {
@@ -783,6 +817,7 @@ const sectionMeta = [
             return;
           }
 
+          isPublishing = true;
           publishButton.disabled = true;
           publishButton.textContent = "Publishing...";
           setStatus("Publishing changes...");
@@ -808,13 +843,14 @@ const sectionMeta = [
             throw new Error(result.error || "Could not publish changes.");
           }
 
-          setStatus("Published. Netlify is redeploying the website.");
+          markSaved();
           publishButton.textContent = "Published";
 
           if (publishModal) {
             publishModal.hidden = false;
           }
         } catch (error) {
+          isPublishing = false;
           setStatus(error.message || "Something went wrong.");
           publishButton.disabled = false;
           publishButton.textContent = "Publish Changes";
