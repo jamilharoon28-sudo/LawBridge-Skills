@@ -1,0 +1,573 @@
+---
+import BaseLayout from "../../../layouts/BaseLayout.astro";
+import { getEntry } from "astro:content";
+
+const editablePages = [
+  { slug: "home", label: "Homepage", previewPath: "/" },
+  { slug: "about", label: "About", previewPath: "/about" },
+  { slug: "students", label: "Students", previewPath: "/students" },
+  { slug: "mentors", label: "Mentors", previewPath: "/mentors" },
+  { slug: "resources", label: "Resources", previewPath: "/resources" },
+  { slug: "blog", label: "Blog", previewPath: "/blog" },
+  { slug: "webinars", label: "Webinars", previewPath: "/webinars" },
+  { slug: "workshops", label: "Workshops", previewPath: "/workshops" },
+];
+
+export function getStaticPaths() {
+  return editablePages.map((page) => ({
+    params: { slug: page.slug },
+    props: { pageMeta: page },
+  }));
+}
+
+const { pageMeta } = Astro.props;
+const page = await getEntry("pages", pageMeta.slug);
+const data = page?.data ?? {};
+
+const homeDashboardFallback =
+  pageMeta.slug === "home"
+    ? {
+        label: "LawBridge Platform",
+        heading: "Practical legal development",
+        description:
+          "Workshops, webinars, mentoring and resources designed to support aspiring lawyers.",
+        items: [
+          "SQE readiness",
+          "QWE preparation",
+          "Commercial awareness",
+          "AI-era legal skills",
+        ],
+      }
+    : {};
+
+const hero = data.hero ?? {};
+const dashboard = data.dashboard ?? homeDashboardFallback;
+const sections = data.sections ?? {};
+const cards = data.cards ?? {};
+const buttons = data.buttons ?? {};
+
+const initialData = JSON.stringify({
+  title: data.title ?? pageMeta.label,
+  hero,
+  dashboard,
+  sections,
+  cards,
+  buttons,
+});
+
+const sectionMeta = [
+  { key: "problem", tone: "cream", grid: "g3" },
+  { key: "method", tone: "light", grid: "g4" },
+  { key: "curriculum", tone: "navy", grid: "g4" },
+  { key: "pathways", tone: "cream", grid: "g2" },
+  { key: "cta", tone: "light", grid: "" },
+];
+---
+
+<BaseLayout title={`Edit ${pageMeta.label} | LawBridge Admin`}>
+  <div class="visual-editor-bar">
+    <div>
+      <strong>Editing: {pageMeta.label}</strong>
+      <span>Click directly on a highlighted section, update the content, then publish.</span>
+    </div>
+
+    <div class="visual-editor-actions">
+      <a href="/admin" class="editor-secondary">Back to Admin</a>
+      <a href={pageMeta.previewPath} class="editor-secondary" target="_blank">Preview Live Page</a>
+      <button id="publish-page" class="editor-primary" type="button">Publish Changes</button>
+    </div>
+  </div>
+
+  <div id="editor-status" class="visual-editor-status">
+    Select any highlighted text area and edit directly on the page.
+  </div>
+
+  <section class="hero visual-edit-section">
+    <div class="container hero-grid">
+      <div>
+        <p class="eyebrow editable-text" contenteditable="true" data-field="hero.eyebrow">
+          {hero.eyebrow}
+        </p>
+
+        <h1 class="editable-text" contenteditable="true" data-field="hero.heading">
+          {hero.heading}
+        </h1>
+
+        <p class="hero-lead editable-text" contenteditable="true" data-field="hero.description">
+          {hero.description}
+        </p>
+
+        <div class="hero-actions">
+          {hero.primaryButtonText && (
+            <span class="btn primary editable-text" contenteditable="true" data-field="hero.primaryButtonText">
+              {hero.primaryButtonText}
+            </span>
+          )}
+
+          {hero.secondaryButtonText && (
+            <span class="btn secondary editable-text" contenteditable="true" data-field="hero.secondaryButtonText">
+              {hero.secondaryButtonText}
+            </span>
+          )}
+
+          {hero.tertiaryButtonText && (
+            <span class="btn ghost editable-text" contenteditable="true" data-field="hero.tertiaryButtonText">
+              {hero.tertiaryButtonText}
+            </span>
+          )}
+        </div>
+      </div>
+
+      {dashboard?.heading && (
+        <div class="dashboard-card visual-edit-card">
+          <span class="pill editable-text" contenteditable="true" data-field="dashboard.label">
+            {dashboard.label}
+          </span>
+
+          <h2 class="editable-text" contenteditable="true" data-field="dashboard.heading">
+            {dashboard.heading}
+          </h2>
+
+          <p class="editable-text" contenteditable="true" data-field="dashboard.description">
+            {dashboard.description}
+          </p>
+
+          <div class="dashboard-list">
+            {(dashboard.items ?? []).map((item, index) => (
+              <span class="editable-text" contenteditable="true" data-dashboard-item={index}>
+                {item}
+              </span>
+            ))}
+          </div>
+        </div>
+      )}
+    </div>
+  </section>
+
+  {sectionMeta.map((section) => (
+    <section class={`section ${section.tone} visual-edit-section`}>
+      <div class="container">
+        <p class="eyebrow editable-text" contenteditable="true" data-field={`sections.${section.key}.eyebrow`}>
+          {sections[section.key]?.eyebrow}
+        </p>
+
+        <h2 class="editable-text" contenteditable="true" data-field={`sections.${section.key}.heading`}>
+          {sections[section.key]?.heading}
+        </h2>
+
+        <p class="section-intro editable-text" contenteditable="true" data-field={`sections.${section.key}.description`}>
+          {sections[section.key]?.description}
+        </p>
+
+        {section.key !== "cta" && (
+          <div class={`grid ${section.grid}`}>
+            {(cards[section.key] ?? []).map((card, index) => (
+              <article
+                class={section.key === "curriculum" ? "curric visual-edit-card" : "card visual-edit-card"}
+                data-card-group={section.key}
+                data-card-index={index}
+              >
+                <h3 class="editable-text" contenteditable="true" data-card-field="title">
+                  {card.title}
+                </h3>
+
+                <p class="editable-text" contenteditable="true" data-card-field="description">
+                  {card.description}
+                </p>
+
+                {section.key === "pathways" && card.buttonText && (
+                  <span class="btn secondary editable-text" contenteditable="true" data-card-field="buttonText">
+                    {card.buttonText}
+                  </span>
+                )}
+              </article>
+            ))}
+          </div>
+        )}
+
+        {section.key === "cta" && (
+          <div class="hero-actions">
+            {buttons.cta?.primaryText && (
+              <span class="btn primary editable-text" contenteditable="true" data-field="buttons.cta.primaryText">
+                {buttons.cta.primaryText}
+              </span>
+            )}
+
+            {buttons.cta?.secondaryText && (
+              <span class="btn secondary editable-text" contenteditable="true" data-field="buttons.cta.secondaryText">
+                {buttons.cta.secondaryText}
+              </span>
+            )}
+          </div>
+        )}
+      </div>
+    </section>
+  ))}
+
+  <section class="section cream">
+    <div class="container visual-link-panel">
+      <p class="eyebrow">Button links</p>
+      <h2>Update button destinations</h2>
+      <p class="section-intro">
+        Edit page text directly above. Use these fields only when a button needs to link somewhere different.
+      </p>
+
+      <div class="visual-link-grid">
+        <label>
+          Primary hero button link
+          <input data-value-field="hero.primaryButtonLink" value={hero.primaryButtonLink ?? ""} />
+        </label>
+
+        <label>
+          Secondary hero button link
+          <input data-value-field="hero.secondaryButtonLink" value={hero.secondaryButtonLink ?? ""} />
+        </label>
+
+        <label>
+          Third hero button link
+          <input data-value-field="hero.tertiaryButtonLink" value={hero.tertiaryButtonLink ?? ""} />
+        </label>
+
+        <label>
+          Final primary button link
+          <input data-value-field="buttons.cta.primaryLink" value={buttons.cta?.primaryLink ?? ""} />
+        </label>
+
+        <label>
+          Final secondary button link
+          <input data-value-field="buttons.cta.secondaryLink" value={buttons.cta?.secondaryLink ?? ""} />
+        </label>
+      </div>
+
+      {(cards.pathways ?? []).length > 0 && (
+        <div class="visual-pathway-links">
+          <h3>Pathway card button links</h3>
+
+          {(cards.pathways ?? []).map((card, index) => (
+            <label>
+              {card.title}
+              <input data-card-link-index={index} value={card.buttonLink ?? ""} />
+            </label>
+          ))}
+        </div>
+      )}
+    </div>
+  </section>
+
+  <style is:inline>
+    .visual-editor-bar {
+      position: sticky;
+      top: 0;
+      z-index: 9999;
+      padding: 1rem 1.5rem;
+      background: rgba(6, 27, 49, 0.96);
+      color: #ffffff;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 1rem;
+      box-shadow: 0 20px 55px rgba(6, 27, 49, 0.22);
+      backdrop-filter: blur(16px);
+    }
+
+    .visual-editor-bar strong {
+      display: block;
+      font-size: 1rem;
+    }
+
+    .visual-editor-bar span {
+      display: block;
+      margin-top: 0.2rem;
+      color: rgba(255, 255, 255, 0.72);
+      font-size: 0.86rem;
+    }
+
+    .visual-editor-actions {
+      display: flex;
+      gap: 0.7rem;
+      align-items: center;
+      flex-wrap: wrap;
+    }
+
+    .editor-primary,
+    .editor-secondary {
+      border: 0;
+      min-height: 42px;
+      padding: 0.7rem 1rem;
+      border-radius: 999px;
+      font-weight: 900;
+      text-decoration: none;
+      cursor: pointer;
+      font-size: 0.9rem;
+    }
+
+    .editor-primary {
+      background: linear-gradient(135deg, #e7b65f, #d39b45);
+      color: #061b31;
+    }
+
+    .editor-secondary {
+      background: rgba(255, 255, 255, 0.1);
+      color: #ffffff;
+      border: 1px solid rgba(255, 255, 255, 0.2);
+    }
+
+    .visual-editor-status {
+      position: fixed;
+      right: 1.2rem;
+      bottom: 1.2rem;
+      z-index: 9999;
+      max-width: 360px;
+      padding: 0.85rem 1rem;
+      border-radius: 18px;
+      background: #061b31;
+      color: #ffffff;
+      box-shadow: 0 18px 55px rgba(6, 27, 49, 0.25);
+      font-weight: 800;
+      font-size: 0.9rem;
+    }
+
+    .visual-edit-section {
+      position: relative;
+    }
+
+    .editable-text {
+      cursor: text;
+      outline: 2px dashed transparent;
+      outline-offset: 6px;
+      border-radius: 10px;
+      transition: outline-color 0.2s ease, background-color 0.2s ease;
+    }
+
+    .editable-text:hover {
+      outline-color: rgba(211, 155, 69, 0.75);
+      background: rgba(231, 182, 95, 0.08);
+    }
+
+    .editable-text:focus {
+      outline-color: #d39b45;
+      background: rgba(231, 182, 95, 0.16);
+    }
+
+    .visual-edit-card {
+      position: relative;
+    }
+
+    .visual-link-panel {
+      padding: 2rem;
+      border-radius: 28px;
+      background: rgba(255, 255, 255, 0.78);
+      border: 1px solid rgba(201, 150, 82, 0.28);
+      box-shadow: 0 24px 70px rgba(6, 27, 49, 0.1);
+    }
+
+    .visual-link-grid,
+    .visual-pathway-links {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 1rem;
+      margin-top: 1.25rem;
+    }
+
+    .visual-link-panel label {
+      display: grid;
+      gap: 0.45rem;
+      color: #061b31;
+      font-weight: 900;
+    }
+
+    .visual-link-panel input {
+      width: 100%;
+      border: 1px solid rgba(201, 150, 82, 0.34);
+      border-radius: 14px;
+      padding: 0.85rem 1rem;
+      font: inherit;
+      color: #061b31;
+      background: #ffffff;
+    }
+
+    .visual-pathway-links {
+      grid-column: 1 / -1;
+    }
+
+    .visual-pathway-links h3 {
+      grid-column: 1 / -1;
+      margin: 0.5rem 0 0;
+      font-family: Georgia, "Times New Roman", serif;
+      color: #061b31;
+      font-size: 1.6rem;
+    }
+
+    @media (max-width: 860px) {
+      .visual-editor-bar {
+        align-items: flex-start;
+        flex-direction: column;
+      }
+
+      .visual-link-grid,
+      .visual-pathway-links {
+        grid-template-columns: 1fr;
+      }
+
+      .visual-editor-status {
+        left: 1rem;
+        right: 1rem;
+        bottom: 1rem;
+      }
+    }
+  </style>
+
+  <script define:vars={{ initialData, pageSlug: pageMeta.slug }}>
+    const state = JSON.parse(initialData);
+    const statusBox = document.getElementById("editor-status");
+    const publishButton = document.getElementById("publish-page");
+
+    function setStatus(message) {
+      if (statusBox) {
+        statusBox.textContent = message;
+      }
+    }
+
+    function setPath(target, path, value) {
+      const parts = path.split(".");
+      let current = target;
+
+      parts.forEach((part, index) => {
+        if (index === parts.length - 1) {
+          current[part] = value;
+          return;
+        }
+
+        if (!current[part] || typeof current[part] !== "object") {
+          current[part] = {};
+        }
+
+        current = current[part];
+      });
+    }
+
+    function getText(element) {
+      return (element?.innerText || "").replace(/\s+\n/g, "\n").trim();
+    }
+
+    function collectTextFields() {
+      document.querySelectorAll("[data-field]").forEach((element) => {
+        setPath(state, element.dataset.field, getText(element));
+      });
+
+      document.querySelectorAll("[data-value-field]").forEach((element) => {
+        setPath(state, element.dataset.valueField, element.value.trim());
+      });
+    }
+
+    function collectDashboardItems() {
+      const items = Array.from(document.querySelectorAll("[data-dashboard-item]"))
+        .map((element) => getText(element))
+        .filter(Boolean);
+
+      if (!state.dashboard) {
+        state.dashboard = {};
+      }
+
+      state.dashboard.items = items;
+    }
+
+    function collectCards() {
+      state.cards = state.cards || {};
+
+      ["problem", "method", "curriculum", "pathways"].forEach((group) => {
+        const cardElements = Array.from(document.querySelectorAll(`[data-card-group="${group}"]`));
+
+        state.cards[group] = cardElements.map((cardElement) => {
+          const card = {
+            title: getText(cardElement.querySelector('[data-card-field="title"]')),
+            description: getText(cardElement.querySelector('[data-card-field="description"]')),
+          };
+
+          if (group === "pathways") {
+            card.buttonText = getText(cardElement.querySelector('[data-card-field="buttonText"]'));
+
+            const linkInput = document.querySelector(`[data-card-link-index="${cardElement.dataset.cardIndex}"]`);
+            card.buttonLink = linkInput ? linkInput.value.trim() : "";
+          }
+
+          return card;
+        });
+      });
+    }
+
+    function collectState() {
+      collectTextFields();
+      collectDashboardItems();
+      collectCards();
+      return state;
+    }
+
+    document.querySelectorAll("[contenteditable='true']").forEach((element) => {
+      element.addEventListener("focus", () => {
+        setStatus("Editing selected text. Press Publish Changes when finished.");
+      });
+
+      element.addEventListener("input", () => {
+        setStatus("Unsaved changes. Press Publish Changes to update the website.");
+      });
+    });
+
+    document.querySelectorAll("input").forEach((input) => {
+      input.addEventListener("input", () => {
+        setStatus("Unsaved link changes. Press Publish Changes to update the website.");
+      });
+    });
+
+    if (publishButton) {
+      publishButton.addEventListener("click", async () => {
+        try {
+          if (!window.netlifyIdentity) {
+            setStatus("Netlify Identity is not loaded.");
+            return;
+          }
+
+          const user = window.netlifyIdentity.currentUser();
+
+          if (!user) {
+            setStatus("Please log in before publishing.");
+            window.netlifyIdentity.open("login");
+            return;
+          }
+
+          publishButton.disabled = true;
+          publishButton.textContent = "Publishing...";
+          setStatus("Publishing changes...");
+
+          const token = await user.jwt();
+          const updatedData = collectState();
+
+          const response = await fetch("/.netlify/functions/update-page-content", {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+              Authorization: `Bearer ${token}`,
+            },
+            body: JSON.stringify({
+              page: pageSlug,
+              data: updatedData,
+            }),
+          });
+
+          const result = await response.json();
+
+          if (!response.ok) {
+            throw new Error(result.error || "Could not publish changes.");
+          }
+
+          setStatus("Published. The website will update after the deployment finishes.");
+          publishButton.textContent = "Published";
+        } catch (error) {
+          setStatus(error.message || "Something went wrong.");
+          publishButton.disabled = false;
+          publishButton.textContent = "Publish Changes";
+        }
+      });
+    }
+  </script>
+</BaseLayout>
