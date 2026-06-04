@@ -1,5 +1,9 @@
 import { PACK_KNOWLEDGE } from "./_ai-pack-knowledge.js";
 
+const DEFAULT_OWNER = "jamilharoon28-sudo";
+const DEFAULT_REPO = "LawBridge-Skills";
+const DEFAULT_BRANCH = "main";
+
 function json(statusCode, body) {
   return {
     statusCode,
@@ -56,6 +60,72 @@ function cleanPack(pack, progressEntry = {}) {
   };
 }
 
+async function githubRequest(url, options = {}) {
+  const token = process.env.GITHUB_TOKEN || process.env.GITHUB_PAT;
+
+  if (!token) {
+    return {
+      status: 404,
+      data: {},
+    };
+  }
+
+  const response = await fetch(url, {
+    ...options,
+    headers: {
+      Authorization: `Bearer ${token}`,
+      Accept: "application/vnd.github+json",
+      "X-GitHub-Api-Version": "2022-11-28",
+      ...(options.headers || {}),
+    },
+  });
+
+  const text = await response.text();
+
+  let data;
+  try {
+    data = text ? JSON.parse(text) : {};
+  } catch {
+    data = { raw: text };
+  }
+
+  if (!response.ok && response.status !== 404) {
+    throw new Error(data.message || `GitHub request failed with status ${response.status}`);
+  }
+
+  return {
+    status: response.status,
+    data,
+  };
+}
+
+async function loadProgress(studentId) {
+  const owner = process.env.GITHUB_OWNER || DEFAULT_OWNER;
+  const repo = process.env.GITHUB_REPO || DEFAULT_REPO;
+  const branch = process.env.GITHUB_BRANCH || DEFAULT_BRANCH;
+
+  const filePath = `src/content/progress/${safeKey(studentId || "guest-student")}.json`;
+  const encodedPath = filePath
+    .split("/")
+    .map((part) => encodeURIComponent(part))
+    .join("/");
+
+  const url = `https://api.github.com/repos/${owner}/${repo}/contents/${encodedPath}?ref=${encodeURIComponent(branch)}`;
+
+  const existing = await githubRequest(url);
+
+  if (existing.status !== 200 || !existing.data?.content) {
+    return {
+      studentId,
+      packs: {},
+      summary: {},
+    };
+  }
+
+  const decoded = Buffer.from(existing.data.content, "base64").toString("utf8");
+  return JSON.parse(decoded);
+}
+
 function recommendNextPack(allPacks, progress) {
   const packs = Array.isArray(allPacks) ? allPacks : [];
   const progressPacks = progress?.packs || progress || {};
@@ -109,15 +179,16 @@ export async function handler(event) {
 
   try {
     const body = JSON.parse(event.body || "{}");
-    safeKey(body.studentId || "guest-student");
+    const studentId = safeKey(body.studentId || "guest-student");
 
-    const progress = body.progress || {};
+    const progress = body.progress || (await loadProgress(studentId));
     const nextPack = recommendNextPack(PACK_KNOWLEDGE, progress);
 
     return json(200, {
       success: true,
       nextPack,
       packsAvailable: PACK_KNOWLEDGE.length,
+      progressSummary: progress.summary || {},
     });
   } catch (error) {
     return json(500, {
