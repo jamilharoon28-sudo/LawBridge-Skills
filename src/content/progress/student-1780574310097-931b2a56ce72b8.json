@@ -1,14 +1,20 @@
 {
   "studentId": "student-1780574310097-931b2a56ce72b8",
-  "updatedAt": "2026-06-04T17:50:48.321Z",
+  "updatedAt": "2026-06-04T21:59:57.104Z",
   "packs": {
     "AN-01": {
       "packCode": "AN-01",
-      "packTitle": "Cyberattack After Client Interview",
+      "packTitle": "Contract Dispute Missing Evidence",
       "skill": "Attendance Notes and Legal Analysis",
       "status": "In progress",
-      "mode": "Opened from resources dashboard",
-      "updatedAt": "2026-06-04T17:50:48.321Z"
+      "mode": "Answer Pack",
+      "updatedAt": "2026-06-04T21:59:57.104Z",
+      "category": "Legal Practice Skills",
+      "categoryGroup": "Legal Practice Skills",
+      "answerRoute": "/answer-pack?pack=AN-01",
+      "answerCount": 5,
+      "lastOpenedAt": "2026-06-04T21:59:57.104Z",
+      "draftSavedAt": "2026-06-04T21:59:57.104Z"
     },
     "AN-02": {
       "packCode": "AN-02",
@@ -18,5 +24,15 @@
       "mode": "Ask Anything",
       "updatedAt": "2026-06-04T13:07:38.742Z"
     }
+  },
+  "latestPackCode": "AN-01",
+  "summary": {
+    "totalStarted": 2,
+    "inProgress": 2,
+    "submittedForAiCheck": 0,
+    "completed": 0,
+    "latestPackCode": "AN-01",
+    "latestStatus": "In progress",
+    "updatedAt": "2026-06-04T21:59:57.104Z"
   }
 }
