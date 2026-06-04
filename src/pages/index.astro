@@ -9,19 +9,7 @@ const hero = data?.hero ?? {};
 const sections = data?.sections ?? {};
 const cards = data?.cards ?? {};
 const buttons = data?.buttons ?? {};
-
-const dashboard = data?.dashboard ?? {
-  label: "LawBridge Platform",
-  heading: "Practical legal development",
-  description:
-    "Workshops, webinars, mentoring and resources designed to support aspiring lawyers.",
-  items: [
-    "SQE readiness",
-    "QWE preparation",
-    "Commercial awareness",
-    "AI-era legal skills",
-  ],
-};
+const dashboard = data?.dashboard ?? {};
 ---
 
 <BaseLayout title={data?.title ?? "LawBridge | Practical Legal Development"}>
