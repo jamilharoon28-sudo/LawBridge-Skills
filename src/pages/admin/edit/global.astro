@@ -27,48 +27,228 @@ const pages = pageFiles.map((file) => {
     <meta charset="UTF-8" />
     <title>Global Website Editor | LawBridge Admin</title>
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
     <script src="https://identity.netlify.com/v1/netlify-identity-widget.js"></script>
 
     <style>
       :root {
         --navy: #061b31;
         --cream: #f8f1e4;
-        --cream-soft: #fbf7ef;
         --gold: #d39b45;
-        --gold-soft: #e7b65f;
         --ink: #142033;
         --muted: #667085;
         --border: rgba(6, 27, 49, 0.14);
-        --white: #ffffff;
       }
-      body { margin:0; background: var(--cream); color: var(--ink); font-family: Inter, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; }
-      .shell { max-width: 1180px; margin:0 auto; padding:40px 22px 80px; }
-      .topbar { display:flex; justify-content:space-between; gap:18px; align-items:center; margin-bottom:28px; }
-      .eyebrow { color: var(--gold); font-weight:800; letter-spacing:0.14em; font-size:0.78rem; text-transform:uppercase; }
-      h1 { margin:8px 0 8px; color: var(--navy); font-family: Georgia, "Times New Roman", serif; font-size: clamp(2rem,4vw,3.35rem); line-height:1.05; }
-      .intro { max-width:760px; color: var(--muted); font-size:1.04rem; line-height:1.65; }
-      .actions { display:flex; gap:10px; flex-wrap:wrap; }
-      .button { border:0; border-radius:999px; padding:11px 18px; background: var(--navy); color:white; font-weight:800; cursor:pointer; text-decoration:none; display:inline-flex; align-items:center; justify-content:center; }
-      .button.secondary { background:white; color: var(--navy); border:1px solid var(--border); }
-      .button.gold { background: var(--gold); color: var(--navy); }
-      .button:disabled { opacity:0.45; cursor:not-allowed; }
-      .notice { background: rgba(211,155,69,0.13); border:1px solid rgba(211,155,69,0.35); color: var(--navy); padding:16px 18px; border-radius:20px; margin:24px 0; line-height:1.55; }
-      .editor-grid { display:grid; gap:22px; margin-top:28px; }
-      .page-card { background: rgba(255,255,255,0.82); border:1px solid var(--border); border-radius:28px; box-shadow:0 18px 50px rgba(6,27,49,0.08); overflow:hidden; }
-      .page-head { padding:20px 22px; background: linear-gradient(135deg,#ffffff,#fbf7ef); border-bottom:1px solid var(--border); display:flex; justify-content:space-between; align-items:center; gap:14px; }
-      .page-title { margin:0; color: var(--navy); font-size:1.2rem; font-weight:900; }
-      .page-meta { color: var(--muted); font-size:0.9rem; margin-top:4px; }
-      .status { font-size:0.86rem; font-weight:800; color: var(--muted); }
-      .status.dirty { color:#a15c00; }
-      .status.saved { color:#18794e; }
-      .status.error { color:#b42318; }
-      textarea { width:100%; min-height:430px; border:0; resize:vertical; padding:22px; box-sizing:border-box; background:#fff; color:#182230; font-family:"SFMono-Regular", Consolas, "Liberation Mono", monospace; font-size:0.92rem; line-height:1.62; outline:none; }
-      .page-actions { padding:16px 22px 20px; border-top:1px solid var(--border); display:flex; justify-content:space-between; gap:14px; flex-wrap:wrap; align-items:center; }
-      .small-links { display:flex; gap:10px; flex-wrap:wrap; }
-      .small-links a { color: var(--navy); font-weight:800; text-decoration:none; }
-      .locked { min-height:70vh; display:grid; place-items:center; text-align:center; }
-      .locked-card { background:white; border:1px solid var(--border); border-radius:28px; padding:32px; max-width:520px; box-shadow:0 18px 50px rgba(6,27,49,0.08); }
-      .hidden { display:none; }
+
+      body {
+        margin: 0;
+        background: var(--cream);
+        color: var(--ink);
+        font-family: Inter, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      }
+
+      .shell {
+        max-width: 1180px;
+        margin: 0 auto;
+        padding: 40px 22px 80px;
+      }
+
+      .topbar {
+        display: flex;
+        justify-content: space-between;
+        gap: 18px;
+        align-items: center;
+        margin-bottom: 28px;
+      }
+
+      .eyebrow {
+        color: var(--gold);
+        font-weight: 800;
+        letter-spacing: 0.14em;
+        font-size: 0.78rem;
+        text-transform: uppercase;
+      }
+
+      h1 {
+        margin: 8px 0;
+        color: var(--navy);
+        font-family: Georgia, "Times New Roman", serif;
+        font-size: clamp(2rem, 4vw, 3.35rem);
+        line-height: 1.05;
+      }
+
+      .intro {
+        max-width: 760px;
+        color: var(--muted);
+        font-size: 1.04rem;
+        line-height: 1.65;
+      }
+
+      .actions {
+        display: flex;
+        gap: 10px;
+        flex-wrap: wrap;
+      }
+
+      .button {
+        border: 0;
+        border-radius: 999px;
+        padding: 11px 18px;
+        background: var(--navy);
+        color: white;
+        font-weight: 800;
+        cursor: pointer;
+        text-decoration: none;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+      }
+
+      .button.secondary {
+        background: white;
+        color: var(--navy);
+        border: 1px solid var(--border);
+      }
+
+      .button.gold {
+        background: var(--gold);
+        color: var(--navy);
+      }
+
+      .button:disabled {
+        opacity: 0.45;
+        cursor: not-allowed;
+      }
+
+      .notice {
+        background: rgba(211, 155, 69, 0.13);
+        border: 1px solid rgba(211, 155, 69, 0.35);
+        color: var(--navy);
+        padding: 16px 18px;
+        border-radius: 20px;
+        margin: 24px 0;
+        line-height: 1.55;
+      }
+
+      .editor-grid {
+        display: grid;
+        gap: 22px;
+        margin-top: 28px;
+      }
+
+      .page-card {
+        background: rgba(255, 255, 255, 0.82);
+        border: 1px solid var(--border);
+        border-radius: 28px;
+        box-shadow: 0 18px 50px rgba(6, 27, 49, 0.08);
+        overflow: hidden;
+      }
+
+      .page-head {
+        padding: 20px 22px;
+        background: linear-gradient(135deg, #ffffff, #fbf7ef);
+        border-bottom: 1px solid var(--border);
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        gap: 14px;
+      }
+
+      .page-title {
+        margin: 0;
+        color: var(--navy);
+        font-size: 1.2rem;
+        font-weight: 900;
+      }
+
+      .page-meta {
+        color: var(--muted);
+        font-size: 0.9rem;
+        margin-top: 4px;
+      }
+
+      .status {
+        font-size: 0.86rem;
+        font-weight: 800;
+        color: var(--muted);
+      }
+
+      .status.dirty {
+        color: #a15c00;
+      }
+
+      .status.saved {
+        color: #18794e;
+      }
+
+      .status.error {
+        color: #b42318;
+      }
+
+      textarea {
+        width: 100%;
+        min-height: 430px;
+        border: 0;
+        resize: vertical;
+        padding: 22px;
+        box-sizing: border-box;
+        background: #fff;
+        color: #182230;
+        font-family: "SFMono-Regular", Consolas, "Liberation Mono", monospace;
+        font-size: 0.92rem;
+        line-height: 1.62;
+        outline: none;
+      }
+
+      .page-actions {
+        padding: 16px 22px 20px;
+        border-top: 1px solid var(--border);
+        display: flex;
+        justify-content: space-between;
+        gap: 14px;
+        flex-wrap: wrap;
+        align-items: center;
+      }
+
+      .small-links {
+        display: flex;
+        gap: 10px;
+        flex-wrap: wrap;
+      }
+
+      .small-links a {
+        color: var(--navy);
+        font-weight: 800;
+        text-decoration: none;
+      }
+
+      .locked {
+        min-height: 70vh;
+        display: grid;
+        place-items: center;
+        text-align: center;
+      }
+
+      .locked-card {
+        background: white;
+        border: 1px solid var(--border);
+        border-radius: 28px;
+        padding: 32px;
+        max-width: 540px;
+        box-shadow: 0 18px 50px rgba(6, 27, 49, 0.08);
+      }
+
+      .login-options {
+        display: flex;
+        gap: 10px;
+        justify-content: center;
+        flex-wrap: wrap;
+        margin-top: 18px;
+      }
+
+      .hidden {
+        display: none;
+      }
     </style>
   </head>
 
@@ -78,9 +258,16 @@ const pages = pageFiles.map((file) => {
         <p class="eyebrow">Admin access</p>
         <h1>Global Website Editor</h1>
         <p class="intro">
-          Please log in with an authorised LawBridge admin account to edit website content.
+          Log in to edit LawBridge website content from one place.
         </p>
-        <button class="button gold" id="loginButton">Log in</button>
+
+        <div class="login-options">
+          <button class="button gold" id="loginButton" type="button">Log in</button>
+          <a class="button secondary" href="/login">Open login page</a>
+          <a class="button secondary" href="/admin">Back to admin</a>
+        </div>
+
+        <p class="intro" id="identityMessage" style="font-size: 0.9rem; margin-top: 18px;"></p>
       </div>
     </div>
 
@@ -96,12 +283,14 @@ const pages = pageFiles.map((file) => {
 
         <div class="actions">
           <a class="button secondary" href="/admin">Admin dashboard</a>
-          <button class="button gold" id="saveAllButton">Save all changed pages</button>
+          <button class="button gold" id="saveAllButton" type="button">Save all changed pages</button>
+          <button class="button secondary" id="logoutButton" type="button">Log out</button>
         </div>
       </div>
 
       <div class="notice">
-        Use honest wording only. Do not add fake testimonials, partners, outcomes, case studies, or AI claims unless they are genuine.
+        Use honest wording only. Do not add fake testimonials, partners, outcomes, case studies,
+        user numbers, mentor claims or AI capability claims unless they are genuine and approved.
       </div>
 
       <section class="editor-grid">
@@ -115,36 +304,44 @@ const pages = pageFiles.map((file) => {
               <div class="status" data-status={page.slug}>No changes</div>
             </div>
 
-            <textarea
-              data-editor={page.slug}
-              spellcheck="false"
-            >{page.raw}</textarea>
+            <textarea data-editor={page.slug} spellcheck="false">{page.raw}</textarea>
 
             <div class="page-actions">
               <div class="small-links">
-                <a href={`/${page.slug === "home" ? "" : page.slug}`} target="_blank">View page</a>
-                <a href={`/admin/edit/${page.slug}`}>Open single-page editor</a>
+                <a href={`/${page.slug === "home" ? "" : page.slug}`} target="_blank">
+                  View page
+                </a>
+                <a href={`/admin/edit/${page.slug}`}>
+                  Open single-page editor
+                </a>
               </div>
 
-              <button class="button" data-save={page.slug}>Save {page.slug}</button>
+              <button class="button" data-save={page.slug} type="button">
+                Save {page.slug}
+              </button>
             </div>
           </article>
         ))}
       </section>
     </main>
 
-    <script>
-      function openLogin() {
-        if (window.netlifyIdentity) {
-          window.netlifyIdentity.open("login");
-        } else {
-          alert("Netlify Identity has not loaded yet. Refresh the page and try again.");
+    <script is:inline>
+      const locked = document.getElementById("locked");
+      const editor = document.getElementById("editor");
+      const loginButton = document.getElementById("loginButton");
+      const logoutButton = document.getElementById("logoutButton");
+      const identityMessage = document.getElementById("identityMessage");
+      const saveAllButton = document.getElementById("saveAllButton");
+
+      const initialPages = new Map();
+
+      function setIdentityMessage(message) {
+        if (identityMessage) {
+          identityMessage.textContent = message;
         }
       }
 
       function showEditor(user) {
-        const locked = document.getElementById("locked");
-        const editor = document.getElementById("editor");
         if (user) {
           locked.classList.add("hidden");
           editor.classList.remove("hidden");
@@ -154,16 +351,109 @@ const pages = pageFiles.map((file) => {
         }
       }
 
-      window.addEventListener("load", () => {
+      function openLogin() {
         if (!window.netlifyIdentity) {
-          alert("Netlify Identity widget did not load. Check the script tag.");
+          setIdentityMessage("Netlify Identity did not load. Use the Open login page button instead.");
           return;
         }
 
-        window.netlifyIdentity.init();
+        window.netlifyIdentity.open("login");
+      }
 
-        const currentUser = window.netlifyIdentity.currentUser();
-        showEditor(currentUser);
+      function setupEditors() {
+        for (const textarea of document.querySelectorAll("[data-editor]")) {
+          initialPages.set(textarea.dataset.editor, textarea.value);
+
+          textarea.addEventListener("input", () => {
+            const slug = textarea.dataset.editor;
+            const status = document.querySelector(`[data-status="${slug}"]`);
+
+            if (textarea.value !== initialPages.get(slug)) {
+              status.textContent = "Unsaved changes";
+              status.className = "status dirty";
+            } else {
+              status.textContent = "No changes";
+              status.className = "status";
+            }
+          });
+        }
+
+        for (const button of document.querySelectorAll("[data-save]")) {
+          button.addEventListener("click", () => savePage(button.dataset.save));
+        }
+      }
+
+      async function savePage(slug) {
+        const textarea = document.querySelector(`[data-editor="${slug}"]`);
+        const status = document.querySelector(`[data-status="${slug}"]`);
+        const button = document.querySelector(`[data-save="${slug}"]`);
+
+        status.textContent = "Saving...";
+        status.className = "status";
+        button.disabled = true;
+
+        try {
+          const response = await fetch("/.netlify/functions/update-page-content", {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+            },
+            body: JSON.stringify({
+              slug,
+              rawContent: textarea.value,
+            }),
+          });
+
+          const result = await response.json();
+
+          if (!response.ok) {
+            throw new Error(result.error || "Save failed.");
+          }
+
+          initialPages.set(slug, textarea.value);
+          status.textContent = "Saved";
+          status.className = "status saved";
+        } catch (error) {
+          status.textContent = error.message;
+          status.className = "status error";
+        } finally {
+          button.disabled = false;
+        }
+      }
+
+      async function saveAllChangedPages() {
+        const changed = [...document.querySelectorAll("[data-editor]")]
+          .filter((textarea) => textarea.value !== initialPages.get(textarea.dataset.editor))
+          .map((textarea) => textarea.dataset.editor);
+
+        if (changed.length === 0) {
+          alert("No changed pages to save.");
+          return;
+        }
+
+        for (const slug of changed) {
+          await savePage(slug);
+        }
+      }
+
+      window.addEventListener("load", () => {
+        setupEditors();
+
+        loginButton?.addEventListener("click", openLogin);
+        saveAllButton?.addEventListener("click", saveAllChangedPages);
+
+        if (!window.netlifyIdentity) {
+          setIdentityMessage("Netlify Identity did not load. Use the Open login page button instead.");
+          showEditor(null);
+          return;
+        }
+
+        window.netlifyIdentity.on("init", (user) => {
+          showEditor(user);
+          if (!user) {
+            setIdentityMessage("Not signed in.");
+          }
+        });
 
         window.netlifyIdentity.on("login", (user) => {
           showEditor(user);
@@ -172,9 +462,17 @@ const pages = pageFiles.map((file) => {
 
         window.netlifyIdentity.on("logout", () => {
           showEditor(null);
+          setIdentityMessage("Signed out.");
         });
 
-        document.getElementById("loginButton")?.addEventListener("click", openLogin);
+        logoutButton?.addEventListener("click", () => {
+          window.netlifyIdentity.logout();
+        });
+
+        window.netlifyIdentity.init();
+
+        const currentUser = window.netlifyIdentity.currentUser();
+        showEditor(currentUser);
       });
     </script>
   </body>
