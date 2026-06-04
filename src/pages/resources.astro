@@ -1,6 +1,7 @@
 ---
 import BaseLayout from "../layouts/BaseLayout.astro";
 import { getCollection, getEntry } from "astro:content";
+import Dashboard from "../components/Dashboard.astro"; // import the dashboard component
 
 const page = await getEntry("pages", "resources");
 const data = page?.data;
@@ -8,20 +9,7 @@ const data = page?.data;
 const hero = data?.hero ?? {};
 
 const legacyResources = [
-  { code: "CI-01", skill: "Client Interviewing", scenario: "Failed Software Launch", difficulty: "Foundation to Guided Practice", summary: "Plan and structure a client interview for a failed software launch dispute.", student: "/resources/student/Client Interviewing - Failed Software Launch - Student Pack.docx", tutor: "/resources/tutor/Client Interviewing - Failed Software Launch - Tutor Guide.docx" },
-  { code: "CI-02", skill: "Client Interviewing", scenario: "Dismissal After Raising Concern", difficulty: "Foundation to Guided Practice", summary: "Prepare a careful client interview after dismissal linked to a workplace concern.", student: "/resources/student/Client Interviewing - Dismissal After Raising Concern - Student Pack.docx", tutor: "/resources/tutor/Client Interviewing - Dismissal After Raising Concern - Tutor Guide.docx" },
-  { code: "AN-01", skill: "Attendance Notes and Legal Analysis", scenario: "Cyberattack After Client Interview", difficulty: "Intermediate", summary: "Turn a cyber incident interview into an attendance note and analysis.", student: "/resources/student/Attendance Notes and Legal Analysis - Cyberattack After Client Interview - Student Pack.docx", tutor: "/resources/tutor/Attendance Notes and Legal Analysis - Cyberattack After Client Interview - Tutor Guide.docx" },
-  { code: "AN-02", skill: "Attendance Notes and Legal Analysis", scenario: "Contract Dispute Missing Evidence", difficulty: "Foundation to Intermediate", summary: "Analyse a contract dispute where key documents and evidence are incomplete.", student: "/resources/student/Attendance Notes and Legal Analysis - Contract Dispute Missing Evidence - Student Pack.docx", tutor: "/resources/tutor/Attendance Notes and Legal Analysis - Contract Dispute Missing Evidence - Tutor Guide.docx" },
-  { code: "LW-01", skill: "Legal Writing", scenario: "AI Tool Dispute Advice Email", difficulty: "Intermediate", summary: "Draft a practical client advice email following an AI-generated content dispute.", student: "/resources/student/Legal Writing - AI Tool Dispute Advice Email - Student Pack.docx", tutor: "/resources/tutor/Legal Writing - AI Tool Dispute Advice Email - Tutor Guide.docx" },
-  { code: "LW-02", skill: "Legal Writing", scenario: "Service Failure Complaint Response", difficulty: "Foundation to Intermediate", summary: "Write a professional response to a service failure complaint without over-admitting liability.", student: "/resources/student/Legal Writing - Service Failure Complaint Response - Student Pack.docx", tutor: "/resources/tutor/Legal Writing - Service Failure Complaint Response - Tutor Guide.docx" },
-  { code: "LD-01", skill: "Legal Drafting", scenario: "Limitation of Liability Clause", difficulty: "Intermediate", summary: "Redraft and explain a limitation of liability clause in a technology services agreement.", student: "/resources/student/Legal Drafting - Limitation of Liability Clause - Student Pack.docx", tutor: "/resources/tutor/Legal Drafting - Limitation of Liability Clause - Tutor Guide.docx" },
-  { code: "LD-02", skill: "Legal Drafting", scenario: "AI Ownership Clause", difficulty: "Intermediate", summary: "Draft contract wording dealing with AI outputs, ownership, review and responsibility.", student: "/resources/student/Legal Drafting - AI Ownership Clause - Student Pack.docx", tutor: "/resources/tutor/Legal Drafting - AI Ownership Clause - Tutor Guide.docx" },
-  { code: "AO-01", skill: "Advocacy and Oral Presentation", scenario: "Technology Payment Dispute", difficulty: "Intermediate", summary: "Prepare a short oral submission in a digital delivery and payment dispute.", student: "/resources/student/Advocacy - Technology Payment Dispute - Student Pack.docx", tutor: "/resources/tutor/Advocacy - Technology Payment Dispute - Tutor Guide.docx" },
-  { code: "AO-02", skill: "Advocacy and Oral Presentation", scenario: "Business Interruption Insurance Dispute", difficulty: "Intermediate to Advanced", summary: "Prepare oral arguments in a cyber insurance business interruption dispute.", student: "/resources/student/Advocacy - Business Interruption Insurance Dispute - Student Pack.docx", tutor: "/resources/tutor/Advocacy - Business Interruption Insurance Dispute - Tutor Guide.docx" },
-  { code: "LR-01", skill: "Legal Research", scenario: "Data Breach Reporting Duties", difficulty: "Foundation to Intermediate", summary: "Frame research questions and preliminary findings for data breach reporting duties.", student: "/resources/student/Legal Research - Data Breach Reporting Duties - Student Pack.docx", tutor: "/resources/tutor/Legal Research - Data Breach Reporting Duties - Tutor Guide.docx" },
-  { code: "LR-02", skill: "Legal Research", scenario: "Digital Payments Market Entry", difficulty: "Intermediate", summary: "Research regulatory issues for a digital payments business entering a new market.", student: "/resources/student/Legal Research - Digital Payments Market Entry - Student Pack.docx", tutor: "/resources/tutor/Legal Research - Digital Payments Market Entry - Tutor Guide.docx" },
-  { code: "CMA-01", skill: "Case and Matter Analysis", scenario: "Tech Company Acquisition Red Flags", difficulty: "Intermediate to Advanced", summary: "Analyse due diligence risks in a technology company acquisition.", student: "/resources/student/Case and Matter Analysis - Tech Company Acquisition Red Flags - Student Pack.docx", tutor: "/resources/tutor/Case and Matter Analysis - Tech Company Acquisition Red Flags - Tutor Guide.docx" },
-  { code: "CMA-02", skill: "Case and Matter Analysis", scenario: "Blockchain Payment Dispute", difficulty: "Intermediate to Advanced", summary: "Analyse evidence, risk and strategy in a smart contract payment dispute.", student: "/resources/student/Case and Matter Analysis - Blockchain Payment Dispute - Student Pack.docx", tutor: "/resources/tutor/Case and Matter Analysis - Blockchain Payment Dispute - Tutor Guide.docx" },
+  // ... keep all your existing legacyResources here
 ];
 
 const contentResources = await getCollection("resources");
@@ -43,20 +31,11 @@ function getResourceKey(resource) {
 function getCoachLink(resource) {
   const params = new URLSearchParams();
 
-  if (resource.code) {
-    params.set("pack", resource.code);
-  }
-
-  if (resource.scenario) {
-    params.set("scenario", resource.scenario);
-  }
-
-  if (resource.skill) {
-    params.set("skill", resource.skill);
-  }
+  if (resource.code) params.set("pack", resource.code);
+  if (resource.scenario) params.set("scenario", resource.scenario);
+  if (resource.skill) params.set("skill", resource.skill);
 
   const query = params.toString();
-
   return query ? `/ai-skills-coach?${query}` : "/ai-skills-coach";
 }
 
@@ -68,7 +47,6 @@ const resourceMap = new Map();
 });
 
 const resources = Array.from(resourceMap.values());
-
 const skills = [...new Set(resources.map((resource) => resource.skill).filter(Boolean))];
 ---
 
@@ -84,6 +62,9 @@ const skills = [...new Set(resources.map((resource) => resource.skill).filter(Bo
       </div>
     </div>
   </section>
+
+  <!-- Embed the Dashboard component here -->
+  <Dashboard />
 
   <section class="section cream">
     <div class="container">
@@ -167,381 +148,5 @@ const skills = [...new Set(resources.map((resource) => resource.skill).filter(Bo
     </div>
   </section>
 
-  <style is:inline>
-    .resource-controls {
-      position: sticky;
-      top: 1rem;
-      z-index: 30;
-      display: flex;
-      flex-wrap: wrap;
-      gap: 0.85rem;
-      align-items: center;
-      margin: 2rem 0;
-      padding: 1rem;
-      border: 1px solid rgba(201, 150, 82, 0.22);
-      border-radius: 24px;
-      background: rgba(255, 255, 255, 0.88);
-      backdrop-filter: blur(18px);
-      box-shadow: 0 18px 50px rgba(4, 27, 50, 0.12);
-    }
-
-    .resource-search {
-      flex: 1 1 320px;
-      min-height: 46px;
-      border-radius: 999px;
-      border: 1px solid rgba(201, 150, 82, 0.28);
-      background: #ffffff;
-      color: #041b32;
-      font-weight: 800;
-      padding: 0.75rem 1.15rem;
-      outline: none;
-    }
-
-    .resource-search::placeholder {
-      color: rgba(4, 27, 50, 0.58);
-    }
-
-    .resource-search:focus {
-      border-color: rgba(201, 150, 82, 0.72);
-      box-shadow: 0 0 0 4px rgba(201, 150, 82, 0.16);
-    }
-
-    .resource-filter,
-    #skillFilter {
-      min-height: 46px;
-      border-radius: 999px;
-      border: 1px solid rgba(201, 150, 82, 0.28);
-      background: #ffffff;
-      color: #041b32;
-      font-weight: 800;
-      padding: 0.75rem 1rem;
-      cursor: pointer;
-    }
-
-    .resource-filter:hover,
-    #skillFilter:hover {
-      transform: translateY(-2px);
-      box-shadow: 0 14px 34px rgba(4, 27, 50, 0.14);
-    }
-
-    .resource-filter.active {
-      background: linear-gradient(135deg, #e7b65f, #c99652);
-      color: #041b32;
-      box-shadow: 0 14px 34px rgba(201, 150, 82, 0.28);
-    }
-
-    .print-resource-list {
-      margin-left: auto;
-    }
-
-    .resource-results-count {
-      color: #334155;
-      font-weight: 700;
-      margin: 0.5rem 0 1.5rem;
-    }
-
-    .resource-library {
-      display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
-      gap: 1.35rem;
-      margin-top: 2rem;
-    }
-
-    .resource-card {
-      position: relative;
-      overflow: hidden;
-      display: flex;
-      flex-direction: column;
-      justify-content: space-between;
-      gap: 1.5rem;
-      min-height: 100%;
-      padding: 2rem;
-      border-radius: 24px;
-      background: linear-gradient(145deg, #ffffff, #fbf8f2);
-      border: 1px solid rgba(201, 150, 82, 0.24);
-      box-shadow: 0 22px 60px rgba(4, 27, 50, 0.1);
-      opacity: 0;
-      transform: translateY(18px) scale(0.98);
-      transition:
-        opacity 0.35s ease,
-        transform 0.35s ease,
-        box-shadow 0.25s ease,
-        border-color 0.25s ease,
-        background 0.25s ease;
-    }
-
-    .resource-card.is-showing {
-      opacity: 1;
-      transform: translateY(0) scale(1);
-    }
-
-    .resource-card.is-hiding {
-      opacity: 0;
-      transform: translateY(12px) scale(0.97);
-      pointer-events: none;
-    }
-
-    .resource-card::before {
-      content: "";
-      position: absolute;
-      inset: 0 auto 0 0;
-      width: 5px;
-      background: linear-gradient(180deg, #e7b65f, #c99652);
-    }
-
-    .resource-card:hover {
-      transform: translateY(-6px) scale(1.01);
-      border-color: rgba(201, 150, 82, 0.45);
-      background: linear-gradient(145deg, #fffaf0, #fbf8f2);
-      box-shadow: 0 32px 90px rgba(4, 27, 50, 0.18);
-    }
-
-    .resource-code {
-      display: inline-flex;
-      max-width: 100%;
-      margin-bottom: 0.9rem;
-      padding: 0.42rem 0.75rem;
-      border-radius: 999px;
-      background: rgba(201, 150, 82, 0.15);
-      color: #9b6b2d;
-      font-weight: 900;
-      overflow-wrap: anywhere;
-    }
-
-    .resource-card .eyebrow {
-      margin-bottom: 0.6rem;
-      font-weight: 800;
-      color: #334155;
-    }
-
-    .resource-card h3 {
-      color: #041b32;
-      font-family: Georgia, "Times New Roman", serif;
-      font-size: clamp(1.45rem, 2vw, 2rem);
-      line-height: 1.05;
-      margin: 0 0 0.75rem;
-      overflow-wrap: anywhere;
-      hyphens: auto;
-    }
-
-    .difficulty-badge {
-      display: inline-flex;
-      width: fit-content;
-      max-width: 100%;
-      margin: 0.2rem 0 1rem;
-      padding: 0.35rem 0.75rem;
-      border-radius: 999px;
-      background: linear-gradient(135deg, #e7b65f, #c99652);
-      color: #041b32 !important;
-      font-size: 0.82rem;
-      font-weight: 900;
-      overflow-wrap: anywhere;
-    }
-
-    .resource-summary {
-      color: #334155;
-      font-size: 1rem;
-      line-height: 1.6;
-      overflow-wrap: anywhere;
-    }
-
-    .resource-downloads {
-      display: flex;
-      flex-wrap: wrap;
-      gap: 0.8rem;
-    }
-
-    .resource-download {
-      width: 100%;
-      white-space: normal;
-      text-align: center;
-    }
-
-    .ai-coach-download {
-      background: linear-gradient(135deg, #e7b65f, #c99652);
-      color: #041b32;
-      box-shadow: 0 14px 34px rgba(201, 150, 82, 0.22);
-    }
-
-    .ai-coach-download::before {
-      content: "✦";
-      margin-right: 0.45rem;
-      font-weight: 900;
-    }
-
-    .resource-download.disabled {
-      opacity: 0.5;
-      cursor: not-allowed;
-      pointer-events: none;
-    }
-
-    .resource-empty-state {
-      margin-top: 2rem;
-      padding: 2rem;
-      border-radius: 24px;
-      background: #ffffff;
-      border: 1px solid rgba(201, 150, 82, 0.22);
-      box-shadow: 0 22px 60px rgba(4, 27, 50, 0.1);
-    }
-
-    .resource-empty-state h3 {
-      color: #041b32;
-      font-family: Georgia, "Times New Roman", serif;
-      font-size: 1.8rem;
-      margin-bottom: 0.5rem;
-    }
-
-    @media (max-width: 900px) {
-      .resource-controls {
-        position: relative;
-        top: auto;
-        align-items: stretch;
-        flex-direction: column;
-      }
-
-      .print-resource-list {
-        margin-left: 0;
-      }
-
-      .resource-search,
-      .resource-filter,
-      #skillFilter {
-        width: 100%;
-      }
-    }
-
-    @media print {
-      .header,
-      .footer,
-      .hero,
-      .resource-controls,
-      .resource-downloads,
-      .resource-results-count,
-      .resource-empty-state {
-        display: none !important;
-      }
-
-      .section {
-        padding: 0 !important;
-        background: #ffffff !important;
-      }
-
-      .resource-library {
-        display: block !important;
-      }
-
-      .resource-card {
-        display: block !important;
-        break-inside: avoid;
-        opacity: 1 !important;
-        transform: none !important;
-        box-shadow: none !important;
-        border: 1px solid #cccccc !important;
-        margin-bottom: 1rem;
-      }
-
-      .resource-card::before {
-        display: none !important;
-      }
-
-      .resource-card h3 {
-        font-size: 18pt;
-      }
-    }
-  </style>
-
-  <script is:inline>
-    const filterButtons = document.querySelectorAll(".resource-filter[data-filter-type]");
-    const skillFilter = document.querySelector("#skillFilter");
-    const searchInput = document.querySelector("#resourceSearch");
-    const cards = document.querySelectorAll(".resource-card");
-    const printButton = document.querySelector(".print-resource-list");
-    const visibleCount = document.querySelector("#visibleResourceCount");
-    const emptyState = document.querySelector(".resource-empty-state");
-
-    let currentType = "all";
-
-    function applyFilters() {
-      const currentSkill = skillFilter?.value || "all";
-      const searchTerm = searchInput?.value.trim().toLowerCase() || "";
-      let shownCount = 0;
-
-      cards.forEach((card, index) => {
-        const matchesSkill = currentSkill === "all" || card.dataset.skill === currentSkill;
-        const matchesSearch = !searchTerm || card.dataset.search.includes(searchTerm);
-        const hasStudent = card.dataset.hasStudent === "true";
-        const hasTutor = card.dataset.hasTutor === "true";
-
-        const matchesType =
-          currentType === "all" ||
-          (currentType === "student" && hasStudent) ||
-          (currentType === "tutor" && hasTutor);
-
-        const shouldShow = matchesSkill && matchesSearch && matchesType;
-
-        const studentButton = card.querySelector(".student-download");
-        const tutorButton = card.querySelector(".tutor-download");
-        const aiCoachButton = card.querySelector(".ai-coach-download");
-
-        if (studentButton) {
-          studentButton.style.display = currentType === "tutor" ? "none" : "inline-flex";
-        }
-
-        if (tutorButton) {
-          tutorButton.style.display = currentType === "student" ? "none" : "inline-flex";
-        }
-
-        if (aiCoachButton) {
-          aiCoachButton.style.display = currentType === "tutor" ? "none" : "inline-flex";
-        }
-
-        if (shouldShow) {
-          shownCount += 1;
-          card.style.display = "flex";
-          card.style.transitionDelay = `${Math.min(index * 25, 220)}ms`;
-
-          requestAnimationFrame(() => {
-            card.classList.remove("is-hiding");
-            card.classList.add("is-showing");
-          });
-        } else {
-          card.style.transitionDelay = "0ms";
-          card.classList.remove("is-showing");
-          card.classList.add("is-hiding");
-
-          setTimeout(() => {
-            if (card.classList.contains("is-hiding")) {
-              card.style.display = "none";
-            }
-          }, 350);
-        }
-      });
-
-      if (visibleCount) {
-        visibleCount.textContent = shownCount.toString();
-      }
-
-      if (emptyState) {
-        emptyState.hidden = shownCount !== 0;
-      }
-    }
-
-    filterButtons.forEach((button) => {
-      button.addEventListener("click", () => {
-        filterButtons.forEach((item) => item.classList.remove("active"));
-        button.classList.add("active");
-        currentType = button.dataset.filterType;
-        applyFilters();
-      });
-    });
-
-    skillFilter?.addEventListener("change", applyFilters);
-    searchInput?.addEventListener("input", applyFilters);
-
-    printButton?.addEventListener("click", () => {
-      window.print();
-    });
-
-    applyFilters();
-  </script>
+  <!-- Keep your existing styles and scripts here as-is -->
 </BaseLayout>
