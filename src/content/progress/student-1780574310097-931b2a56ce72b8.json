@@ -1,6 +1,6 @@
 {
   "studentId": "student-1780574310097-931b2a56ce72b8",
-  "updatedAt": "2026-06-04T12:50:07.290Z",
+  "updatedAt": "2026-06-04T13:07:00.198Z",
   "packs": {
     "AN-01": {
       "packCode": "AN-01",
@@ -9,6 +9,14 @@
       "status": "In progress",
       "mode": "Give Me a Hint",
       "updatedAt": "2026-06-04T12:50:07.290Z"
+    },
+    "AN-02": {
+      "packCode": "AN-02",
+      "packTitle": "Contract Dispute Missing Evidence",
+      "skill": "Attendance Notes and Legal Analysis",
+      "status": "In progress",
+      "mode": "Opened from resources dashboard",
+      "updatedAt": "2026-06-04T13:07:00.198Z"
     }
   }
 }
