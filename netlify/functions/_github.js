@@ -33,7 +33,7 @@ function requireAdmin(context) {
     return {
       ok: false,
       response: json(401, {
-        error: "Please sign in before publishing changes.",
+        error: "Please sign in before making changes.",
       }),
     };
   }
@@ -43,7 +43,7 @@ function requireAdmin(context) {
       ok: false,
       response: json(403, {
         error:
-          "This signed-in account is not authorised to publish changes. Check that ADMIN_EMAIL in Netlify matches your login email exactly.",
+          "This signed-in account is not authorised to make changes. Check that ADMIN_EMAIL in Netlify matches your login email exactly.",
         signedInEmail: user.email || null,
       }),
     };
@@ -160,6 +160,46 @@ async function putGitHubFile({
   return response.json();
 }
 
+async function deleteGitHubFile({
+  token,
+  owner,
+  repo,
+  branch,
+  path,
+  message,
+}) {
+  const cleanPath = normalisePath(path);
+  const apiUrl = `https://api.github.com/repos/${owner}/${repo}/contents/${cleanPath}`;
+  const sha = await getExistingFileSha({
+    token,
+    owner,
+    repo,
+    branch,
+    path: cleanPath,
+  });
+
+  if (!sha) {
+    throw new Error("The file could not be found in GitHub.");
+  }
+
+  const response = await fetch(apiUrl, {
+    method: "DELETE",
+    headers: getGitHubHeaders(token),
+    body: JSON.stringify({
+      message,
+      sha,
+      branch,
+    }),
+  });
+
+  if (!response.ok) {
+    const details = await response.text();
+    throw new Error(`Could not delete GitHub file: ${details}`);
+  }
+
+  return response.json();
+}
+
 async function putTextFile({
   token,
   owner,
@@ -258,6 +298,7 @@ export {
   getGitHubConfig,
   putTextFile,
   putBase64File,
+  deleteGitHubFile,
   slugify,
   buildFrontmatter,
   createExcerpt,
