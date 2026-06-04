@@ -1,141 +1,96 @@
 ---
-import { onMount } from "solid-js";
 import BaseLayout from "../layouts/BaseLayout.astro";
-import { fetchPackTasks } from "../netlify/functions/get-pack-tasks.js";
-
-let packCode = new URLSearchParams(location.search).get("pack") || "";
-let pack = null;
-let tasks = [];
-let answeredTasks = 0;
-
-async function loadPack() {
-  if (!packCode) return;
-  const res = await fetch(`/api/get-pack-tasks?pack=${encodeURIComponent(packCode)}`);
-  const data = await res.json();
-  if (data.success) {
-    pack = data.pack;
-    tasks = pack.tasks || [];
-    answeredTasks = tasks.filter(t => t.answer).length;
-  }
-}
-
-function updateProgress() {
-  answeredTasks = tasks.filter(t => t.answer).length;
-}
-
-onMount(() => {
-  loadPack();
-});
 ---
 
-<BaseLayout title={`Answer Pack | ${pack ? pack.title : "Loading..."}`}>
-  <section class="answer-hero">
+<BaseLayout title="Answer Pack | LawBridge">
+  <section class="answer-shell">
     <div class="container">
-      <h1>{pack?.title || "Answer Pack"}</h1>
-      {pack && (
-        <div class="pack-meta">
-          <span class="skill">{pack.skill}</span>
-          <span class="difficulty">{pack.difficulty}</span>
-          <span class="continue-pill">Continue Answer Pack</span>
+      <div class="answer-topbar">
+        <a href="/resources" class="answer-button secondary">← Back to Resources</a>
+        <a href="/ai-skills-coach" class="answer-button secondary">Open AI Skills Coach</a>
+      </div>
+
+      <header class="answer-hero">
+        <div>
+          <p class="answer-eyebrow" id="pack-skill">LawBridge Answer Pack</p>
+          <h1 id="pack-title">Loading pack...</h1>
+          <p id="pack-summary">
+            Your pack tasks will appear here. Write your answers, save your draft, then submit for LawBridge AI feedback.
+          </p>
+
+          <div class="answer-progress-wrap">
+            <div class="answer-progress-label">
+              <span id="answer-progress-text">0% complete</span>
+              <span id="answer-progress-count">0/0 tasks answered</span>
+            </div>
+            <div class="answer-progress-track">
+              <span class="answer-progress-fill" id="answer-progress-fill"></span>
+            </div>
+          </div>
         </div>
-      )}
-      {pack && (
-        <progress value={answeredTasks} max={tasks.length}></progress>
-      )}
-    </div>
-  </section>
 
-  <section class="pack-tasks">
-    <div class="container">
-      {tasks.length > 0 ? (
-        tasks.map(task => (
+        <aside class="answer-guide-card">
+          <p class="answer-eyebrow">How to complete this pack</p>
+          <ul>
+            <li>Read each task carefully.</li>
+            <li>Use evidence from the pack.</li>
+            <li>Separate facts, assumptions and missing information.</li>
+            <li>Do not guess the law or jurisdiction-specific rules.</li>
+            <li>Submit for AI feedback when ready.</li>
+          </ul>
+        </aside>
+      </header>
+
+      <section class="answer-disclaimer">
+        LawBridge resources are provided for educational and training purposes only. They do not constitute legal advice and are not intended as guidance for any particular jurisdiction, legal system, regulator, court, firm policy or client matter. Students should always check the applicable law, rules and professional requirements in the relevant jurisdiction.
+      </section>
+
+      <section class="pack-meta-card" id="pack-meta-card">
+        <span id="pack-code">PACK</span>
+        <span id="pack-category">Category loading</span>
+        <span id="pack-difficulty">Difficulty loading</span>
+        <span id="pack-status">Not started</span>
+      </section>
+
+      <section class="answer-section">
+        <div class="answer-section-heading">
+          <div>
+            <p class="answer-eyebrow">Student Tasks</p>
+            <h2>Answer each task below</h2>
+          </div>
+
+          <button class="answer-button secondary" id="save-draft-top" type="button">
+            Save Draft
+          </button>
+        </div>
+
+        <div id="task-list" class="task-list">
           <article class="task-card">
-            <h3>{task.title}</h3>
-            <p>{task.instructions}</p>
-            <textarea
-              value={task.answer || ""}
-              onInput={(e) => {
-                task.answer = e.target.value;
-                updateProgress();
-              }}
-              placeholder="Type your answer here..."
-            ></textarea>
+            <h3>Loading tasks...</h3>
+            <p>Please wait while LawBridge loads this pack.</p>
           </article>
-        ))
-      ) : (
-        <p>No tasks available for this pack.</p>
-      )}
-    </div>
-  </section>
+        </div>
+      </section>
 
-  <section class="submit-section">
-    <div class="container">
-      <button
-        class="submit-button"
-        onClick={() => {
-          // Save answers and optionally send to AI Skills Coach
-          console.log("Submit clicked", tasks);
-        }}
-      >
-        Submit Answers
-      </button>
+      <section class="submission-panel">
+        <div>
+          <p class="answer-eyebrow">Submit</p>
+          <h2>Check your pack submission</h2>
+          <p>
+            Submit your answers for educational feedback. The AI will give strengths, improvements, missing evidence, structure suggestions and a next step.
+          </p>
+        </div>
+
+        <div class="submission-actions">
+          <button class="answer-button secondary" id="save-draft-bottom" type="button">
+            Save Draft
+          </button>
+
+          <button class="answer-button primary" id="submit-ai-check" type="button">
+            Submit for LawBridge AI Check
+          </button>
+        </div>
+      </section>
     </div>
   </section>
 </BaseLayout>
-
-<style is:inline>
-.answer-hero {
-  padding: 2rem 0;
-}
-.pack-meta {
-  display: flex;
-  gap: 1rem;
-  margin-top: 0.5rem;
-}
-.continue-pill {
-  background: #e7b65f;
-  padding: 0.3rem 0.6rem;
-  border-radius: 999px;
-  font-weight: 700;
-  font-size: 0.85rem;
-}
-.pack-tasks {
-  margin-top: 2rem;
-}
-.task-card {
-  padding: 1rem;
-  margin-bottom: 1rem;
-  border-radius: 12px;
-  border: 1px solid rgba(201,150,82,0.24);
-  background: #fff;
-}
-.task-card h3 {
-  margin: 0 0 0.5rem;
-}
-.task-card textarea {
-  width: 100%;
-  min-height: 100px;
-  padding: 0.5rem;
-  border-radius: 6px;
-  border: 1px solid #ccc;
-  resize: vertical;
-}
-.submit-section {
-  margin: 2rem 0;
-  text-align: right;
-}
-.submit-button {
-  padding: 0.8rem 1.2rem;
-  background: linear-gradient(135deg, #e7b65f, #d39b45);
-  color: #061b31;
-  border: none;
-  border-radius: 999px;
-  font-weight: 900;
-  cursor: pointer;
-}
-progress {
-  width: 100%;
-  height: 12px;
-  margin-top: 1rem;
-}
-</style>
