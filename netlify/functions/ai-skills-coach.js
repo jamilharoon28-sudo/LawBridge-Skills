@@ -85,7 +85,7 @@ function extractOutputText(data) {
 
 function scorePack(pack, payload) {
   const message = normalise(payload.message);
-  const packCode = normalise(payload.packCode);
+  const packCode = normalise(payload.packCode || payload.pack);
   const scenario = normalise(payload.scenario);
   const skill = normalise(payload.skill);
 
@@ -94,15 +94,21 @@ function scorePack(pack, payload) {
   const packSkill = normalise(pack.skill);
   const title = normalise(pack.title);
   const summary = normalise(pack.summary);
+  const slug = normalise(pack.slug);
 
   let score = 0;
 
-  if (packCode && code && packCode === code) score += 100;
-  if (packCode && code && message.includes(code)) score += 60;
-  if (scenario && packScenario && scenario === packScenario) score += 50;
-  if (skill && packSkill && skill === packSkill) score += 25;
+  if (packCode && code && packCode === code) score += 150;
+  if (packCode && slug && packCode === slug) score += 150;
+  if (packCode && code && message.includes(code)) score += 80;
+  if (packCode && slug && message.includes(slug)) score += 60;
 
-  [code, packScenario, packSkill, title, summary]
+  if (scenario && packScenario && scenario === packScenario) score += 60;
+  if (scenario && title && scenario === title) score += 45;
+
+  if (skill && packSkill && skill === packSkill) score += 35;
+
+  [code, slug, packScenario, packSkill, title, summary]
     .filter(Boolean)
     .forEach((value) => {
       const words = value.split(/[^a-z0-9]+/).filter((word) => word.length > 2);
@@ -133,7 +139,7 @@ function findRelevantPacks(payload) {
 }
 
 function buildPackContext(pack, index) {
-  const studentText = cleanLongText(pack.studentText, index === 0 ? 8000 : 3500);
+  const studentText = cleanLongText(pack.studentText, index === 0 ? 8500 : 3500);
   const tutorText = cleanLongText(pack.tutorText, index === 0 ? 4500 : 2000);
 
   return `
