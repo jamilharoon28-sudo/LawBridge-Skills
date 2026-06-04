@@ -1,677 +1,141 @@
 ---
+import { onMount } from "solid-js";
 import BaseLayout from "../layouts/BaseLayout.astro";
+import { fetchPackTasks } from "../netlify/functions/get-pack-tasks.js";
+
+let packCode = new URLSearchParams(location.search).get("pack") || "";
+let pack = null;
+let tasks = [];
+let answeredTasks = 0;
+
+async function loadPack() {
+  if (!packCode) return;
+  const res = await fetch(`/api/get-pack-tasks?pack=${encodeURIComponent(packCode)}`);
+  const data = await res.json();
+  if (data.success) {
+    pack = data.pack;
+    tasks = pack.tasks || [];
+    answeredTasks = tasks.filter(t => t.answer).length;
+  }
+}
+
+function updateProgress() {
+  answeredTasks = tasks.filter(t => t.answer).length;
+}
+
+onMount(() => {
+  loadPack();
+});
 ---
 
-<BaseLayout title="Answer Pack | LawBridge">
-  <section class="answer-shell">
+<BaseLayout title={`Answer Pack | ${pack ? pack.title : "Loading..."}`}>
+  <section class="answer-hero">
     <div class="container">
-      <div class="answer-topbar">
-        <a href="/resources" class="answer-button secondary">← Back to Resources</a>
-        <a href="/ai-skills-coach" class="answer-button secondary">Open AI Skills Coach</a>
-      </div>
-
-      <header class="answer-hero">
-        <div>
-          <p class="answer-eyebrow" id="pack-skill">LawBridge Answer Pack</p>
-          <h1 id="pack-title">Loading pack...</h1>
-          <p id="pack-summary">
-            Your pack tasks will appear here. Write your answers, save your draft, then submit for LawBridge AI feedback.
-          </p>
+      <h1>{pack?.title || "Answer Pack"}</h1>
+      {pack && (
+        <div class="pack-meta">
+          <span class="skill">{pack.skill}</span>
+          <span class="difficulty">{pack.difficulty}</span>
+          <span class="continue-pill">Continue Answer Pack</span>
         </div>
-
-        <aside class="answer-guide-card">
-          <p class="answer-eyebrow">How to complete this pack</p>
-          <ul>
-            <li>Read each task carefully.</li>
-            <li>Use evidence from the pack.</li>
-            <li>Separate facts, assumptions and missing information.</li>
-            <li>Do not guess the law or jurisdiction-specific rules.</li>
-            <li>Submit for AI feedback when ready.</li>
-          </ul>
-        </aside>
-      </header>
-
-      <section class="answer-disclaimer">
-        LawBridge resources are provided for educational and training purposes only. They do not constitute legal advice and are not intended as guidance for any particular jurisdiction, legal system, regulator, court, firm policy or client matter. Students should always check the applicable law, rules and professional requirements in the relevant jurisdiction.
-      </section>
-
-      <section class="pack-meta-card" id="pack-meta-card">
-        <span id="pack-code">PACK</span>
-        <span id="pack-category">Category loading</span>
-        <span id="pack-difficulty">Difficulty loading</span>
-      </section>
-
-      <section class="answer-section">
-        <div class="answer-section-heading">
-          <div>
-            <p class="answer-eyebrow">Student Tasks</p>
-            <h2>Answer each task below</h2>
-          </div>
-
-          <button class="answer-button secondary" id="save-draft-top" type="button">
-            Save Draft
-          </button>
-        </div>
-
-        <div id="task-list" class="task-list">
-          <article class="task-card">
-            <h3>Loading tasks...</h3>
-            <p>Please wait while LawBridge loads this pack.</p>
-          </article>
-        </div>
-      </section>
-
-      <section class="submission-panel">
-        <div>
-          <p class="answer-eyebrow">Submit</p>
-          <h2>Check your pack submission</h2>
-          <p>
-            Submit your answers for educational feedback. The AI will give strengths, improvements, missing evidence, structure suggestions and a next step.
-          </p>
-        </div>
-
-        <div class="submission-actions">
-          <button class="answer-button secondary" id="save-draft-bottom" type="button">
-            Save Draft
-          </button>
-
-          <button class="answer-button primary" id="submit-ai-check" type="button">
-            Submit for LawBridge AI Check
-          </button>
-
-          <button class="answer-button complete" id="mark-complete" type="button">
-            Mark as Complete
-          </button>
-        </div>
-      </section>
-
-      <section class="feedback-panel" id="feedback-panel" hidden>
-        <p class="answer-eyebrow">LawBridge AI Feedback</p>
-        <div id="feedback-content"></div>
-      </section>
-
-      <p class="save-status" id="save-status" aria-live="polite"></p>
+      )}
+      {pack && (
+        <progress value={answeredTasks} max={tasks.length}></progress>
+      )}
     </div>
   </section>
 
-  <style is:inline>
-    .answer-shell {
-      min-height: 100vh;
-      padding: 2rem 0 4rem;
-      background:
-        radial-gradient(circle at top right, rgba(231, 182, 95, 0.16), transparent 32%),
-        linear-gradient(180deg, #f8f1e4 0%, #fbf7ef 100%);
-      color: #061b31;
-    }
-
-    .answer-topbar {
-      display: flex;
-      justify-content: space-between;
-      gap: 1rem;
-      flex-wrap: wrap;
-      align-items: center;
-      margin-bottom: 2rem;
-    }
-
-    .answer-button {
-      display: inline-flex;
-      align-items: center;
-      justify-content: center;
-      min-height: 44px;
-      padding: 0.78rem 1.15rem;
-      border-radius: 999px;
-      text-decoration: none;
-      font-weight: 900;
-      border: 0;
-      cursor: pointer;
-      font: inherit;
-      transition:
-        transform 0.2s ease,
-        box-shadow 0.2s ease;
-    }
-
-    .answer-button:hover {
-      transform: translateY(-2px);
-    }
-
-    .answer-button.primary {
-      background: linear-gradient(135deg, #e7b65f, #d39b45);
-      color: #061b31;
-      box-shadow: 0 14px 34px rgba(211, 155, 69, 0.24);
-    }
-
-    .answer-button.secondary {
-      background: #ffffff;
-      color: #061b31;
-      border: 1px solid rgba(201, 150, 82, 0.32);
-    }
-
-    .answer-button.complete {
-      background: #061b31;
-      color: #ffffff;
-    }
-
-    .answer-button:disabled {
-      opacity: 0.6;
-      cursor: not-allowed;
-      transform: none;
-    }
-
-    .answer-hero {
-      display: grid;
-      grid-template-columns: minmax(0, 1.6fr) minmax(320px, 0.8fr);
-      gap: 1.5rem;
-      align-items: stretch;
-      padding: clamp(1.5rem, 4vw, 3rem);
-      border-radius: 34px;
-      background: rgba(255, 255, 255, 0.78);
-      border: 1px solid rgba(201, 150, 82, 0.3);
-      box-shadow: 0 28px 90px rgba(6, 27, 49, 0.12);
-    }
-
-    .answer-eyebrow {
-      margin: 0 0 0.7rem;
-      color: #b37b32;
-      font-weight: 900;
-      text-transform: uppercase;
-      letter-spacing: 0.12em;
-      font-size: 0.78rem;
-    }
-
-    .answer-hero h1 {
-      max-width: 920px;
-      margin: 0;
-      font-family: Georgia, "Times New Roman", serif;
-      font-size: clamp(2.6rem, 5.5vw, 5.2rem);
-      line-height: 0.96;
-      letter-spacing: -0.045em;
-      color: #061b31;
-    }
-
-    .answer-hero p:not(.answer-eyebrow),
-    .answer-guide-card li,
-    .submission-panel p,
-    .task-card p,
-    .feedback-panel {
-      color: #334155;
-      line-height: 1.65;
-    }
-
-    .answer-hero > div > p:not(.answer-eyebrow) {
-      max-width: 760px;
-      margin: 1rem 0 0;
-      font-size: 1.08rem;
-    }
-
-    .answer-guide-card {
-      padding: 1.3rem;
-      border-radius: 24px;
-      background: #061b31;
-      color: #ffffff;
-      box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.08);
-    }
-
-    .answer-guide-card .answer-eyebrow,
-    .answer-guide-card li {
-      color: #ffffff;
-    }
-
-    .answer-guide-card ul {
-      margin: 0;
-      padding-left: 1.2rem;
-      display: grid;
-      gap: 0.5rem;
-    }
-
-    .answer-disclaimer {
-      margin-top: 1.3rem;
-      padding: 1rem 1.1rem;
-      border-radius: 20px;
-      background: rgba(211, 155, 69, 0.13);
-      border: 1px solid rgba(211, 155, 69, 0.3);
-      color: #334155;
-      font-weight: 800;
-      line-height: 1.6;
-    }
-
-    .pack-meta-card {
-      margin-top: 1rem;
-      display: flex;
-      flex-wrap: wrap;
-      gap: 0.7rem;
-    }
-
-    .pack-meta-card span {
-      display: inline-flex;
-      align-items: center;
-      min-height: 36px;
-      padding: 0.45rem 0.75rem;
-      border-radius: 999px;
-      background: #ffffff;
-      border: 1px solid rgba(201, 150, 82, 0.28);
-      color: #061b31;
-      font-weight: 900;
-      font-size: 0.88rem;
-    }
-
-    .answer-section,
-    .submission-panel,
-    .feedback-panel {
-      margin-top: 1.5rem;
-      padding: clamp(1.2rem, 3vw, 2rem);
-      border-radius: 28px;
-      background: rgba(255, 255, 255, 0.84);
-      border: 1px solid rgba(201, 150, 82, 0.28);
-      box-shadow: 0 18px 52px rgba(6, 27, 49, 0.09);
-    }
-
-    .answer-section-heading,
-    .submission-panel {
-      display: flex;
-      justify-content: space-between;
-      gap: 1rem;
-      flex-wrap: wrap;
-      align-items: end;
-    }
-
-    .answer-section-heading h2,
-    .submission-panel h2 {
-      margin: 0;
-      font-family: Georgia, "Times New Roman", serif;
-      font-size: clamp(2rem, 3vw, 3rem);
-      color: #061b31;
-      line-height: 1;
-    }
-
-    .task-list {
-      display: grid;
-      gap: 1rem;
-      margin-top: 1.2rem;
-    }
-
-    .task-card {
-      padding: 1.2rem;
-      border-radius: 22px;
-      background: #fbf7ef;
-      border: 1px solid rgba(201, 150, 82, 0.22);
-    }
-
-    .task-card h3 {
-      margin: 0 0 0.5rem;
-      font-family: Georgia, "Times New Roman", serif;
-      color: #061b31;
-      font-size: 1.55rem;
-      line-height: 1.12;
-    }
-
-    .task-card label {
-      display: block;
-      margin-top: 1rem;
-      color: #061b31;
-      font-weight: 900;
-    }
-
-    .task-answer {
-      width: 100%;
-      min-height: 180px;
-      margin-top: 0.5rem;
-      box-sizing: border-box;
-      resize: vertical;
-      border: 1px solid rgba(201, 150, 82, 0.34);
-      border-radius: 18px;
-      padding: 1rem;
-      background: #ffffff;
-      color: #061b31;
-      font: inherit;
-      line-height: 1.55;
-    }
-
-    .task-answer:focus {
-      outline: 3px solid rgba(211, 155, 69, 0.28);
-      border-color: #d39b45;
-    }
-
-    .character-count {
-      margin-top: 0.4rem;
-      color: #64748b;
-      font-weight: 800;
-      font-size: 0.86rem;
-    }
-
-    .submission-actions {
-      display: flex;
-      gap: 0.75rem;
-      flex-wrap: wrap;
-      align-items: center;
-    }
-
-    .feedback-panel {
-      white-space: pre-wrap;
-    }
-
-    .feedback-panel h3 {
-      color: #061b31;
-      font-family: Georgia, "Times New Roman", serif;
-      margin-top: 0;
-    }
-
-    .save-status {
-      margin: 1rem 0 0;
-      color: #18794e;
-      font-weight: 900;
-    }
-
-    @media (max-width: 900px) {
-      .answer-hero,
-      .submission-panel {
-        grid-template-columns: 1fr;
-      }
-
-      .answer-section-heading,
-      .submission-panel,
-      .answer-topbar {
-        align-items: stretch;
-        flex-direction: column;
-      }
-
-      .answer-button {
-        width: 100%;
-      }
-    }
-  </style>
-
-  <script is:inline>
-    const params = new URLSearchParams(window.location.search);
-    const packCode = params.get("pack") || params.get("packCode") || "";
-
-    const packSkill = document.getElementById("pack-skill");
-    const packTitle = document.getElementById("pack-title");
-    const packSummary = document.getElementById("pack-summary");
-    const packCodeElement = document.getElementById("pack-code");
-    const packCategory = document.getElementById("pack-category");
-    const packDifficulty = document.getElementById("pack-difficulty");
-    const taskList = document.getElementById("task-list");
-    const saveDraftTop = document.getElementById("save-draft-top");
-    const saveDraftBottom = document.getElementById("save-draft-bottom");
-    const submitAiCheck = document.getElementById("submit-ai-check");
-    const markComplete = document.getElementById("mark-complete");
-    const feedbackPanel = document.getElementById("feedback-panel");
-    const feedbackContent = document.getElementById("feedback-content");
-    const saveStatus = document.getElementById("save-status");
-
-    let currentPack = null;
-    let currentTasks = [];
-
-    function getStudentId() {
-      const existing = localStorage.getItem("lawbridgeStudentId");
-
-      if (existing) {
-        return existing;
-      }
-
-      const created = `student-${Date.now()}-${Math.random().toString(16).slice(2)}`;
-      localStorage.setItem("lawbridgeStudentId", created);
-      return created;
-    }
-
-    function getDraftKey() {
-      return `lawbridgeAnswerDraft:${getStudentId()}:${packCode || "unknown-pack"}`;
-    }
-
-    function setStatus(message, isError = false) {
-      if (!saveStatus) {
-        return;
-      }
-
-      saveStatus.textContent = message;
-      saveStatus.style.color = isError ? "#b42318" : "#18794e";
-    }
-
-    function loadSavedDraft() {
-      try {
-        return JSON.parse(localStorage.getItem(getDraftKey()) || "{}");
-      } catch {
-        return {};
-      }
-    }
-
-    function collectAnswers() {
-      return Array.from(document.querySelectorAll(".task-answer")).map((textarea) => ({
-        taskId: textarea.dataset.taskId,
-        taskTitle: textarea.dataset.taskTitle,
-        answer: textarea.value.trim(),
-      }));
-    }
-
-    function saveDraftLocally() {
-      const answers = collectAnswers();
-
-      localStorage.setItem(
-        getDraftKey(),
-        JSON.stringify({
-          packCode,
-          updatedAt: new Date().toISOString(),
-          answers,
-        })
-      );
-
-      setStatus("Draft saved on this device.");
-    }
-
-    async function saveProgress(status, extra = {}) {
-      if (!currentPack?.code) {
-        return;
-      }
-
-      try {
-        await fetch("/.netlify/functions/save-progress", {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify({
-            studentId: getStudentId(),
-            packCode: currentPack.code,
-            packTitle: currentPack.scenario || currentPack.title,
-            skill: currentPack.skill,
-            category: currentPack.categoryGroup,
-            status,
-            mode: "Answer Pack",
-            ...extra,
-          }),
-        });
-      } catch (error) {
-        console.warn("Progress could not be saved:", error);
-      }
-    }
-
-    function renderTasks(tasks) {
-      const savedDraft = loadSavedDraft();
-      const savedAnswers = Array.isArray(savedDraft.answers) ? savedDraft.answers : [];
-
-      taskList.innerHTML = "";
-
-      tasks.forEach((task, index) => {
-        const savedAnswer =
-          savedAnswers.find((item) => item.taskId === task.id)?.answer || "";
-
-        const article = document.createElement("article");
-        article.className = "task-card";
-
-        const title = document.createElement("h3");
-        title.textContent = `${index + 1}. ${task.title || "Task"}`;
-
-        const instructions = document.createElement("p");
-        instructions.textContent =
-          task.instructions ||
-          "Write your answer below. Use evidence from the pack and avoid unsupported conclusions.";
-
-        const label = document.createElement("label");
-        const textareaId = `answer-${task.id}`;
-        label.setAttribute("for", textareaId);
-        label.textContent = "Your answer";
-
-        const textarea = document.createElement("textarea");
-        textarea.className = "task-answer";
-        textarea.id = textareaId;
-        textarea.dataset.taskId = task.id;
-        textarea.dataset.taskTitle = task.title || `Task ${index + 1}`;
-        textarea.placeholder = "Write your answer here...";
-        textarea.value = savedAnswer;
-
-        const counter = document.createElement("div");
-        counter.className = "character-count";
-        counter.textContent = `${textarea.value.length} characters`;
-
-        textarea.addEventListener("input", () => {
-          counter.textContent = `${textarea.value.length} characters`;
-          saveDraftLocally();
-        });
-
-        article.appendChild(title);
-        article.appendChild(instructions);
-        article.appendChild(label);
-        article.appendChild(textarea);
-        article.appendChild(counter);
-
-        taskList.appendChild(article);
-      });
-    }
-
-    async function loadPack() {
-      if (!packCode) {
-        taskList.innerHTML = `
+  <section class="pack-tasks">
+    <div class="container">
+      {tasks.length > 0 ? (
+        tasks.map(task => (
           <article class="task-card">
-            <h3>No pack selected</h3>
-            <p>Please go back to Resources and choose Answer Pack from a resource card.</p>
+            <h3>{task.title}</h3>
+            <p>{task.instructions}</p>
+            <textarea
+              value={task.answer || ""}
+              onInput={(e) => {
+                task.answer = e.target.value;
+                updateProgress();
+              }}
+              placeholder="Type your answer here..."
+            ></textarea>
           </article>
-        `;
-        packTitle.textContent = "No pack selected";
-        return;
-      }
+        ))
+      ) : (
+        <p>No tasks available for this pack.</p>
+      )}
+    </div>
+  </section>
 
-      try {
-        const response = await fetch(
-          `/.netlify/functions/get-pack-tasks?pack=${encodeURIComponent(packCode)}`
-        );
-
-        const result = await response.json().catch(() => ({}));
-
-        if (!response.ok) {
-          throw new Error(result.error || "Could not load this pack.");
-        }
-
-        currentPack = result.pack;
-        currentTasks = Array.isArray(result.pack.tasks) ? result.pack.tasks : [];
-
-        packSkill.textContent = currentPack.skill || "LawBridge Answer Pack";
-        packTitle.textContent = `${currentPack.code} | ${currentPack.scenario || currentPack.title}`;
-        packSummary.textContent =
-          currentPack.summary ||
-          "Work through this pack by answering each task below, then submit for educational feedback.";
-
-        packCodeElement.textContent = currentPack.code || "PACK";
-        packCategory.textContent = currentPack.categoryGroup || "Legal Practice Skills";
-        packDifficulty.textContent = currentPack.difficulty || "Intermediate";
-
-        renderTasks(currentTasks);
-
-        await saveProgress("In progress", {
-          lastAnsweredAt: new Date().toISOString(),
-        });
-      } catch (error) {
-        taskList.innerHTML = `
-          <article class="task-card">
-            <h3>Could not load pack</h3>
-            <p>${error.message}</p>
-          </article>
-        `;
-
-        packTitle.textContent = "Pack could not be loaded";
-        setStatus(error.message, true);
-      }
-    }
-
-    async function handleSaveDraft() {
-      saveDraftLocally();
-
-      await saveProgress("In progress", {
-        lastAnsweredAt: new Date().toISOString(),
-      });
-
-      setStatus("Draft saved. Your progress is marked as In progress.");
-    }
-
-    async function handleSubmitForAiCheck() {
-      const answers = collectAnswers();
-      const hasAnswer = answers.some((item) => item.answer.length > 0);
-
-      if (!hasAnswer) {
-        setStatus("Please write at least one answer before submitting.", true);
-        return;
-      }
-
-      submitAiCheck.disabled = true;
-      feedbackPanel.hidden = false;
-      feedbackContent.textContent = "Generating LawBridge AI feedback...";
-
-      try {
-        const response = await fetch("/.netlify/functions/ai-skills-coach", {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify({
-            mode: "Check Pack Submission",
-            packCode: currentPack.code,
-            scenario: currentPack.scenario || currentPack.title,
-            skill: currentPack.skill,
-            answers,
-          }),
-        });
-
-        const result = await response.json().catch(() => ({}));
-
-        if (!response.ok) {
-          throw new Error(result.error || result.details || "AI feedback failed.");
-        }
-
-        feedbackContent.textContent =
-          result.answer || "No feedback was generated this time.";
-
-        saveDraftLocally();
-
-        await saveProgress("Submitted for AI Check", {
-          lastAnsweredAt: new Date().toISOString(),
-          submittedAt: new Date().toISOString(),
-        });
-
-        setStatus("Submitted for AI check. Review the feedback below.");
-      } catch (error) {
-        feedbackContent.textContent = error.message;
-        setStatus(error.message, true);
-      } finally {
-        submitAiCheck.disabled = false;
-      }
-    }
-
-    async function handleMarkComplete() {
-      saveDraftLocally();
-
-      await saveProgress("Completed", {
-        lastAnsweredAt: new Date().toISOString(),
-        completedAt: new Date().toISOString(),
-        completionFlag: true,
-      });
-
-      setStatus("Marked as complete.");
-    }
-
-    saveDraftTop?.addEventListener("click", handleSaveDraft);
-    saveDraftBottom?.addEventListener("click", handleSaveDraft);
-    submitAiCheck?.addEventListener("click", handleSubmitForAiCheck);
-    markComplete?.addEventListener("click", handleMarkComplete);
-
-    loadPack();
-  </script>
+  <section class="submit-section">
+    <div class="container">
+      <button
+        class="submit-button"
+        onClick={() => {
+          // Save answers and optionally send to AI Skills Coach
+          console.log("Submit clicked", tasks);
+        }}
+      >
+        Submit Answers
+      </button>
+    </div>
+  </section>
 </BaseLayout>
+
+<style is:inline>
+.answer-hero {
+  padding: 2rem 0;
+}
+.pack-meta {
+  display: flex;
+  gap: 1rem;
+  margin-top: 0.5rem;
+}
+.continue-pill {
+  background: #e7b65f;
+  padding: 0.3rem 0.6rem;
+  border-radius: 999px;
+  font-weight: 700;
+  font-size: 0.85rem;
+}
+.pack-tasks {
+  margin-top: 2rem;
+}
+.task-card {
+  padding: 1rem;
+  margin-bottom: 1rem;
+  border-radius: 12px;
+  border: 1px solid rgba(201,150,82,0.24);
+  background: #fff;
+}
+.task-card h3 {
+  margin: 0 0 0.5rem;
+}
+.task-card textarea {
+  width: 100%;
+  min-height: 100px;
+  padding: 0.5rem;
+  border-radius: 6px;
+  border: 1px solid #ccc;
+  resize: vertical;
+}
+.submit-section {
+  margin: 2rem 0;
+  text-align: right;
+}
+.submit-button {
+  padding: 0.8rem 1.2rem;
+  background: linear-gradient(135deg, #e7b65f, #d39b45);
+  color: #061b31;
+  border: none;
+  border-radius: 999px;
+  font-weight: 900;
+  cursor: pointer;
+}
+progress {
+  width: 100%;
+  height: 12px;
+  margin-top: 1rem;
+}
+</style>
