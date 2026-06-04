@@ -9,6 +9,8 @@ const packs = resources
     title: entry.data.scenario || entry.data.title || "Untitled Pack",
     skill: entry.data.skill || "Practical Skills",
     difficulty: entry.data.difficulty || "Intermediate",
+    sheetType: entry.data.sheetType || "student",
+    answerCount: Array.isArray(entry.data.tasks) ? entry.data.tasks.length : 0,
   }))
   .filter((pack) => pack.code || pack.title);
 ---
@@ -53,12 +55,20 @@ const packs = resources
             data-pack-code={pack.code}
             data-pack-title={pack.title}
             data-pack-skill={pack.skill}
+            data-answer-count={pack.answerCount}
           >
             <div>
               <span class="pack-code">{pack.code || "PACK"}</span>
               <h3>{pack.title}</h3>
               <p>{pack.skill}</p>
               <small>{pack.difficulty}</small>
+            </div>
+
+            <div class="pack-progress-bar" aria-label="Answer Pack progress">
+              <div class="pack-progress-track">
+                <span class="pack-progress-fill" data-progress-fill={pack.code}></span>
+              </div>
+              <small data-progress-label={pack.code}>0% complete</small>
             </div>
 
             <div class="progress-actions">
@@ -74,6 +84,14 @@ const packs = resources
                 data-pack-skill={pack.skill}
               >
                 Open Pack
+              </a>
+
+              <a
+                class="dashboard-button secondary answer-pack-link"
+                href={`/answer-pack?pack=${encodeURIComponent(pack.code)}`}
+                data-pack-code={pack.code}
+              >
+                Continue Answer Pack
               </a>
             </div>
           </article>
@@ -255,6 +273,28 @@ const packs = resources
       font-weight: 800;
     }
 
+    .pack-progress-bar {
+      display: grid;
+      gap: 0.35rem;
+    }
+
+    .pack-progress-track {
+      width: 100%;
+      height: 10px;
+      overflow: hidden;
+      border-radius: 999px;
+      background: rgba(6, 27, 49, 0.1);
+    }
+
+    .pack-progress-fill {
+      display: block;
+      width: 0%;
+      height: 100%;
+      border-radius: 999px;
+      background: linear-gradient(135deg, #e7b65f, #d39b45);
+      transition: width 0.25s ease;
+    }
+
     .progress-actions {
       display: flex;
       gap: 0.7rem;
@@ -282,6 +322,11 @@ const packs = resources
     .status-pill.in-progress {
       background: rgba(211, 155, 69, 0.18);
       color: #8a5a18;
+    }
+
+    .status-pill.submitted-for-ai-check {
+      background: rgba(37, 99, 235, 0.12);
+      color: #1d4ed8;
     }
 
     .status-pill.completed {
@@ -349,6 +394,35 @@ const packs = resources
       statusElement.className = `status-pill ${className}`;
     }
 
+    function setPackProgress(packCode, answeredCount, answerCount) {
+      const card = Array.from(progressCards).find(
+        (item) => item.dataset.packCode === packCode
+      );
+
+      if (!card) {
+        return;
+      }
+
+      const savedTotal = Number(answerCount || 0);
+      const cardTotal = Number(card.dataset.answerCount || 0);
+      const total = savedTotal > 0 ? savedTotal : cardTotal;
+      const answered = Number(answeredCount || 0);
+      const percentage = total > 0 ? Math.min(100, Math.round((answered / total) * 100)) : 0;
+
+      const fill = card.querySelector("[data-progress-fill]");
+      const label = card.querySelector("[data-progress-label]");
+
+      if (fill) {
+        fill.style.width = `${percentage}%`;
+      }
+
+      if (label) {
+        label.textContent = total > 0
+          ? `${percentage}% complete (${answered}/${total} tasks)`
+          : `${percentage}% complete`;
+      }
+    }
+
     function applyProgress(progress) {
       const packs = progress?.packs || {};
 
@@ -357,6 +431,7 @@ const packs = resources
         const saved = packs[code];
 
         setPackStatus(code, saved?.status || "Not started");
+        setPackProgress(code, saved?.answeredCount || 0, saved?.answerCount || card.dataset.answerCount || 0);
       });
     }
 
