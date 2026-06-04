@@ -770,8 +770,8 @@ const popularPacks = packs.slice(0, 5);
 
       if (!response.ok) {
         throw new Error(
-          result.error ||
-            result.details ||
+          result.details ||
+            result.error ||
             "The LawBridge AI Skills Coach could not respond."
         );
       }
