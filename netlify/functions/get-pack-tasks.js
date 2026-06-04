@@ -23,14 +23,27 @@ function normalise(value) {
   return String(value || "").toLowerCase().trim();
 }
 
+function normaliseLoose(value) {
+  return normalise(value)
+    .replace(/&/g, "and")
+    .replace(/[^a-z0-9]+/g, "-")
+    .replace(/^-+|-+$/g, "");
+}
+
 function getPackCodeFromEvent(event) {
   if (event.httpMethod === "GET") {
-    return event.queryStringParameters?.pack || event.queryStringParameters?.packCode || "";
+    return (
+      event.queryStringParameters?.pack ||
+      event.queryStringParameters?.packCode ||
+      event.queryStringParameters?.code ||
+      event.queryStringParameters?.slug ||
+      ""
+    );
   }
 
   try {
     const body = JSON.parse(event.body || "{}");
-    return body.pack || body.packCode || "";
+    return body.pack || body.packCode || body.code || body.slug || "";
   } catch {
     return "";
   }
@@ -38,6 +51,7 @@ function getPackCodeFromEvent(event) {
 
 function findPack(packCode) {
   const wanted = normalise(packCode);
+  const wantedLoose = normaliseLoose(packCode);
 
   if (!wanted) {
     return null;
@@ -46,6 +60,9 @@ function findPack(packCode) {
   return (
     PACK_KNOWLEDGE.find((pack) => normalise(pack.code) === wanted) ||
     PACK_KNOWLEDGE.find((pack) => normalise(pack.slug) === wanted) ||
+    PACK_KNOWLEDGE.find((pack) => normaliseLoose(pack.slug) === wantedLoose) ||
+    PACK_KNOWLEDGE.find((pack) => normaliseLoose(pack.title) === wantedLoose) ||
+    PACK_KNOWLEDGE.find((pack) => normaliseLoose(pack.scenario) === wantedLoose) ||
     null
   );
 }
@@ -85,6 +102,20 @@ function fallbackTasks() {
   ];
 }
 
+function cleanTasks(tasks) {
+  if (!Array.isArray(tasks) || tasks.length === 0) {
+    return fallbackTasks();
+  }
+
+  return tasks
+    .filter((task) => task && (task.title || task.instructions))
+    .map((task, index) => ({
+      id: String(task.id || `task-${index + 1}`),
+      title: cleanText(task.title || `Task ${index + 1}`, 220),
+      instructions: cleanText(task.instructions || "", 1200),
+    }));
+}
+
 export async function handler(event) {
   if (!["GET", "POST"].includes(event.httpMethod)) {
     return json(405, { error: "Method not allowed." });
@@ -101,8 +132,7 @@ export async function handler(event) {
     });
   }
 
-  const tasks =
-    Array.isArray(pack.tasks) && pack.tasks.length > 0 ? pack.tasks : fallbackTasks();
+  const tasks = cleanTasks(pack.tasks);
 
   return json(200, {
     success: true,
@@ -118,7 +148,11 @@ export async function handler(event) {
       difficulty: pack.difficulty || "Intermediate",
       summary: pack.summary || "",
       studentLink: pack.studentLink || "",
+      answerRoute:
+        pack.answerRoute ||
+        `/answer-pack?pack=${encodeURIComponent(pack.code || pack.slug || "")}`,
       tasks,
+      taskCount: tasks.length,
       studentPreview: cleanText(pack.studentText, 2200),
     },
   });
