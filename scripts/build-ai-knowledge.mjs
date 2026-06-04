@@ -2,6 +2,7 @@ import fs from "node:fs/promises";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
 import mammoth from "mammoth";
+import pdfParse from "pdf-parse";
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -95,9 +96,46 @@ async function extractDocxText(filePath) {
     const result = await mammoth.extractRawText({ path: filePath });
     return cleanText(result.value, 18000);
   } catch (error) {
-    console.warn(`Could not extract text from ${filePath}: ${error.message}`);
+    console.warn(`Could not extract DOCX text from ${filePath}: ${error.message}`);
     return "";
   }
+}
+
+async function extractPdfText(filePath) {
+  if (!filePath || !filePath.toLowerCase().endsWith(".pdf")) {
+    return "";
+  }
+
+  if (!(await pathExists(filePath))) {
+    return "";
+  }
+
+  try {
+    const buffer = await fs.readFile(filePath);
+    const result = await pdfParse(buffer);
+    return cleanText(result.text, 18000);
+  } catch (error) {
+    console.warn(`Could not extract PDF text from ${filePath}: ${error.message}`);
+    return "";
+  }
+}
+
+async function extractPackText(publicLink) {
+  const filePath = resolvePublicPath(publicLink);
+
+  if (!filePath) {
+    return "";
+  }
+
+  if (filePath.toLowerCase().endsWith(".docx")) {
+    return extractDocxText(filePath);
+  }
+
+  if (filePath.toLowerCase().endsWith(".pdf")) {
+    return extractPdfText(filePath);
+  }
+
+  return "";
 }
 
 async function readResourceEntries() {
@@ -122,8 +160,8 @@ async function readResourceEntries() {
 
     const tutorLink = data.tutorLink || data.tutor || "";
 
-    const studentText = await extractDocxText(resolvePublicPath(studentLink));
-    const tutorText = await extractDocxText(resolvePublicPath(tutorLink));
+    const studentText = await extractPackText(studentLink);
+    const tutorText = await extractPackText(tutorLink);
 
     entries.push({
       slug,
@@ -137,6 +175,16 @@ async function readResourceEntries() {
       tutorLink,
       studentText,
       tutorText,
+      studentTextSource: studentLink.toLowerCase().endsWith(".pdf")
+        ? "pdf"
+        : studentLink.toLowerCase().endsWith(".docx")
+          ? "docx"
+          : "",
+      tutorTextSource: tutorLink.toLowerCase().endsWith(".pdf")
+        ? "pdf"
+        : tutorLink.toLowerCase().endsWith(".docx")
+          ? "docx"
+          : "",
     });
   }
 
