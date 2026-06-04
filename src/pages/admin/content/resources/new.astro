@@ -1,40 +1,34 @@
 ---
 import BaseLayout from "../../../../layouts/BaseLayout.astro";
 
-const categories = [
-  "Student",
-  "Tutor",
-  "Workshop",
-  "Commercial Awareness",
-  "Legal Skills",
-  "Applications",
-];
-
-const resourceTypes = [
-  "Student Pack",
-  "Tutor Guide",
-  "Template",
-  "Checklist",
-  "Guide",
-  "Exercise",
-];
-
 const skillAreas = [
-  "Advocacy",
+  "Advocacy and Oral Presentation",
+  "Attendance Notes and Legal Analysis",
+  "Case and Matter Analysis",
   "Client Interviewing",
   "Legal Drafting",
   "Legal Research",
   "Legal Writing",
-  "Case and Matter Analysis",
-  "Attendance Notes",
-  "Commercial Awareness",
-  "Applications",
 ];
 
-const difficulties = ["Beginner", "Intermediate", "Advanced"];
+const difficulties = [
+  "Foundation",
+  "Foundation to Guided Practice",
+  "Foundation to Intermediate",
+  "Intermediate",
+  "Intermediate to Advanced",
+  "Advanced",
+];
+
+const categories = [
+  "Practical Skills",
+  "Student Pack",
+  "Tutor Guide",
+  "Workshop Resource",
+];
 ---
 
-<BaseLayout title="Add Resource | LawBridge Admin">
+<BaseLayout title="Add Resource Simulation | LawBridge Admin">
   <section class="studio-shell">
     <div class="container">
       <div class="studio-topbar">
@@ -45,19 +39,19 @@ const difficulties = ["Beginner", "Intermediate", "Advanced"];
       <header class="studio-hero">
         <div>
           <p class="studio-eyebrow">LawBridge Content Studio</p>
-          <h1>Add a new resource file.</h1>
+          <h1>Add a practical skills resource.</h1>
           <p>
-            Upload a Word, PDF, PowerPoint or spreadsheet resource, add the key details, then publish it to the Resources page.
+            Upload a Student Pack and optional Tutor Guide. The resource will appear on the Resources page in the practical simulation format.
           </p>
         </div>
 
         <aside class="studio-guide">
-          <h2>Publishing flow</h2>
+          <h2>Resource format</h2>
           <ol>
-            <li>Upload the resource file.</li>
-            <li>Add title, category, skill and difficulty.</li>
-            <li>Publish the resource.</li>
-            <li>Netlify rebuilds the website.</li>
+            <li>Add the simulation code, skill and scenario.</li>
+            <li>Upload the Student Pack.</li>
+            <li>Optionally upload a Tutor Guide.</li>
+            <li>Publish and wait for Netlify to redeploy.</li>
           </ol>
         </aside>
       </header>
@@ -65,30 +59,20 @@ const difficulties = ["Beginner", "Intermediate", "Advanced"];
       <div class="studio-layout">
         <form id="resource-form" class="studio-form">
           <div class="form-card">
-            <p class="studio-eyebrow">Resource details</p>
-
-            <label>
-              Resource title
-              <input
-                id="resource-title"
-                name="title"
-                type="text"
-                placeholder="Example: Client Interviewing Practice Pack"
-                required
-              />
-            </label>
-
-            <label>
-              Short description
-              <textarea
-                id="resource-description"
-                name="description"
-                rows="4"
-                placeholder="Optional. If left blank for a Word document, LawBridge will try to create a short description from the document."
-              ></textarea>
-            </label>
+            <p class="studio-eyebrow">Simulation details</p>
 
             <div class="form-grid">
+              <label>
+                Resource code
+                <input
+                  id="resource-code"
+                  name="code"
+                  type="text"
+                  placeholder="Example: CI-01, AO-02, LD-01"
+                  required
+                />
+              </label>
+
               <label>
                 Category
                 <select id="resource-category" name="category">
@@ -97,16 +81,29 @@ const difficulties = ["Beginner", "Intermediate", "Advanced"];
                   ))}
                 </select>
               </label>
-
-              <label>
-                Resource type
-                <select id="resource-type" name="type">
-                  {resourceTypes.map((type) => (
-                    <option value={type}>{type}</option>
-                  ))}
-                </select>
-              </label>
             </div>
+
+            <label>
+              Display title
+              <input
+                id="resource-title"
+                name="title"
+                type="text"
+                placeholder="Example: The Startup Founder With a Failed Software Launch"
+                required
+              />
+            </label>
+
+            <label>
+              Scenario title
+              <input
+                id="resource-scenario"
+                name="scenario"
+                type="text"
+                placeholder="Example: Initial client interview in a technology services dispute"
+                required
+              />
+            </label>
 
             <div class="form-grid">
               <label>
@@ -129,35 +126,59 @@ const difficulties = ["Beginner", "Intermediate", "Advanced"];
             </div>
 
             <label>
-              Extra notes
+              Short card summary
               <textarea
-                id="resource-notes"
-                name="notes"
-                rows="4"
-                placeholder="Optional internal or public notes about the resource."
+                id="resource-summary"
+                name="summary"
+                rows="5"
+                placeholder="Briefly explain what this simulation helps students practise. If left blank, LawBridge will try to create a summary from the Student Pack."
               ></textarea>
             </label>
           </div>
 
           <div class="form-card">
-            <p class="studio-eyebrow">Resource file</p>
+            <p class="studio-eyebrow">Student Pack</p>
 
-            <label class="upload-box" for="resource-file">
-              <span>Upload resource file</span>
-              <strong id="file-name">No file selected</strong>
+            <label class="upload-box" for="student-file">
+              <span>Upload Student Pack</span>
+              <strong id="student-file-name">No Student Pack selected</strong>
               <small>
-                Accepted files: .docx, .pdf, .pptx or .xlsx. The file will be uploaded and linked from the Resources page.
+                Required. Upload a .docx or .pdf file. This becomes the “View Student Pack” button.
               </small>
             </label>
 
             <input
-              id="resource-file"
-              name="file"
+              id="student-file"
+              name="studentFile"
               type="file"
-              accept=".docx,.pdf,.pptx,.xlsx,application/pdf,application/vnd.openxmlformats-officedocument.wordprocessingml.document,application/vnd.openxmlformats-officedocument.presentationml.presentation,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
+              accept=".docx,.pdf,application/pdf,application/vnd.openxmlformats-officedocument.wordprocessingml.document"
               required
               hidden
             />
+          </div>
+
+          <div class="form-card">
+            <p class="studio-eyebrow">Tutor Guide</p>
+
+            <label class="upload-box tutor-upload" for="tutor-file">
+              <span>Upload Tutor Guide</span>
+              <strong id="tutor-file-name">No Tutor Guide selected</strong>
+              <small>
+                Optional. Upload a .docx or .pdf file. This becomes the “View Tutor Guide” button.
+              </small>
+            </label>
+
+            <input
+              id="tutor-file"
+              name="tutorFile"
+              type="file"
+              accept=".docx,.pdf,application/pdf,application/vnd.openxmlformats-officedocument.wordprocessingml.document"
+              hidden
+            />
+
+            <button id="clear-tutor-file" type="button" class="studio-button secondary clear-file-button">
+              Remove Tutor Guide
+            </button>
           </div>
 
           <div class="form-actions">
@@ -173,25 +194,47 @@ const difficulties = ["Beginner", "Intermediate", "Advanced"];
 
         <aside class="studio-preview-panel">
           <p class="studio-eyebrow">Resource preview</p>
-          <h2 id="preview-title">Resource title will appear here</h2>
-          <p id="preview-description">
-            Add a description and upload a file. This preview shows how the resource card will be prepared before publishing.
-          </p>
 
-          <div class="preview-meta">
-            <span id="preview-category">Student</span>
-            <span id="preview-type">Student Pack</span>
-            <span id="preview-skill">Advocacy</span>
-            <span id="preview-difficulty">Beginner</span>
+          <div class="resource-preview-card">
+            <div class="preview-card-top">
+              <span id="preview-code">CODE</span>
+              <span id="preview-difficulty">Intermediate</span>
+            </div>
+
+            <p id="preview-skill" class="preview-skill">
+              Advocacy and Oral Presentation
+            </p>
+
+            <h2 id="preview-title">Resource title will appear here</h2>
+
+            <p id="preview-scenario">
+              Scenario title will appear here.
+            </p>
+
+            <p id="preview-summary">
+              Add a summary to preview how the resource card will look on the Resources page.
+            </p>
+
+            <div class="preview-actions">
+              <span class="studio-button secondary">View Student Pack</span>
+              <span id="preview-tutor-button" class="studio-button secondary muted">
+                View Tutor Guide
+              </span>
+            </div>
           </div>
 
           <div class="preview-document">
-            <strong>Uploaded file</strong>
-            <span id="preview-document-name">No file selected</span>
+            <strong>Student Pack</strong>
+            <span id="preview-student-file">No Student Pack selected</span>
+          </div>
+
+          <div class="preview-document">
+            <strong>Tutor Guide</strong>
+            <span id="preview-tutor-file">No Tutor Guide selected</span>
           </div>
 
           <div id="studio-status" class="studio-status">
-            Ready to create a new resource entry.
+            Ready to create a practical skills resource.
           </div>
         </aside>
       </div>
@@ -323,7 +366,7 @@ const difficulties = ["Beginner", "Intermediate", "Advanced"];
 
     .studio-layout {
       display: grid;
-      grid-template-columns: minmax(0, 1.35fr) minmax(340px, 0.65fr);
+      grid-template-columns: minmax(0, 1.35fr) minmax(360px, 0.65fr);
       gap: 1.5rem;
       align-items: start;
       margin-top: 2rem;
@@ -382,7 +425,7 @@ const difficulties = ["Beginner", "Intermediate", "Advanced"];
     }
 
     .upload-box {
-      min-height: 210px;
+      min-height: 190px;
       align-items: center;
       justify-items: center;
       text-align: center;
@@ -397,6 +440,10 @@ const difficulties = ["Beginner", "Intermediate", "Advanced"];
     .upload-box:hover {
       border-color: #d39b45;
       transform: translateY(-2px);
+    }
+
+    .tutor-upload {
+      border-color: rgba(6, 27, 49, 0.22);
     }
 
     .upload-box span {
@@ -415,8 +462,14 @@ const difficulties = ["Beginner", "Intermediate", "Advanced"];
       line-height: 1.5;
     }
 
+    .clear-file-button {
+      margin-top: 1rem;
+      width: fit-content;
+    }
+
     .form-actions,
-    .success-actions {
+    .success-actions,
+    .preview-actions {
       display: flex;
       gap: 0.8rem;
       flex-wrap: wrap;
@@ -434,6 +487,7 @@ const difficulties = ["Beginner", "Intermediate", "Advanced"];
       align-items: center;
       justify-content: center;
       font-size: 0.94rem;
+      text-align: center;
     }
 
     .studio-button.primary {
@@ -448,6 +502,10 @@ const difficulties = ["Beginner", "Intermediate", "Advanced"];
       border: 1px solid rgba(201, 150, 82, 0.32);
     }
 
+    .studio-button.secondary.muted {
+      opacity: 0.55;
+    }
+
     .studio-button:disabled {
       opacity: 0.55;
       cursor: not-allowed;
@@ -458,39 +516,64 @@ const difficulties = ["Beginner", "Intermediate", "Advanced"];
       top: 1rem;
     }
 
-    .studio-preview-panel h2 {
+    .resource-preview-card {
+      padding: 1.2rem;
+      border-radius: 24px;
+      background:
+        radial-gradient(circle at top right, rgba(231, 182, 95, 0.18), transparent 34%),
+        #ffffff;
+      border: 1px solid rgba(201, 150, 82, 0.28);
+      box-shadow: 0 14px 40px rgba(6, 27, 49, 0.08);
+      overflow: hidden;
+    }
+
+    .preview-card-top {
+      display: flex;
+      gap: 0.5rem;
+      flex-wrap: wrap;
+      justify-content: space-between;
+      margin-bottom: 1rem;
+    }
+
+    .preview-card-top span,
+    .preview-skill {
+      display: inline-flex;
+      width: fit-content;
+      max-width: 100%;
+      padding: 0.42rem 0.7rem;
+      border-radius: 999px;
+      background: rgba(211, 155, 69, 0.13);
+      color: #061b31;
+      font-weight: 900;
+      font-size: 0.78rem;
+      overflow-wrap: anywhere;
+    }
+
+    .preview-skill {
+      margin: 0 0 0.9rem;
+      background: rgba(6, 27, 49, 0.06);
+      color: #334155;
+    }
+
+    .resource-preview-card h2 {
       margin: 0;
       font-family: Georgia, "Times New Roman", serif;
       font-size: clamp(1.8rem, 3vw, 2.6rem);
       line-height: 1.05;
       color: #061b31;
+      overflow-wrap: anywhere;
+      hyphens: auto;
     }
 
-    .studio-preview-panel p {
+    .resource-preview-card p {
       color: #334155;
       line-height: 1.65;
-    }
-
-    .preview-meta {
-      display: flex;
-      gap: 0.55rem;
-      flex-wrap: wrap;
-      margin-top: 1rem;
-    }
-
-    .preview-meta span {
-      padding: 0.45rem 0.75rem;
-      border-radius: 999px;
-      background: rgba(211, 155, 69, 0.13);
-      color: #061b31;
-      font-weight: 900;
-      font-size: 0.82rem;
+      overflow-wrap: anywhere;
     }
 
     .preview-document {
       display: grid;
       gap: 0.3rem;
-      margin-top: 1.25rem;
       padding: 1rem;
       border-radius: 18px;
       background: rgba(6, 27, 49, 0.04);
@@ -507,7 +590,6 @@ const difficulties = ["Beginner", "Intermediate", "Advanced"];
     }
 
     .studio-status {
-      margin-top: 1rem;
       padding: 0.9rem 1rem;
       border-radius: 18px;
       background: #061b31;
@@ -581,36 +663,49 @@ const difficulties = ["Beginner", "Intermediate", "Advanced"];
       .studio-button {
         width: 100%;
       }
+
+      .clear-file-button {
+        width: 100%;
+      }
     }
   </style>
 
   <script>
     const form = document.getElementById("resource-form");
-    const titleInput = document.getElementById("resource-title");
-    const descriptionInput = document.getElementById("resource-description");
+
+    const codeInput = document.getElementById("resource-code");
     const categoryInput = document.getElementById("resource-category");
-    const typeInput = document.getElementById("resource-type");
+    const titleInput = document.getElementById("resource-title");
+    const scenarioInput = document.getElementById("resource-scenario");
     const skillInput = document.getElementById("resource-skill");
     const difficultyInput = document.getElementById("resource-difficulty");
-    const notesInput = document.getElementById("resource-notes");
-    const fileInput = document.getElementById("resource-file");
-    const fileName = document.getElementById("file-name");
+    const summaryInput = document.getElementById("resource-summary");
+
+    const studentFileInput = document.getElementById("student-file");
+    const tutorFileInput = document.getElementById("tutor-file");
+    const studentFileName = document.getElementById("student-file-name");
+    const tutorFileName = document.getElementById("tutor-file-name");
+    const clearTutorFile = document.getElementById("clear-tutor-file");
+
     const publishButton = document.getElementById("publish-resource");
     const resetButton = document.getElementById("reset-form");
 
-    const previewTitle = document.getElementById("preview-title");
-    const previewDescription = document.getElementById("preview-description");
-    const previewCategory = document.getElementById("preview-category");
-    const previewType = document.getElementById("preview-type");
-    const previewSkill = document.getElementById("preview-skill");
+    const previewCode = document.getElementById("preview-code");
     const previewDifficulty = document.getElementById("preview-difficulty");
-    const previewDocumentName = document.getElementById("preview-document-name");
+    const previewSkill = document.getElementById("preview-skill");
+    const previewTitle = document.getElementById("preview-title");
+    const previewScenario = document.getElementById("preview-scenario");
+    const previewSummary = document.getElementById("preview-summary");
+    const previewStudentFile = document.getElementById("preview-student-file");
+    const previewTutorFile = document.getElementById("preview-tutor-file");
+    const previewTutorButton = document.getElementById("preview-tutor-button");
     const statusBox = document.getElementById("studio-status");
 
     const successModal = document.getElementById("success-modal");
     const closeSuccess = document.getElementById("close-success");
 
-    let selectedFile = null;
+    let selectedStudentFile = null;
+    let selectedTutorFile = null;
 
     function setStatus(message) {
       if (statusBox) {
@@ -618,19 +713,32 @@ const difficulties = ["Beginner", "Intermediate", "Advanced"];
       }
     }
 
-    function updatePreview() {
-      const title = titleInput.value.trim();
-      const description = descriptionInput.value.trim();
+    function isAllowedPackFile(file) {
+      const name = file?.name?.toLowerCase() || "";
+      return name.endsWith(".docx") || name.endsWith(".pdf");
+    }
 
+    function updatePreview() {
+      const code = codeInput.value.trim();
+      const title = titleInput.value.trim();
+      const scenario = scenarioInput.value.trim();
+      const summary = summaryInput.value.trim();
+
+      previewCode.textContent = code || "CODE";
+      previewDifficulty.textContent = difficultyInput.value || "Intermediate";
+      previewSkill.textContent = skillInput.value || "Advocacy and Oral Presentation";
       previewTitle.textContent = title || "Resource title will appear here";
-      previewDescription.textContent =
-        description ||
-        "Add a description and upload a file. This preview shows how the resource card will be prepared before publishing.";
-      previewCategory.textContent = categoryInput.value || "Student";
-      previewType.textContent = typeInput.value || "Student Pack";
-      previewSkill.textContent = skillInput.value || "Advocacy";
-      previewDifficulty.textContent = difficultyInput.value || "Beginner";
-      previewDocumentName.textContent = selectedFile?.name || "No file selected";
+      previewScenario.textContent = scenario || "Scenario title will appear here.";
+      previewSummary.textContent =
+        summary ||
+        "Add a summary to preview how the resource card will look on the Resources page.";
+
+      previewStudentFile.textContent = selectedStudentFile?.name || "No Student Pack selected";
+      previewTutorFile.textContent = selectedTutorFile?.name || "No Tutor Guide selected";
+
+      if (previewTutorButton) {
+        previewTutorButton.classList.toggle("muted", !selectedTutorFile);
+      }
     }
 
     function readFileAsBase64(file) {
@@ -643,61 +751,92 @@ const difficulties = ["Beginner", "Intermediate", "Advanced"];
       });
     }
 
-    function isAllowedResourceFile(file) {
-      const name = file?.name?.toLowerCase() || "";
-      return (
-        name.endsWith(".docx") ||
-        name.endsWith(".pdf") ||
-        name.endsWith(".pptx") ||
-        name.endsWith(".xlsx")
-      );
-    }
-
     function resetForm() {
       form.reset();
-      selectedFile = null;
-      fileName.textContent = "No file selected";
-      previewDocumentName.textContent = "No file selected";
-      setStatus("Ready to create a new resource entry.");
+
+      selectedStudentFile = null;
+      selectedTutorFile = null;
+
+      studentFileInput.value = "";
+      tutorFileInput.value = "";
+
+      studentFileName.textContent = "No Student Pack selected";
+      tutorFileName.textContent = "No Tutor Guide selected";
+
+      setStatus("Ready to create a practical skills resource.");
       updatePreview();
     }
 
     [
-      titleInput,
-      descriptionInput,
+      codeInput,
       categoryInput,
-      typeInput,
+      titleInput,
+      scenarioInput,
       skillInput,
       difficultyInput,
-      notesInput,
+      summaryInput,
     ].forEach((input) => {
       input.addEventListener("input", updatePreview);
       input.addEventListener("change", updatePreview);
     });
 
-    fileInput.addEventListener("change", () => {
-      const file = fileInput.files?.[0];
+    studentFileInput.addEventListener("change", () => {
+      const file = studentFileInput.files?.[0];
 
       if (!file) {
-        selectedFile = null;
-        fileName.textContent = "No file selected";
-        setStatus("No file selected.");
+        selectedStudentFile = null;
+        studentFileName.textContent = "No Student Pack selected";
+        setStatus("No Student Pack selected.");
         updatePreview();
         return;
       }
 
-      if (!isAllowedResourceFile(file)) {
-        selectedFile = null;
-        fileInput.value = "";
-        fileName.textContent = "No file selected";
-        setStatus("Please upload a .docx, .pdf, .pptx or .xlsx file.");
+      if (!isAllowedPackFile(file)) {
+        selectedStudentFile = null;
+        studentFileInput.value = "";
+        studentFileName.textContent = "No Student Pack selected";
+        setStatus("Please upload the Student Pack as a .docx or .pdf file.");
         updatePreview();
         return;
       }
 
-      selectedFile = file;
-      fileName.textContent = file.name;
-      setStatus("Resource file selected. Add the details, then publish.");
+      selectedStudentFile = file;
+      studentFileName.textContent = file.name;
+      setStatus("Student Pack selected.");
+      updatePreview();
+    });
+
+    tutorFileInput.addEventListener("change", () => {
+      const file = tutorFileInput.files?.[0];
+
+      if (!file) {
+        selectedTutorFile = null;
+        tutorFileName.textContent = "No Tutor Guide selected";
+        setStatus("No Tutor Guide selected.");
+        updatePreview();
+        return;
+      }
+
+      if (!isAllowedPackFile(file)) {
+        selectedTutorFile = null;
+        tutorFileInput.value = "";
+        tutorFileName.textContent = "No Tutor Guide selected";
+        setStatus("Please upload the Tutor Guide as a .docx or .pdf file.");
+        updatePreview();
+        return;
+      }
+
+      selectedTutorFile = file;
+      tutorFileName.textContent = file.name;
+      setStatus("Tutor Guide selected.");
+      updatePreview();
+    });
+
+    clearTutorFile.addEventListener("click", () => {
+      selectedTutorFile = null;
+      tutorFileInput.value = "";
+      tutorFileName.textContent = "No Tutor Guide selected";
+      setStatus("Tutor Guide removed.");
       updatePreview();
     });
 
@@ -726,19 +865,23 @@ const difficulties = ["Beginner", "Intermediate", "Advanced"];
           return;
         }
 
-        if (!selectedFile) {
-          setStatus("Please upload a resource file before publishing.");
+        if (!selectedStudentFile) {
+          setStatus("Please upload a Student Pack before publishing.");
           return;
         }
 
         publishButton.disabled = true;
         publishButton.textContent = "Publishing...";
-        setStatus("Reading resource file...");
+        setStatus("Reading resource files...");
 
         const token = await user.jwt();
-        const fileBase64 = await readFileAsBase64(selectedFile);
 
-        setStatus("Creating resource entry...");
+        const studentFileBase64 = await readFileAsBase64(selectedStudentFile);
+        const tutorFileBase64 = selectedTutorFile
+          ? await readFileAsBase64(selectedTutorFile)
+          : "";
+
+        setStatus("Creating resource simulation entry...");
 
         const response = await fetch("/.netlify/functions/create-resource-upload", {
           method: "POST",
@@ -747,15 +890,19 @@ const difficulties = ["Beginner", "Intermediate", "Advanced"];
             Authorization: `Bearer ${token}`,
           },
           body: JSON.stringify({
-            title: titleInput.value.trim(),
-            description: descriptionInput.value.trim(),
+            code: codeInput.value.trim(),
             category: categoryInput.value,
-            type: typeInput.value,
+            title: titleInput.value.trim(),
+            scenario: scenarioInput.value.trim(),
             skill: skillInput.value,
             difficulty: difficultyInput.value,
-            notes: notesInput.value.trim(),
-            fileName: selectedFile.name,
-            fileBase64,
+            summary: summaryInput.value.trim(),
+
+            studentFileName: selectedStudentFile.name,
+            studentFileBase64,
+
+            tutorFileName: selectedTutorFile?.name || "",
+            tutorFileBase64,
           }),
         });
 
