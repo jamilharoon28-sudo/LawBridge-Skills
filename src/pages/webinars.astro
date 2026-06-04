@@ -1,6 +1,6 @@
 ---
 import BaseLayout from "../layouts/BaseLayout.astro";
-import { getEntry } from "astro:content";
+import { getCollection, getEntry } from "astro:content";
 
 const page = await getEntry("pages", "webinars");
 const data = page?.data;
@@ -10,6 +10,38 @@ const sections = data?.sections ?? {};
 const cards = data?.cards ?? {};
 const buttons = data?.buttons ?? {};
 const dashboard = data?.dashboard ?? {};
+
+const webinars = await getCollection("webinars");
+
+const sortedWebinars = webinars.sort((a, b) => {
+  const aTime = a.data.date ? new Date(a.data.date).getTime() : 0;
+  const bTime = b.data.date ? new Date(b.data.date).getTime() : 0;
+  return bTime - aTime;
+});
+
+function formatDate(dateValue) {
+  if (!dateValue) {
+    return "Date to be confirmed";
+  }
+
+  const date = new Date(dateValue);
+
+  if (Number.isNaN(date.getTime())) {
+    return "Date to be confirmed";
+  }
+
+  return date.toLocaleString("en-GB", {
+    day: "2-digit",
+    month: "short",
+    year: "numeric",
+    hour: "2-digit",
+    minute: "2-digit",
+  });
+}
+
+function getWebinarLink(webinar) {
+  return webinar.data.registrationLink || webinar.data.link || `/webinars/${webinar.slug}`;
+}
 ---
 
 <BaseLayout title={data?.title ?? "Webinars | LawBridge"}>
@@ -22,15 +54,21 @@ const dashboard = data?.dashboard ?? {};
 
         <div class="hero-actions">
           {hero.primaryButtonText && (
-            <a class="btn primary" href={hero.primaryButtonLink}>{hero.primaryButtonText}</a>
+            <a class="btn primary" href={hero.primaryButtonLink}>
+              {hero.primaryButtonText}
+            </a>
           )}
 
           {hero.secondaryButtonText && (
-            <a class="btn secondary" href={hero.secondaryButtonLink}>{hero.secondaryButtonText}</a>
+            <a class="btn secondary" href={hero.secondaryButtonLink}>
+              {hero.secondaryButtonText}
+            </a>
           )}
 
           {hero.tertiaryButtonText && (
-            <a class="btn secondary" href={hero.tertiaryButtonLink}>{hero.tertiaryButtonText}</a>
+            <a class="btn ghost" href={hero.tertiaryButtonLink}>
+              {hero.tertiaryButtonText}
+            </a>
           )}
         </div>
       </div>
@@ -53,6 +91,48 @@ const dashboard = data?.dashboard ?? {};
 
   <section class="section cream">
     <div class="container">
+      <p class="eyebrow">Upcoming webinars</p>
+      <h2>Explore LawBridge webinar sessions.</h2>
+      <p class="section-intro">
+        Webinars added through the LawBridge Content Studio will appear here automatically.
+      </p>
+
+      {sortedWebinars.length > 0 ? (
+        <div class="grid g3">
+          {sortedWebinars.map((webinar) => (
+            <article class="card">
+              {webinar.data.status && (
+                <span class="pill">{webinar.data.status}</span>
+              )}
+
+              <h3>{webinar.data.title}</h3>
+              <p>{webinar.data.description}</p>
+
+              <div class="webinar-meta">
+                <span>{formatDate(webinar.data.date)}</span>
+                {webinar.data.location && <span>{webinar.data.location}</span>}
+                {webinar.data.speaker && <span>{webinar.data.speaker}</span>}
+              </div>
+
+              <a class="btn secondary" href={getWebinarLink(webinar)}>
+                Register / View Webinar
+              </a>
+            </article>
+          ))}
+        </div>
+      ) : (
+        <article class="card">
+          <h3>No webinars published yet</h3>
+          <p>
+            Add a webinar from the LawBridge admin dashboard and it will appear here.
+          </p>
+        </article>
+      )}
+    </div>
+  </section>
+
+  <section class="section light">
+    <div class="container">
       <p class="eyebrow">{sections.problem?.eyebrow}</p>
       <h2>{sections.problem?.heading}</h2>
       <p class="section-intro">{sections.problem?.description}</p>
@@ -68,7 +148,7 @@ const dashboard = data?.dashboard ?? {};
     </div>
   </section>
 
-  <section class="section light">
+  <section class="section cream">
     <div class="container">
       <p class="eyebrow">{sections.method?.eyebrow}</p>
       <h2>{sections.method?.heading}</h2>
@@ -115,7 +195,9 @@ const dashboard = data?.dashboard ?? {};
             <p>{card.description}</p>
 
             {card.buttonText && (
-              <a class="btn secondary" href={card.buttonLink}>{card.buttonText}</a>
+              <a class="btn secondary" href={card.buttonLink}>
+                {card.buttonText}
+              </a>
             )}
           </article>
         ))}
@@ -131,13 +213,36 @@ const dashboard = data?.dashboard ?? {};
 
       <div class="hero-actions">
         {buttons.cta?.primaryText && (
-          <a class="btn primary" href={buttons.cta.primaryLink}>{buttons.cta.primaryText}</a>
+          <a class="btn primary" href={buttons.cta.primaryLink}>
+            {buttons.cta.primaryText}
+          </a>
         )}
 
         {buttons.cta?.secondaryText && (
-          <a class="btn secondary" href={buttons.cta.secondaryLink}>{buttons.cta.secondaryText}</a>
+          <a class="btn secondary" href={buttons.cta.secondaryLink}>
+            {buttons.cta.secondaryText}
+          </a>
         )}
       </div>
     </div>
   </section>
+
+  <style is:inline>
+    .webinar-meta {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.5rem;
+      margin: 1rem 0;
+    }
+
+    .webinar-meta span {
+      display: inline-flex;
+      padding: 0.42rem 0.7rem;
+      border-radius: 999px;
+      background: rgba(211, 155, 69, 0.12);
+      color: #061b31;
+      font-size: 0.82rem;
+      font-weight: 900;
+    }
+  </style>
 </BaseLayout>
