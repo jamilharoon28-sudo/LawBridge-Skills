@@ -1,117 +1,152 @@
 ---
-import BaseLayout from "../layouts/BaseLayout.astro";
 import { getCollection } from "astro:content";
+import Dashboard from "../components/Dashboard.astro";
+import { legacyResources } from "../content/config";
 
-const allResources = await getCollection("resources");
+// Load studio resources
+const studioResources = await getCollection("resources");
 
-// Organise resources by category and type
-const categories = ["legal-practice-skills", "professional-skills"];
-const types = ["student", "tutor"];
+// Merge legacy + studio
+const allResources = [...legacyResources, ...studioResources];
 
-function filterResources(category, type) {
-  return allResources.filter(
-    (res) => res.data.category === category && res.data.type === type
-  );
+// Filters / search / view toggle logic
+let filterCategory = Astro.request.query.get("category") || "all";
+let filterType = Astro.request.query.get("type") || "all";
+let viewMode = Astro.request.query.get("view") || "folders";
+
+// Map resources by category group (Legal Practice / Professional Skills)
+const resourceMap = allResources.reduce((acc, res) => {
+  const categoryGroup = res.categoryGroup || "Uncategorized";
+  if (!acc[categoryGroup]) acc[categoryGroup] = [];
+  acc[categoryGroup].push(res);
+  return acc;
+}, {});
+
+function getResourceKey(res) {
+  return res.packCode || res.slug || res.title || "unknown";
+}
+
+function getCoachLink(res) {
+  return `/ai-skills-coach?pack=${res.packCode}`;
+}
+
+function filteredResources(resources) {
+  return resources.filter((res) => {
+    let categoryMatch = filterCategory === "all" || res.categoryGroup === filterCategory;
+    let typeMatch = filterType === "all" || res.sheetType === filterType;
+    return categoryMatch && typeMatch;
+  });
 }
 ---
 
-<BaseLayout title="Resources | LawBridge">
+<!-- Page Header / Navbar is preserved -->
+<main class="resources-page">
+  <!-- Hero section already exists -->
   <section class="hero">
-    <div class="container hero-grid">
-      <div>
-        <p class="eyebrow">LawBridge Resources</p>
-        <h1>Practical Legal Skills Simulations</h1>
-        <p>Explore Student Packs, Tutor Guides, and AI-assisted simulations organised by skill area.</p>
-      </div>
-    </div>
+    <h1>Resources</h1>
+    <p>Explore Student and Tutor Sheets for Legal & Professional Skills.</p>
   </section>
 
-  <!-- Dashboard component included at top -->
-  <Dashboard />
+  <!-- Dashboard section -->
+  <section class="dashboard-section">
+    <Dashboard />
+  </section>
 
-  {categories.map((category) => (
-    <section class="section">
-      <div class="container">
-        <h2 class="section-heading">{category.replace("-", " ")}</h2>
+  <!-- AI Skills Coach banner -->
+  <section class="ai-coach-banner">
+    <a href="/ai-skills-coach" class="btn btn-gold">Ask AI Skills Coach</a>
+  </section>
 
-        {types.map((type) => {
-          const packs = filterResources(category, type);
-          return (
-            <div class="resource-subsection">
-              <h3>{type === "student" ? "Student Packs" : "Tutor Guides"}</h3>
-              {packs.length > 0 ? (
-                <div class="grid g3">
-                  {packs.map((pack) => (
-                    <article class="card">
-                      <h4>{pack.data.title}</h4>
-                      <p>{pack.data.skill} | {pack.data.difficulty || "N/A"}</p>
+  <!-- Search / Filter / View Toggle -->
+  <section class="filter-bar">
+    <form method="get">
+      <select name="category" onchange="this.form.submit()">
+        <option value="all">All Categories</option>
+        <option value="Legal Practice Skills" selected={filterCategory==='Legal Practice Skills'}>Legal Practice Skills</option>
+        <option value="Professional Skills" selected={filterCategory==='Professional Skills'}>Professional Skills</option>
+      </select>
 
-                      {pack.data.studentLink && type === "student" && (
-                        <a href={pack.data.studentLink} target="_blank">Open Student Pack</a>
-                      )}
+      <select name="type" onchange="this.form.submit()">
+        <option value="all">All Types</option>
+        <option value="student" selected={filterType==='student'}>Student Sheets</option>
+        <option value="tutor" selected={filterType==='tutor'}>Tutor Sheets</option>
+      </select>
 
-                      {pack.data.tutorLink && type === "tutor" && (
-                        <a href={pack.data.tutorLink} target="_blank">Open Tutor Guide</a>
-                      )}
+      <select name="view" onchange="this.form.submit()">
+        <option value="folders" selected={viewMode==='folders'}>View as Folders</option>
+        <option value="list" selected={viewMode==='list'}>View as List</option>
+      </select>
+    </form>
+  </section>
 
-                      <a href={`/ai-skills-coach?pack=${encodeURIComponent(pack.data.code)}`} target="_blank">AI Skills Coach</a>
-                    </article>
-                  ))}
+  <!-- Resource Library -->
+  <section class="resource-library">
+    {Object.entries(resourceMap).map(([categoryGroup, resources]) => {
+      const filtered = filteredResources(resources);
+      if (!filtered.length) return null;
+
+      return (
+        <div class="category-group" key={categoryGroup}>
+          <h2>{categoryGroup}</h2>
+          <div class={viewMode==='folders' ? 'folder-view' : 'list-view'}>
+            {filtered.map((res) => (
+              <div class="resource-card" key={getResourceKey(res)}>
+                <h3>{res.title}</h3>
+                <p>Skill: {res.skill}</p>
+                <p>Type: {res.sheetType}</p>
+                <p>Difficulty: {res.difficulty || 'N/A'}</p>
+                <p>Category: {res.categoryGroup}</p>
+
+                <div class="buttons">
+                  {res.sheetType === 'student' && res.studentLink && (
+                    <>
+                      <a href={res.studentLink} target="_blank" class="btn btn-primary">Open Student Sheet</a>
+                      <a href={`/answer-pack?pack=${res.packCode}`} class="btn btn-gold">Answer Pack</a>
+                    </>
+                  )}
+
+                  {res.sheetType === 'tutor' && res.tutorLink && (
+                    <a href={res.tutorLink} target="_blank" class="btn btn-secondary">Open Tutor Sheet</a>
+                  )}
+
+                  <a href={getCoachLink(res)} class="btn btn-outline">Ask AI Skills Coach</a>
                 </div>
-              ) : (
-                <p>No packs available in this section.</p>
-              )}
-            </div>
-          );
-        })}
-      </div>
-    </section>
-  ))}
-</BaseLayout>
+              </div>
+            ))}
+          </div>
+        </div>
+      );
+    })}
+  </section>
 
-<style is:inline>
-.section-heading {
-  font-size: 2rem;
-  margin-bottom: 1rem;
-  color: #061b31;
-}
+  <!-- Disclaimer -->
+  <section class="disclaimer">
+    <small>
+      LawBridge resources are provided for educational and training purposes only.
+      They do not constitute legal advice and are not intended as guidance for any particular jurisdiction,
+      legal system, regulator, court, firm policy or client matter.
+      Students should always check the applicable law, rules and professional requirements in the relevant jurisdiction.
+    </small>
+  </section>
+</main>
 
-.resource-subsection {
-  margin-bottom: 2rem;
-}
-
-.resource-subsection h3 {
-  font-size: 1.4rem;
-  margin-bottom: 0.8rem;
-  color: #142033;
-}
-
-.card {
-  padding: 1.2rem;
-  border-radius: 20px;
-  background: rgba(255,255,255,0.9);
-  border: 1px solid rgba(6,27,49,0.1);
-  box-shadow: 0 10px 40px rgba(6,27,49,0.06);
-  display: flex;
-  flex-direction: column;
-  gap: 0.6rem;
-}
-
-.card h4 {
-  margin: 0;
-  font-size: 1.2rem;
-  color: #061b31;
-}
-
-.card p {
-  margin: 0;
-  font-size: 0.95rem;
-  color: #334155;
-}
-
-.card a {
-  text-decoration: none;
-  color: #d39b45;
-  font-weight: 700;
-}
+<style>
+.resources-page { padding: 2rem; font-family: Georgia, serif; }
+.hero { text-align: center; margin-bottom: 2rem; }
+.dashboard-section { margin-bottom: 2rem; }
+.ai-coach-banner { text-align: center; margin-bottom: 1.5rem; }
+.filter-bar { display: flex; gap: 1rem; justify-content: center; margin-bottom: 2rem; }
+.resource-library { display: flex; flex-direction: column; gap: 2rem; }
+.category-group h2 { font-size: 1.75rem; margin-bottom: 1rem; }
+.folder-view { display: flex; flex-wrap: wrap; gap: 1rem; }
+.list-view { display: flex; flex-direction: column; gap: 1rem; }
+.resource-card { background: #fff; border-radius: 8px; padding: 1rem; box-shadow: 0 2px 8px rgba(0,0,0,0.1); width: 250px; }
+.resource-card h3 { margin-top: 0; }
+.resource-card .buttons { display: flex; flex-direction: column; gap: 0.5rem; margin-top: 0.5rem; }
+.btn { padding: 0.5rem 1rem; border-radius: 4px; text-decoration: none; text-align: center; display: inline-block; }
+.btn-primary { background-color: #061b31; color: #fff; }
+.btn-secondary { background-color: #d39b45; color: #fff; }
+.btn-gold { background-color: #e7b65f; color: #061b31; }
+.btn-outline { border: 1px solid #061b31; color: #061b31; background: transparent; }
+.disclaimer { margin-top: 3rem; text-align: center; font-size: 0.8rem; color: #555; }
 </style>
