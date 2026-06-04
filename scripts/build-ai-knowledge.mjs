@@ -9,6 +9,8 @@ const __dirname = path.dirname(__filename);
 const rootDir = path.resolve(__dirname, "..");
 
 const resourcesDir = path.join(rootDir, "src", "content", "resources");
+const aiKnowledgeDir = path.join(rootDir, "src", "content", "ai-knowledge");
+
 const outputPath = path.join(
   rootDir,
   "netlify",
@@ -58,6 +60,24 @@ function parseFrontmatter(markdown) {
   }
 
   return fields;
+}
+
+function removeFrontmatter(markdown) {
+  return String(markdown || "").replace(/^---\n[\s\S]*?\n---/, "").trim();
+}
+
+function extractSection(markdownBody, heading) {
+  const text = String(markdownBody || "");
+  const escapedHeading = heading.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+
+  const regex = new RegExp(
+    `##\\s+${escapedHeading}\\s*\\n([\\s\\S]*?)(?=\\n##\\s+|$)`,
+    "i"
+  );
+
+  const match = text.match(regex);
+
+  return cleanText(match?.[1] || "", 18000);
 }
 
 function resolvePublicPath(publicLink) {
@@ -144,7 +164,6 @@ async function readResourceEntries() {
   }
 
   const files = await fs.readdir(resourcesDir);
-
   const markdownFiles = files.filter((file) => file.endsWith(".md"));
   const entries = [];
 
@@ -164,6 +183,7 @@ async function readResourceEntries() {
     const tutorText = await extractPackText(tutorLink);
 
     entries.push({
+      source: "resources",
       slug,
       code: data.code || "",
       title: data.title || "",
@@ -191,8 +211,87 @@ async function readResourceEntries() {
   return entries;
 }
 
+async function readAiKnowledgeEntries() {
+  if (!(await pathExists(aiKnowledgeDir))) {
+    return [];
+  }
+
+  const files = await fs.readdir(aiKnowledgeDir);
+  const markdownFiles = files.filter(
+    (file) => file.endsWith(".md") && !file.startsWith(".")
+  );
+
+  const entries = [];
+
+  for (const file of markdownFiles) {
+    const filePath = path.join(aiKnowledgeDir, file);
+    const markdown = await fs.readFile(filePath, "utf8");
+    const data = parseFrontmatter(markdown);
+    const body = removeFrontmatter(markdown);
+
+    const slug = file.replace(/\.md$/, "");
+
+    const studentText =
+      extractSection(body, "Student Pack Knowledge") ||
+      extractSection(body, "Student Knowledge") ||
+      "";
+
+    const tutorText =
+      extractSection(body, "Hidden Tutor Guidance") ||
+      extractSection(body, "Tutor Guidance") ||
+      "";
+
+    entries.push({
+      source: "ai-knowledge",
+      slug,
+      code: data.code || "",
+      title: data.title || "",
+      skill: data.skill || "",
+      scenario: data.scenario || data.title || "",
+      difficulty: data.difficulty || "",
+      summary: data.summary || data.description || "",
+      studentLink: "",
+      tutorLink: "",
+      studentText,
+      tutorText,
+      studentTextSource: "markdown",
+      tutorTextSource: "markdown",
+    });
+  }
+
+  return entries;
+}
+
+function mergeEntries(resourceEntries, aiKnowledgeEntries) {
+  const merged = new Map();
+
+  for (const entry of resourceEntries) {
+    const key = entry.code || entry.slug;
+    merged.set(key, entry);
+  }
+
+  for (const entry of aiKnowledgeEntries) {
+    const key = entry.code || entry.slug;
+
+    const existing = merged.get(key);
+
+    merged.set(key, {
+      ...(existing || {}),
+      ...entry,
+      studentText: entry.studentText || existing?.studentText || "",
+      tutorText: entry.tutorText || existing?.tutorText || "",
+      source: existing ? `${existing.source}+ai-knowledge` : "ai-knowledge",
+    });
+  }
+
+  return [...merged.values()];
+}
+
 async function main() {
-  const entries = await readResourceEntries();
+  const resourceEntries = await readResourceEntries();
+  const aiKnowledgeEntries = await readAiKnowledgeEntries();
+
+  const entries = mergeEntries(resourceEntries, aiKnowledgeEntries);
 
   const output = `// This file is generated automatically by scripts/build-ai-knowledge.mjs.
 // Do not edit manually.
@@ -205,7 +304,11 @@ export { PACK_KNOWLEDGE };
   await fs.mkdir(path.dirname(outputPath), { recursive: true });
   await fs.writeFile(outputPath, output, "utf8");
 
-  console.log(`Built AI knowledge for ${entries.length} resource packs.`);
+  console.log(
+    `Built AI knowledge for ${entries.length} packs. ` +
+      `Resources: ${resourceEntries.length}. ` +
+      `AI knowledge files: ${aiKnowledgeEntries.length}.`
+  );
 }
 
 main().catch((error) => {
