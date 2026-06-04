@@ -141,16 +141,26 @@ const popularPacks = packs.slice(0, 5);
             </article>
           </div>
 
-          <form class="chat-input-bar" id="chat-form">
-            <input
-              id="chat-input"
-              type="text"
-              placeholder="Ask a question about a Student Pack..."
-              autocomplete="off"
-            />
-            <button class="send-button" type="submit" aria-label="Send message">
-              →
-            </button>
+          <form class="chat-input-area" id="chat-form">
+            <div class="chat-input-bar">
+              <textarea
+                id="chat-input"
+                rows="3"
+                placeholder="Ask a question about a Student Pack..."
+                autocomplete="off"
+              ></textarea>
+
+              <button class="send-button" type="submit" aria-label="Send message">
+                →
+              </button>
+            </div>
+
+            <div class="chat-helper-row">
+              <span id="character-count">0 / 1500 characters</span>
+              <span id="character-guidance">
+                Use Check My Answer for longer draft feedback.
+              </span>
+            </div>
           </form>
 
           <p class="coach-disclaimer">
@@ -169,7 +179,7 @@ const popularPacks = packs.slice(0, 5);
 
             <div class="behind-item">
               <strong>Tutor Guide ready</strong>
-              <span>Later, hidden tutor guidance can support feedback mode.</span>
+              <span>Hidden tutor guidance can support feedback mode.</span>
             </div>
 
             <div class="behind-item">
@@ -337,7 +347,7 @@ const popularPacks = packs.slice(0, 5);
     }
 
     .coach-select-label select,
-    .chat-input-bar input {
+    .chat-input-bar textarea {
       width: 100%;
       border: 1px solid rgba(201, 150, 82, 0.34);
       border-radius: 16px;
@@ -345,6 +355,19 @@ const popularPacks = packs.slice(0, 5);
       font: inherit;
       color: #061b31;
       background: #ffffff;
+    }
+
+    .chat-input-bar textarea {
+      resize: vertical;
+      min-height: 76px;
+      max-height: 210px;
+      line-height: 1.45;
+    }
+
+    .chat-input-bar textarea:focus,
+    .coach-select-label select:focus {
+      outline: 3px solid rgba(211, 155, 69, 0.18);
+      border-color: #d39b45;
     }
 
     .popular-list {
@@ -470,6 +493,7 @@ const popularPacks = packs.slice(0, 5);
       color: #061b31;
       line-height: 1.65;
       box-shadow: 0 12px 34px rgba(6, 27, 49, 0.06);
+      overflow-wrap: anywhere;
     }
 
     .message-bubble.generated-reply {
@@ -491,23 +515,42 @@ const popularPacks = packs.slice(0, 5);
       font-weight: 900;
     }
 
+    .chat-input-area {
+      margin-top: 1rem;
+    }
+
     .chat-input-bar {
       display: grid;
       grid-template-columns: minmax(0, 1fr) auto;
       gap: 0.7rem;
-      margin-top: 1rem;
+      align-items: end;
     }
 
     .send-button {
-      width: 48px;
-      height: 48px;
+      width: 52px;
+      height: 52px;
       font-size: 1.4rem;
     }
 
     .send-button:disabled,
-    .chat-input-bar input:disabled {
+    .chat-input-bar textarea:disabled {
       opacity: 0.6;
       cursor: not-allowed;
+    }
+
+    .chat-helper-row {
+      display: flex;
+      justify-content: space-between;
+      gap: 0.75rem;
+      flex-wrap: wrap;
+      margin-top: 0.55rem;
+      color: #64748b;
+      font-size: 0.86rem;
+      font-weight: 800;
+    }
+
+    .chat-helper-row.too-long {
+      color: #7f1d1d;
     }
 
     .coach-disclaimer {
@@ -580,6 +623,9 @@ const popularPacks = packs.slice(0, 5);
   </style>
 
   <script is:inline>
+    const STANDARD_MESSAGE_LIMIT = 1500;
+    const FEEDBACK_MESSAGE_LIMIT = 2500;
+
     const packSelect = document.getElementById("pack-select");
     const currentPackTitle = document.getElementById("current-pack-title");
     const currentPackSkill = document.getElementById("current-pack-skill");
@@ -590,6 +636,9 @@ const popularPacks = packs.slice(0, 5);
     const chatInput = document.getElementById("chat-input");
     const chatWindow = document.getElementById("chat-window");
     const sendButton = document.querySelector(".send-button");
+    const characterCount = document.getElementById("character-count");
+    const characterGuidance = document.getElementById("character-guidance");
+    const chatHelperRow = document.querySelector(".chat-helper-row");
 
     let selectedPack = {
       code: "",
@@ -599,6 +648,39 @@ const popularPacks = packs.slice(0, 5);
 
     function getActiveMode() {
       return document.querySelector(".mode-button.active")?.dataset.mode || "Ask Anything";
+    }
+
+    function getCurrentLimit() {
+      return getActiveMode() === "Check My Answer"
+        ? FEEDBACK_MESSAGE_LIMIT
+        : STANDARD_MESSAGE_LIMIT;
+    }
+
+    function updateCharacterCounter() {
+      if (!chatInput || !characterCount) {
+        return;
+      }
+
+      const currentLength = chatInput.value.length;
+      const currentLimit = getCurrentLimit();
+      const isTooLong = currentLength > currentLimit;
+
+      characterCount.textContent = `${currentLength} / ${currentLimit} characters`;
+
+      if (characterGuidance) {
+        characterGuidance.textContent =
+          getActiveMode() === "Check My Answer"
+            ? "Paste one draft section at a time for focused feedback."
+            : "Use Check My Answer for longer draft feedback.";
+      }
+
+      if (chatHelperRow) {
+        chatHelperRow.classList.toggle("too-long", isTooLong);
+      }
+
+      if (sendButton) {
+        sendButton.disabled = isTooLong;
+      }
     }
 
     function setCurrentPack({ code = "", scenario = "", skill = "" }) {
@@ -636,6 +718,10 @@ const popularPacks = packs.slice(0, 5);
 
       if (sendButton) {
         sendButton.disabled = isDisabled;
+      }
+
+      if (!isDisabled) {
+        updateCharacterCounter();
       }
     }
 
@@ -822,20 +908,41 @@ const popularPacks = packs.slice(0, 5);
       button.addEventListener("click", () => {
         modeButtons.forEach((item) => item.classList.remove("active"));
         button.classList.add("active");
+
+        if (chatInput) {
+          chatInput.placeholder =
+            getActiveMode() === "Check My Answer"
+              ? "Paste a short draft section for feedback..."
+              : "Ask a question about a Student Pack...";
+        }
+
+        updateCharacterCounter();
       });
     });
+
+    chatInput?.addEventListener("input", updateCharacterCounter);
 
     chatForm?.addEventListener("submit", async (event) => {
       event.preventDefault();
 
       const message = chatInput.value.trim();
+      const currentLimit = getCurrentLimit();
 
       if (!message) {
         return;
       }
 
+      if (message.length > currentLimit) {
+        addAssistantMessage(
+          `Your message is too long. Please shorten it to ${currentLimit} characters or paste only the section you want help with.`
+        );
+        updateCharacterCounter();
+        return;
+      }
+
       addUserMessage(message);
       chatInput.value = "";
+      updateCharacterCounter();
 
       const thinkingMessage = addAssistantMessage("Thinking...", {
         thinking: true,
@@ -865,5 +972,6 @@ const popularPacks = packs.slice(0, 5);
     });
 
     loadPackFromUrl();
+    updateCharacterCounter();
   </script>
 </BaseLayout>
