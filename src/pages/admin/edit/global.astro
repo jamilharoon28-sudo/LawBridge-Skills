@@ -27,40 +27,259 @@ const pages = pageFiles.map((file) => {
     <meta charset="UTF-8" />
     <title>Global Website Editor | LawBridge Admin</title>
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <script src="https://identity.netlify.com/v1/netlify-identity-widget.js"></script>
 
     <style>
-      :root { --navy:#061b31; --cream:#f8f1e4; --gold:#d39b45; --ink:#142033; --muted:#667085; --border:rgba(6,27,49,0.14);}
-      body{margin:0;background:var(--cream);color:var(--ink);font-family:Inter,system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;}
-      .shell{max-width:1180px;margin:0 auto;padding:40px 22px 80px;}
-      .topbar{display:flex;justify-content:space-between;gap:18px;align-items:center;margin-bottom:28px;}
-      .page-card{background:rgba(255,255,255,0.82);border:1px solid var(--border);border-radius:28px;box-shadow:0 18px 50px rgba(6,27,49,0.08);overflow:hidden;}
-      .page-head{padding:20px 22px;background:linear-gradient(135deg,#ffffff,#fbf7ef);border-bottom:1px solid var(--border);display:flex;justify-content:space-between;align-items:center;gap:14px;}
-      .page-title{margin:0;color:var(--navy);font-size:1.2rem;font-weight:900;}
-      .page-meta{color:var(--muted);font-size:0.9rem;margin-top:4px;}
-      .status{font-size:0.86rem;font-weight:800;color:var(--muted);}
-      .status.dirty{color:#a15c00;}
-      .status.saved{color:#18794e;}
-      .status.error{color:#b42318;}
-      textarea{width:100%;min-height:430px;border:0;resize:vertical;padding:22px;box-sizing:border-box;background:#fff;color:#182230;font-family:"SFMono-Regular",Consolas,"Liberation Mono",monospace;font-size:0.92rem;line-height:1.62;outline:none;}
-      .page-actions{padding:16px 22px 20px;border-top:1px solid var(--border);display:flex;justify-content:space-between;gap:14px;flex-wrap:wrap;align-items:center;}
-      .small-links{display:flex;gap:10px;flex-wrap:wrap;}
-      .small-links a{color:var(--navy);font-weight:800;text-decoration:none;}
-      .hidden{display:none;}
+      :root {
+        --navy: #061b31;
+        --cream: #f8f1e4;
+        --cream-soft: #fbf7ef;
+        --gold: #d39b45;
+        --gold-soft: #e7b65f;
+        --ink: #142033;
+        --muted: #667085;
+        --border: rgba(6, 27, 49, 0.14);
+        --card: rgba(255, 255, 255, 0.86);
+      }
+
+      body {
+        margin: 0;
+        background:
+          radial-gradient(circle at top right, rgba(231, 182, 95, 0.2), transparent 32%),
+          linear-gradient(180deg, var(--cream) 0%, var(--cream-soft) 100%);
+        color: var(--ink);
+        font-family: Inter, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      }
+
+      .shell {
+        max-width: 1180px;
+        margin: 0 auto;
+        padding: 38px 22px 80px;
+      }
+
+      .topbar {
+        display: flex;
+        justify-content: space-between;
+        gap: 18px;
+        align-items: flex-start;
+        margin-bottom: 28px;
+      }
+
+      .eyebrow {
+        margin: 0 0 0.7rem;
+        color: #b37b32;
+        font-weight: 900;
+        text-transform: uppercase;
+        letter-spacing: 0.12em;
+        font-size: 0.78rem;
+      }
+
+      h1 {
+        margin: 0;
+        color: var(--navy);
+        font-family: Georgia, "Times New Roman", serif;
+        font-size: clamp(2.4rem, 5vw, 4.8rem);
+        line-height: 0.98;
+        letter-spacing: -0.045em;
+      }
+
+      .intro {
+        max-width: 760px;
+        color: #334155;
+        font-size: 1.04rem;
+        line-height: 1.65;
+        margin: 1rem 0 0;
+      }
+
+      .actions {
+        display: flex;
+        gap: 10px;
+        flex-wrap: wrap;
+        justify-content: flex-end;
+      }
+
+      .button {
+        border: 0;
+        border-radius: 999px;
+        min-height: 42px;
+        padding: 0.72rem 1rem;
+        background: linear-gradient(135deg, var(--gold-soft), var(--gold));
+        color: var(--navy);
+        font-weight: 900;
+        cursor: pointer;
+        text-decoration: none;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        box-shadow: 0 12px 28px rgba(211, 155, 69, 0.2);
+      }
+
+      .button.secondary {
+        background: #ffffff;
+        color: var(--navy);
+        border: 1px solid rgba(201, 150, 82, 0.32);
+        box-shadow: none;
+      }
+
+      .button:disabled {
+        opacity: 0.45;
+        cursor: not-allowed;
+      }
+
+      .notice {
+        background: rgba(211, 155, 69, 0.13);
+        border: 1px solid rgba(211, 155, 69, 0.35);
+        color: var(--navy);
+        padding: 16px 18px;
+        border-radius: 22px;
+        margin: 24px 0;
+        line-height: 1.55;
+        font-weight: 700;
+      }
+
+      .editor-grid {
+        display: grid;
+        gap: 22px;
+        margin-top: 28px;
+      }
+
+      .page-card {
+        background: var(--card);
+        border: 1px solid rgba(201, 150, 82, 0.28);
+        border-radius: 28px;
+        box-shadow: 0 18px 52px rgba(6, 27, 49, 0.09);
+        overflow: hidden;
+      }
+
+      .page-head {
+        padding: 20px 22px;
+        background:
+          radial-gradient(circle at top right, rgba(231, 182, 95, 0.18), transparent 34%),
+          linear-gradient(135deg, #ffffff, #fbf7ef);
+        border-bottom: 1px solid rgba(201, 150, 82, 0.22);
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        gap: 14px;
+      }
+
+      .page-title {
+        margin: 0;
+        color: var(--navy);
+        font-family: Georgia, "Times New Roman", serif;
+        font-size: 1.55rem;
+        letter-spacing: -0.02em;
+      }
+
+      .page-meta {
+        color: var(--muted);
+        font-size: 0.9rem;
+        margin-top: 4px;
+        font-weight: 700;
+      }
+
+      .status {
+        font-size: 0.86rem;
+        font-weight: 900;
+        color: var(--muted);
+        white-space: nowrap;
+      }
+
+      .status.dirty {
+        color: #a15c00;
+      }
+
+      .status.saved {
+        color: #18794e;
+      }
+
+      .status.error {
+        color: #b42318;
+      }
+
+      textarea {
+        width: 100%;
+        min-height: 430px;
+        border: 0;
+        resize: vertical;
+        padding: 22px;
+        box-sizing: border-box;
+        background: #fff;
+        color: #182230;
+        font-family: "SFMono-Regular", Consolas, "Liberation Mono", monospace;
+        font-size: 0.92rem;
+        line-height: 1.62;
+        outline: none;
+      }
+
+      .page-actions {
+        padding: 16px 22px 20px;
+        border-top: 1px solid rgba(201, 150, 82, 0.22);
+        display: flex;
+        justify-content: space-between;
+        gap: 14px;
+        flex-wrap: wrap;
+        align-items: center;
+        background: rgba(255, 255, 255, 0.78);
+      }
+
+      .small-links {
+        display: flex;
+        gap: 10px;
+        flex-wrap: wrap;
+      }
+
+      .small-links a {
+        color: var(--navy);
+        font-weight: 900;
+        text-decoration: none;
+        padding: 0.55rem 0.8rem;
+        border-radius: 999px;
+        background: #ffffff;
+        border: 1px solid rgba(201, 150, 82, 0.32);
+      }
+
+      @media (max-width: 760px) {
+        .topbar {
+          flex-direction: column;
+        }
+
+        .actions,
+        .button,
+        .small-links,
+        .small-links a {
+          width: 100%;
+        }
+
+        .page-head,
+        .page-actions {
+          align-items: flex-start;
+          flex-direction: column;
+        }
+      }
     </style>
   </head>
 
   <body>
-    <!-- locked div hidden by default -->
-    <div id="locked" class="hidden"></div>
-
     <main id="editor" class="shell">
       <div class="topbar">
         <div>
           <p class="eyebrow">LawBridge Admin</p>
           <h1>Global Website Editor</h1>
-          <p class="intro">Edit all website pages and sections from one place.</p>
+          <p class="intro">
+            Edit all website page content from one place. This editor updates the markdown files in
+            <strong>src/content/pages</strong>.
+          </p>
         </div>
+
+        <div class="actions">
+          <a class="button secondary" href="/admin">Back to Admin</a>
+          <button class="button" id="saveAllButton" type="button">Save All Changed Pages</button>
+        </div>
+      </div>
+
+      <div class="notice">
+        Use honest wording only. Do not add fake testimonials, partners, outcomes, case studies,
+        student numbers, mentor claims or AI capability claims unless they are genuine and approved.
       </div>
 
       <section class="editor-grid">
@@ -81,6 +300,7 @@ const pages = pageFiles.map((file) => {
                 <a href={`/${page.slug === "home" ? "" : page.slug}`} target="_blank">View page</a>
                 <a href={`/admin/edit/${page.slug}`}>Open single-page editor</a>
               </div>
+
               <button class="button" data-save={page.slug} type="button">Save {page.slug}</button>
             </div>
           </article>
@@ -90,38 +310,79 @@ const pages = pageFiles.map((file) => {
 
     <script is:inline>
       const initialPages = new Map();
+
       document.querySelectorAll("[data-editor]").forEach((textarea) => {
         initialPages.set(textarea.dataset.editor, textarea.value);
+
         textarea.addEventListener("input", () => {
           const slug = textarea.dataset.editor;
           const status = document.querySelector(`[data-status="${slug}"]`);
+
           if (textarea.value !== initialPages.get(slug)) {
-            status.textContent = "Unsaved changes"; status.className="status dirty";
-          } else { status.textContent="No changes"; status.className="status"; }
+            status.textContent = "Unsaved changes";
+            status.className = "status dirty";
+          } else {
+            status.textContent = "No changes";
+            status.className = "status";
+          }
         });
       });
 
-      async function savePage(slug){
-        const textarea=document.querySelector(`[data-editor="${slug}"]`);
-        const status=document.querySelector(`[data-status="${slug}"]`);
-        const button=document.querySelector(`[data-save="${slug}"]`);
-        status.textContent="Saving..."; status.className="status"; button.disabled=true;
-        try{
-          const response=await fetch("/.netlify/functions/update-page-content",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({slug,rawContent:textarea.value})});
-          const result=await response.json();
-          if(!response.ok)throw new Error(result.error||"Save failed.");
-          initialPages.set(slug,textarea.value); status.textContent="Saved"; status.className="status saved";
-        }catch(e){status.textContent=e.message; status.className="status error";}finally{button.disabled=false;}
+      async function savePage(slug) {
+        const textarea = document.querySelector(`[data-editor="${slug}"]`);
+        const status = document.querySelector(`[data-status="${slug}"]`);
+        const button = document.querySelector(`[data-save="${slug}"]`);
+
+        status.textContent = "Saving...";
+        status.className = "status";
+        button.disabled = true;
+
+        try {
+          const response = await fetch("/.netlify/functions/update-page-content", {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+            },
+            body: JSON.stringify({
+              slug,
+              rawContent: textarea.value,
+            }),
+          });
+
+          const result = await response.json();
+
+          if (!response.ok) {
+            throw new Error(result.error || "Save failed.");
+          }
+
+          initialPages.set(slug, textarea.value);
+          status.textContent = "Saved";
+          status.className = "status saved";
+        } catch (error) {
+          status.textContent = error.message;
+          status.className = "status error";
+        } finally {
+          button.disabled = false;
+        }
       }
 
-      document.querySelectorAll("[data-save]").forEach((btn)=>btn.addEventListener("click",()=>savePage(btn.dataset.save)));
+      document.querySelectorAll("[data-save]").forEach((button) => {
+        button.addEventListener("click", () => savePage(button.dataset.save));
+      });
 
-      document.getElementById("saveAllButton")?.addEventListener("click",async()=>{
-        const changed=[...document.querySelectorAll("[data-editor]")]
-          .filter(t=>t.value!==initialPages.get(t.dataset.editor))
-          .map(t=>t.dataset.editor);
-        for(const slug of changed) await savePage(slug);
-        if(changed.length===0) alert("No changed pages to save.");
+      document.getElementById("saveAllButton")?.addEventListener("click", async () => {
+        const changed = [...document.querySelectorAll("[data-editor]")]
+          .filter((textarea) => textarea.value !== initialPages.get(textarea.dataset.editor))
+          .map((textarea) => textarea.dataset.editor);
+
+        if (changed.length === 0) {
+          alert("No changed pages to save.");
+          return;
+        }
+
+        for (const slug of changed) {
+          await savePage(slug);
+        }
       });
     </script>
   </body>
