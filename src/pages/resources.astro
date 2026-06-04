@@ -40,6 +40,26 @@ function getResourceKey(resource) {
   return `${resource.code}-${resource.scenario}`.toLowerCase().replace(/[^a-z0-9]+/g, "-");
 }
 
+function getCoachLink(resource) {
+  const params = new URLSearchParams();
+
+  if (resource.code) {
+    params.set("pack", resource.code);
+  }
+
+  if (resource.scenario) {
+    params.set("scenario", resource.scenario);
+  }
+
+  if (resource.skill) {
+    params.set("skill", resource.skill);
+  }
+
+  const query = params.toString();
+
+  return query ? `/ai-skills-coach?${query}` : "/ai-skills-coach";
+}
+
 const resourceMap = new Map();
 
 [...legacyResources, ...studioResources].forEach((resource) => {
@@ -121,6 +141,10 @@ const skills = [...new Set(resources.map((resource) => resource.skill).filter(Bo
                   Student Pack Missing
                 </span>
               )}
+
+              <a class="btn primary resource-download ai-coach-download" href={getCoachLink(res)}>
+                Ask AI Skills Coach
+              </a>
 
               {res.tutor ? (
                 <a class="btn secondary resource-download tutor-download" href={res.tutor} target="_blank">
@@ -333,6 +357,18 @@ const skills = [...new Set(resources.map((resource) => resource.skill).filter(Bo
       text-align: center;
     }
 
+    .ai-coach-download {
+      background: linear-gradient(135deg, #e7b65f, #c99652);
+      color: #041b32;
+      box-shadow: 0 14px 34px rgba(201, 150, 82, 0.22);
+    }
+
+    .ai-coach-download::before {
+      content: "✦";
+      margin-right: 0.45rem;
+      font-weight: 900;
+    }
+
     .resource-download.disabled {
       opacity: 0.5;
       cursor: not-allowed;
@@ -445,6 +481,7 @@ const skills = [...new Set(resources.map((resource) => resource.skill).filter(Bo
 
         const studentButton = card.querySelector(".student-download");
         const tutorButton = card.querySelector(".tutor-download");
+        const aiCoachButton = card.querySelector(".ai-coach-download");
 
         if (studentButton) {
           studentButton.style.display = currentType === "tutor" ? "none" : "inline-flex";
@@ -452,6 +489,10 @@ const skills = [...new Set(resources.map((resource) => resource.skill).filter(Bo
 
         if (tutorButton) {
           tutorButton.style.display = currentType === "student" ? "none" : "inline-flex";
+        }
+
+        if (aiCoachButton) {
+          aiCoachButton.style.display = currentType === "tutor" ? "none" : "inline-flex";
         }
 
         if (shouldShow) {
