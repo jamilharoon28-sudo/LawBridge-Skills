@@ -141,10 +141,22 @@ const sectionMeta = [
             {dashboard.description}
           </p>
 
-          <div class="dashboard-list">
+          <div class="visual-card-tools dashboard-tools">
+            <span>Dashboard bullet points</span>
+            <button type="button" data-add-dashboard-item>
+              Add bullet
+            </button>
+          </div>
+
+          <div class="dashboard-list visual-dashboard-list" data-dashboard-list>
             {(dashboard.items ?? []).map((item, index) => (
-              <span class="editable-text" contenteditable="true" data-dashboard-item={index}>
-                {item}
+              <span class="visual-dashboard-item">
+                <span class="editable-text dashboard-item-text" contenteditable="true" data-dashboard-item={index}>
+                  {item}
+                </span>
+                <button type="button" data-remove-dashboard-item>
+                  Remove
+                </button>
               </span>
             ))}
           </div>
@@ -463,13 +475,21 @@ const sectionMeta = [
       box-shadow: 0 14px 38px rgba(6, 27, 49, 0.08);
     }
 
+    .dashboard-tools {
+      margin-top: 1.2rem;
+      margin-bottom: 1rem;
+      background: rgba(6, 27, 49, 0.04);
+      box-shadow: none;
+    }
+
     .visual-card-tools span {
       color: #061b31;
       font-weight: 900;
     }
 
     .visual-card-tools button,
-    .remove-card-button {
+    .remove-card-button,
+    .visual-dashboard-item button {
       border: 0;
       border-radius: 999px;
       cursor: pointer;
@@ -493,8 +513,43 @@ const sectionMeta = [
       border: 1px solid rgba(6, 27, 49, 0.12);
     }
 
-    .remove-card-button:hover {
+    .remove-card-button:hover,
+    .visual-dashboard-item button:hover {
       background: rgba(211, 155, 69, 0.16);
+    }
+
+    .visual-dashboard-list {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 0.8rem;
+      margin-top: 1rem;
+    }
+
+    .visual-dashboard-item {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 0.6rem;
+      padding: 0.75rem 0.75rem;
+      border-radius: 999px;
+      background: rgba(6, 27, 49, 0.04);
+      border: 1px solid rgba(201, 150, 82, 0.18);
+    }
+
+    .dashboard-item-text {
+      flex: 1;
+      min-width: 0;
+      font-weight: 900;
+      color: #061b31;
+    }
+
+    .visual-dashboard-item button {
+      flex: 0 0 auto;
+      padding: 0.35rem 0.65rem;
+      background: #ffffff;
+      color: #061b31;
+      border: 1px solid rgba(6, 27, 49, 0.12);
+      font-size: 0.74rem;
     }
 
     .visual-card-link-fields {
@@ -616,7 +671,8 @@ const sectionMeta = [
         flex-direction: column;
       }
 
-      .visual-link-grid {
+      .visual-link-grid,
+      .visual-dashboard-list {
         grid-template-columns: 1fr;
       }
 
@@ -850,6 +906,14 @@ const sectionMeta = [
       });
     }
 
+    function renumberDashboardItems() {
+      const items = Array.from(document.querySelectorAll("[data-dashboard-item]"));
+
+      items.forEach((item, index) => {
+        item.dataset.dashboardItem = index.toString();
+      });
+    }
+
     function createEditableText(tagName, className, fieldName, text) {
       const element = document.createElement(tagName);
       element.className = className;
@@ -918,29 +982,80 @@ const sectionMeta = [
       markUnsaved("New card added. Press Publish Changes to update the website.");
     }
 
+    function createDashboardItem() {
+      const list = document.querySelector("[data-dashboard-list]");
+
+      if (!list) {
+        return;
+      }
+
+      const wrapper = document.createElement("span");
+      wrapper.className = "visual-dashboard-item";
+
+      const text = document.createElement("span");
+      text.className = "editable-text dashboard-item-text";
+      text.contentEditable = "true";
+      text.dataset.dashboardItem = "";
+      text.textContent = "New bullet point";
+
+      const removeButton = document.createElement("button");
+      removeButton.type = "button";
+      removeButton.dataset.removeDashboardItem = "";
+      removeButton.textContent = "Remove";
+
+      wrapper.appendChild(text);
+      wrapper.appendChild(removeButton);
+      list.appendChild(wrapper);
+
+      renumberDashboardItems();
+      attachEditableListeners(wrapper);
+      markUnsaved("New dashboard bullet added. Press Publish Changes to update the website.");
+    }
+
     document.querySelectorAll("[data-add-card]").forEach((button) => {
       button.addEventListener("click", () => {
         createCard(button.dataset.addCard);
       });
     });
 
+    const addDashboardButton = document.querySelector("[data-add-dashboard-item]");
+
+    if (addDashboardButton) {
+      addDashboardButton.addEventListener("click", () => {
+        createDashboardItem();
+      });
+    }
+
     document.addEventListener("click", (event) => {
-      const button = event.target.closest("[data-remove-card]");
+      const removeCardButton = event.target.closest("[data-remove-card]");
 
-      if (!button) {
+      if (removeCardButton) {
+        const card = removeCardButton.closest("[data-card-group]");
+        const group = card?.dataset.cardGroup;
+
+        if (!card || !group) {
+          return;
+        }
+
+        card.remove();
+        renumberCards(group);
+        markUnsaved("Card removed. Press Publish Changes to update the website.");
         return;
       }
 
-      const card = button.closest("[data-card-group]");
-      const group = card?.dataset.cardGroup;
+      const removeDashboardButton = event.target.closest("[data-remove-dashboard-item]");
 
-      if (!card || !group) {
-        return;
+      if (removeDashboardButton) {
+        const item = removeDashboardButton.closest(".visual-dashboard-item");
+
+        if (!item) {
+          return;
+        }
+
+        item.remove();
+        renumberDashboardItems();
+        markUnsaved("Dashboard bullet removed. Press Publish Changes to update the website.");
       }
-
-      card.remove();
-      renumberCards(group);
-      markUnsaved("Card removed. Press Publish Changes to update the website.");
     });
 
     attachEditableListeners();
