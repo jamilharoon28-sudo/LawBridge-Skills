@@ -1,0 +1,273 @@
+---
+import BaseLayout from "../../../../layouts/BaseLayout.astro";
+---
+
+<BaseLayout title="Import Original Resources | LawBridge Admin">
+  <section class="import-shell">
+    <div class="container">
+      <div class="import-topbar">
+        <a href="/admin" class="import-button dark">← Back to Admin</a>
+        <a href="/admin/content/resources/manage" class="import-button light">Manage Resources</a>
+      </div>
+
+      <header class="import-hero">
+        <div>
+          <p class="import-eyebrow">LawBridge Content Studio</p>
+          <h1>Import original resource packs.</h1>
+          <p>
+            This will convert the original resource library into proper Content Studio entries so they can be managed and deleted from the admin area.
+          </p>
+        </div>
+
+        <aside class="import-guide">
+          <h2>What this does</h2>
+          <ol>
+            <li>Creates resource entries in <strong>src/content/resources</strong>.</li>
+            <li>Keeps the existing Student Pack and Tutor Guide links.</li>
+            <li>Makes the packs appear in Manage Resources.</li>
+            <li>Lets you delete them from the admin dashboard.</li>
+          </ol>
+        </aside>
+      </header>
+
+      <section class="import-card">
+        <p class="import-eyebrow">One-time import</p>
+        <h2>Ready to import the current packs?</h2>
+        <p>
+          Only press this once. If you press it again later, it will update the same entries rather than creating duplicates.
+        </p>
+
+        <button id="import-resources" type="button" class="import-button primary">
+          Import Original Resources
+        </button>
+
+        <div id="import-status" class="import-status">
+          Waiting to import.
+        </div>
+      </section>
+    </div>
+  </section>
+
+  <style is:inline>
+    .import-shell {
+      min-height: 100vh;
+      padding: 2rem 0 4rem;
+      background:
+        radial-gradient(circle at top right, rgba(231, 182, 95, 0.18), transparent 32%),
+        linear-gradient(180deg, #f8f1e4 0%, #fbf7ef 100%);
+      color: #061b31;
+    }
+
+    .import-topbar {
+      display: flex;
+      justify-content: space-between;
+      gap: 1rem;
+      align-items: center;
+      margin-bottom: 2rem;
+    }
+
+    .import-button {
+      border: 0;
+      min-height: 44px;
+      padding: 0.75rem 1.05rem;
+      border-radius: 999px;
+      font-weight: 900;
+      text-decoration: none;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 0.92rem;
+      text-align: center;
+    }
+
+    .import-button.primary {
+      background: linear-gradient(135deg, #e7b65f, #d39b45);
+      color: #061b31;
+      box-shadow: 0 12px 28px rgba(211, 155, 69, 0.22);
+    }
+
+    .import-button.dark {
+      background: #061b31;
+      color: #ffffff;
+    }
+
+    .import-button.light {
+      background: #ffffff;
+      color: #061b31;
+      border: 1px solid rgba(201, 150, 82, 0.32);
+    }
+
+    .import-button:disabled {
+      opacity: 0.55;
+      cursor: not-allowed;
+    }
+
+    .import-hero {
+      display: grid;
+      grid-template-columns: minmax(0, 1.8fr) minmax(320px, 0.8fr);
+      gap: 1.5rem;
+      align-items: stretch;
+      padding: clamp(1.5rem, 4vw, 3rem);
+      border-radius: 34px;
+      background: rgba(255, 255, 255, 0.78);
+      border: 1px solid rgba(201, 150, 82, 0.3);
+      box-shadow: 0 28px 90px rgba(6, 27, 49, 0.12);
+    }
+
+    .import-eyebrow {
+      margin: 0 0 0.7rem;
+      color: #b37b32;
+      font-weight: 900;
+      text-transform: uppercase;
+      letter-spacing: 0.12em;
+      font-size: 0.78rem;
+    }
+
+    .import-hero h1 {
+      max-width: 920px;
+      margin: 0;
+      font-family: Georgia, "Times New Roman", serif;
+      font-size: clamp(2.8rem, 6vw, 5.6rem);
+      line-height: 0.95;
+      letter-spacing: -0.045em;
+      color: #061b31;
+      overflow-wrap: anywhere;
+    }
+
+    .import-hero p:not(.import-eyebrow) {
+      max-width: 780px;
+      margin: 1rem 0 0;
+      color: #334155;
+      line-height: 1.7;
+      font-size: 1.08rem;
+    }
+
+    .import-guide {
+      padding: 1.3rem;
+      border-radius: 24px;
+      background: #061b31;
+      color: #ffffff;
+    }
+
+    .import-guide h2 {
+      margin: 0 0 1rem;
+      color: #ffffff;
+      font-family: Georgia, "Times New Roman", serif;
+    }
+
+    .import-guide ol {
+      margin: 0;
+      padding-left: 1.2rem;
+      display: grid;
+      gap: 0.65rem;
+      color: rgba(255, 255, 255, 0.86);
+      line-height: 1.5;
+    }
+
+    .import-card {
+      margin-top: 2rem;
+      padding: 2rem;
+      border-radius: 28px;
+      background: rgba(255, 255, 255, 0.86);
+      border: 1px solid rgba(201, 150, 82, 0.28);
+      box-shadow: 0 18px 52px rgba(6, 27, 49, 0.09);
+    }
+
+    .import-card h2 {
+      margin: 0;
+      font-family: Georgia, "Times New Roman", serif;
+      font-size: clamp(2rem, 4vw, 3rem);
+      color: #061b31;
+    }
+
+    .import-card p:not(.import-eyebrow) {
+      max-width: 760px;
+      color: #334155;
+      line-height: 1.65;
+    }
+
+    .import-status {
+      margin-top: 1.2rem;
+      padding: 1rem 1.15rem;
+      border-radius: 20px;
+      background: #061b31;
+      color: #ffffff;
+      font-weight: 900;
+      line-height: 1.5;
+    }
+
+    @media (max-width: 900px) {
+      .import-hero {
+        grid-template-columns: 1fr;
+      }
+
+      .import-topbar {
+        align-items: flex-start;
+        flex-direction: column;
+      }
+
+      .import-button {
+        width: 100%;
+      }
+    }
+  </style>
+
+  <script>
+    const importButton = document.getElementById("import-resources");
+    const statusBox = document.getElementById("import-status");
+
+    function setStatus(message) {
+      if (statusBox) {
+        statusBox.textContent = message;
+      }
+    }
+
+    importButton?.addEventListener("click", async () => {
+      try {
+        if (!window.netlifyIdentity) {
+          setStatus("Netlify Identity is not loaded.");
+          return;
+        }
+
+        const user = window.netlifyIdentity.currentUser();
+
+        if (!user) {
+          setStatus("Please log in before importing resources.");
+          window.netlifyIdentity.open("login");
+          return;
+        }
+
+        importButton.disabled = true;
+        importButton.textContent = "Importing...";
+        setStatus("Importing original resources into Content Studio...");
+
+        const token = await user.jwt();
+
+        const response = await fetch("/.netlify/functions/import-original-resources", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${token}`,
+          },
+        });
+
+        const result = await response.json();
+
+        if (!response.ok) {
+          throw new Error(result.error || "Could not import original resources.");
+        }
+
+        setStatus(
+          `Imported ${result.imported.length} resources. Netlify will redeploy. After deploy, open Manage Resources.`
+        );
+
+        importButton.textContent = "Imported";
+      } catch (error) {
+        setStatus(error.message || "Something went wrong.");
+        importButton.disabled = false;
+        importButton.textContent = "Import Original Resources";
+      }
+    });
+  </script>
+</BaseLayout>
