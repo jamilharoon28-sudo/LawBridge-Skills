@@ -1,0 +1,674 @@
+---
+import BaseLayout from "../../../../layouts/BaseLayout.astro";
+
+const statuses = [
+  "Upcoming",
+  "Open for registration",
+  "Fully booked",
+  "Completed",
+  "Draft",
+];
+---
+
+<BaseLayout title="Add Webinar | LawBridge Admin">
+  <section class="studio-shell">
+    <div class="container">
+      <div class="studio-topbar">
+        <a href="/admin" class="studio-back">← Back to Admin</a>
+        <a href="/webinars" class="studio-preview" target="_blank">Preview Webinars Page</a>
+      </div>
+
+      <header class="studio-hero">
+        <div>
+          <p class="studio-eyebrow">LawBridge Content Studio</p>
+          <h1>Add a webinar link.</h1>
+          <p>
+            Add the webinar title, date, description and registration link. LawBridge will create a polished webinar entry for the website.
+          </p>
+        </div>
+
+        <aside class="studio-guide">
+          <h2>Publishing flow</h2>
+          <ol>
+            <li>Add the webinar details.</li>
+            <li>Paste the registration or joining link.</li>
+            <li>Publish the webinar.</li>
+            <li>Netlify rebuilds the website.</li>
+          </ol>
+        </aside>
+      </header>
+
+      <div class="studio-layout">
+        <form id="webinar-form" class="studio-form">
+          <div class="form-card">
+            <p class="studio-eyebrow">Webinar details</p>
+
+            <label>
+              Webinar title
+              <input
+                id="webinar-title"
+                name="title"
+                type="text"
+                placeholder="Example: Commercial Awareness for Aspiring Solicitors"
+                required
+              />
+            </label>
+
+            <label>
+              Short description
+              <textarea
+                id="webinar-description"
+                name="description"
+                rows="4"
+                placeholder="Briefly explain what the webinar covers and who it is for."
+                required
+              ></textarea>
+            </label>
+
+            <div class="form-grid">
+              <label>
+                Date and time
+                <input id="webinar-date" name="date" type="datetime-local" />
+              </label>
+
+              <label>
+                Status
+                <select id="webinar-status" name="status">
+                  {statuses.map((status) => (
+                    <option value={status}>{status}</option>
+                  ))}
+                </select>
+              </label>
+            </div>
+
+            <div class="form-grid">
+              <label>
+                Location / format
+                <input
+                  id="webinar-location"
+                  name="location"
+                  type="text"
+                  value="Online"
+                  placeholder="Online, Zoom, London, University event"
+                />
+              </label>
+
+              <label>
+                Speaker
+                <input
+                  id="webinar-speaker"
+                  name="speaker"
+                  type="text"
+                  placeholder="Optional speaker name"
+                />
+              </label>
+            </div>
+
+            <label>
+              Webinar link
+              <input
+                id="webinar-link"
+                name="link"
+                type="url"
+                placeholder="https://..."
+                required
+              />
+            </label>
+
+            <label>
+              Extra details
+              <textarea
+                id="webinar-details"
+                name="details"
+                rows="5"
+                placeholder="Optional extra details, agenda, learning outcomes or joining instructions."
+              ></textarea>
+            </label>
+          </div>
+
+          <div class="form-actions">
+            <button id="publish-webinar" type="submit" class="studio-button primary">
+              Publish Webinar
+            </button>
+
+            <button id="reset-form" type="button" class="studio-button secondary">
+              Clear Form
+            </button>
+          </div>
+        </form>
+
+        <aside class="studio-preview-panel">
+          <p class="studio-eyebrow">Webinar preview</p>
+          <h2 id="preview-title">Webinar title will appear here</h2>
+          <p id="preview-description">
+            Add a webinar description. This preview shows how the webinar card will be prepared before publishing.
+          </p>
+
+          <div class="preview-meta">
+            <span id="preview-status">Upcoming</span>
+            <span id="preview-date">Date to be confirmed</span>
+            <span id="preview-location">Online</span>
+          </div>
+
+          <div class="preview-document">
+            <strong>Webinar link</strong>
+            <span id="preview-link">No link added yet</span>
+          </div>
+
+          <div id="studio-status" class="studio-status">
+            Ready to create a new webinar entry.
+          </div>
+        </aside>
+      </div>
+    </div>
+  </section>
+
+  <div id="success-modal" class="success-modal" hidden>
+    <div class="success-card">
+      <p class="studio-eyebrow">Published</p>
+      <h2>Webinar sent to GitHub</h2>
+      <p>
+        Netlify should now start a fresh deployment. Once the deploy finishes, the webinar will appear on the Webinars page.
+      </p>
+
+      <div class="success-actions">
+        <a id="open-webinars-page" href="/webinars" class="studio-button primary" target="_blank">
+          Open Webinars Page
+        </a>
+        <a href="/admin" class="studio-button secondary">Back to Admin</a>
+        <button id="close-success" type="button" class="studio-button secondary">
+          Continue Editing
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <style is:inline>
+    .studio-shell {
+      min-height: 100vh;
+      padding: 2rem 0 4rem;
+      background:
+        radial-gradient(circle at top right, rgba(231, 182, 95, 0.18), transparent 32%),
+        linear-gradient(180deg, #f8f1e4 0%, #fbf7ef 100%);
+      color: #061b31;
+    }
+
+    .studio-topbar {
+      display: flex;
+      justify-content: space-between;
+      gap: 1rem;
+      align-items: center;
+      margin-bottom: 2rem;
+    }
+
+    .studio-back,
+    .studio-preview {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      min-height: 42px;
+      padding: 0.7rem 1rem;
+      border-radius: 999px;
+      text-decoration: none;
+      font-weight: 900;
+      font-size: 0.92rem;
+    }
+
+    .studio-back {
+      background: #061b31;
+      color: #ffffff;
+    }
+
+    .studio-preview {
+      background: #ffffff;
+      color: #061b31;
+      border: 1px solid rgba(201, 150, 82, 0.28);
+    }
+
+    .studio-hero {
+      display: grid;
+      grid-template-columns: minmax(0, 1.8fr) minmax(320px, 0.8fr);
+      gap: 1.5rem;
+      align-items: stretch;
+      padding: clamp(1.5rem, 4vw, 3rem);
+      border-radius: 34px;
+      background: rgba(255, 255, 255, 0.78);
+      border: 1px solid rgba(201, 150, 82, 0.3);
+      box-shadow: 0 28px 90px rgba(6, 27, 49, 0.12);
+    }
+
+    .studio-eyebrow {
+      margin: 0 0 0.7rem;
+      color: #b37b32;
+      font-weight: 900;
+      text-transform: uppercase;
+      letter-spacing: 0.12em;
+      font-size: 0.78rem;
+    }
+
+    .studio-hero h1 {
+      max-width: 920px;
+      margin: 0;
+      font-family: Georgia, "Times New Roman", serif;
+      font-size: clamp(2.6rem, 5vw, 5rem);
+      line-height: 0.95;
+      letter-spacing: -0.045em;
+      color: #061b31;
+    }
+
+    .studio-hero p:not(.studio-eyebrow) {
+      max-width: 760px;
+      margin: 1rem 0 0;
+      color: #334155;
+      line-height: 1.7;
+      font-size: 1.08rem;
+    }
+
+    .studio-guide {
+      padding: 1.3rem;
+      border-radius: 24px;
+      background: #061b31;
+      color: #ffffff;
+    }
+
+    .studio-guide h2 {
+      margin: 0 0 1rem;
+      color: #ffffff;
+      font-family: Georgia, "Times New Roman", serif;
+    }
+
+    .studio-guide ol {
+      margin: 0;
+      padding-left: 1.2rem;
+      display: grid;
+      gap: 0.65rem;
+      color: rgba(255, 255, 255, 0.86);
+      line-height: 1.5;
+    }
+
+    .studio-layout {
+      display: grid;
+      grid-template-columns: minmax(0, 1.35fr) minmax(340px, 0.65fr);
+      gap: 1.5rem;
+      align-items: start;
+      margin-top: 2rem;
+    }
+
+    .studio-form,
+    .studio-preview-panel {
+      display: grid;
+      gap: 1rem;
+    }
+
+    .form-card,
+    .studio-preview-panel {
+      padding: 1.4rem;
+      border-radius: 26px;
+      background: rgba(255, 255, 255, 0.86);
+      border: 1px solid rgba(201, 150, 82, 0.28);
+      box-shadow: 0 18px 52px rgba(6, 27, 49, 0.09);
+    }
+
+    label {
+      display: grid;
+      gap: 0.5rem;
+      color: #061b31;
+      font-weight: 900;
+      margin-top: 1rem;
+    }
+
+    input,
+    textarea,
+    select {
+      width: 100%;
+      border: 1px solid rgba(201, 150, 82, 0.34);
+      border-radius: 16px;
+      padding: 0.9rem 1rem;
+      font: inherit;
+      color: #061b31;
+      background: #ffffff;
+    }
+
+    textarea {
+      resize: vertical;
+    }
+
+    input:focus,
+    textarea:focus,
+    select:focus {
+      outline: 3px solid rgba(211, 155, 69, 0.18);
+      border-color: #d39b45;
+    }
+
+    .form-grid {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 1rem;
+    }
+
+    .form-actions,
+    .success-actions {
+      display: flex;
+      gap: 0.8rem;
+      flex-wrap: wrap;
+    }
+
+    .studio-button {
+      border: 0;
+      min-height: 46px;
+      padding: 0.8rem 1.15rem;
+      border-radius: 999px;
+      font-weight: 900;
+      text-decoration: none;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 0.94rem;
+    }
+
+    .studio-button.primary {
+      background: linear-gradient(135deg, #e7b65f, #d39b45);
+      color: #061b31;
+      box-shadow: 0 12px 28px rgba(211, 155, 69, 0.22);
+    }
+
+    .studio-button.secondary {
+      background: #ffffff;
+      color: #061b31;
+      border: 1px solid rgba(201, 150, 82, 0.32);
+    }
+
+    .studio-button:disabled {
+      opacity: 0.55;
+      cursor: not-allowed;
+    }
+
+    .studio-preview-panel {
+      position: sticky;
+      top: 1rem;
+    }
+
+    .studio-preview-panel h2 {
+      margin: 0;
+      font-family: Georgia, "Times New Roman", serif;
+      font-size: clamp(1.8rem, 3vw, 2.6rem);
+      line-height: 1.05;
+      color: #061b31;
+    }
+
+    .studio-preview-panel p {
+      color: #334155;
+      line-height: 1.65;
+    }
+
+    .preview-meta {
+      display: flex;
+      gap: 0.55rem;
+      flex-wrap: wrap;
+      margin-top: 1rem;
+    }
+
+    .preview-meta span {
+      padding: 0.45rem 0.75rem;
+      border-radius: 999px;
+      background: rgba(211, 155, 69, 0.13);
+      color: #061b31;
+      font-weight: 900;
+      font-size: 0.82rem;
+    }
+
+    .preview-document {
+      display: grid;
+      gap: 0.3rem;
+      margin-top: 1.25rem;
+      padding: 1rem;
+      border-radius: 18px;
+      background: rgba(6, 27, 49, 0.04);
+      border: 1px solid rgba(6, 27, 49, 0.08);
+    }
+
+    .preview-document strong {
+      color: #061b31;
+    }
+
+    .preview-document span {
+      color: #64748b;
+      overflow-wrap: anywhere;
+    }
+
+    .studio-status {
+      margin-top: 1rem;
+      padding: 0.9rem 1rem;
+      border-radius: 18px;
+      background: #061b31;
+      color: #ffffff;
+      font-weight: 800;
+      line-height: 1.45;
+    }
+
+    .success-modal {
+      position: fixed;
+      inset: 0;
+      z-index: 10000;
+      display: grid;
+      place-items: center;
+      padding: 1.5rem;
+      background: rgba(6, 27, 49, 0.55);
+      backdrop-filter: blur(10px);
+    }
+
+    .success-modal[hidden] {
+      display: none;
+    }
+
+    .success-card {
+      width: min(680px, 100%);
+      padding: 2rem;
+      border-radius: 28px;
+      background: #fbf7ef;
+      border: 1px solid rgba(201, 150, 82, 0.32);
+      box-shadow: 0 30px 90px rgba(6, 27, 49, 0.25);
+      color: #061b31;
+    }
+
+    .success-card h2 {
+      margin: 0;
+      font-family: Georgia, "Times New Roman", serif;
+      font-size: clamp(2rem, 4vw, 3rem);
+      color: #061b31;
+    }
+
+    .success-card p:not(.studio-eyebrow) {
+      color: #334155;
+      line-height: 1.65;
+    }
+
+    @media (max-width: 980px) {
+      .studio-hero,
+      .studio-layout {
+        grid-template-columns: 1fr;
+      }
+
+      .studio-preview-panel {
+        position: static;
+      }
+    }
+
+    @media (max-width: 680px) {
+      .studio-topbar,
+      .form-actions,
+      .success-actions {
+        align-items: flex-start;
+        flex-direction: column;
+      }
+
+      .form-grid {
+        grid-template-columns: 1fr;
+      }
+
+      .studio-back,
+      .studio-preview,
+      .studio-button {
+        width: 100%;
+      }
+    }
+  </style>
+
+  <script>
+    const form = document.getElementById("webinar-form");
+    const titleInput = document.getElementById("webinar-title");
+    const descriptionInput = document.getElementById("webinar-description");
+    const dateInput = document.getElementById("webinar-date");
+    const statusInput = document.getElementById("webinar-status");
+    const locationInput = document.getElementById("webinar-location");
+    const speakerInput = document.getElementById("webinar-speaker");
+    const linkInput = document.getElementById("webinar-link");
+    const detailsInput = document.getElementById("webinar-details");
+    const publishButton = document.getElementById("publish-webinar");
+    const resetButton = document.getElementById("reset-form");
+
+    const previewTitle = document.getElementById("preview-title");
+    const previewDescription = document.getElementById("preview-description");
+    const previewStatus = document.getElementById("preview-status");
+    const previewDate = document.getElementById("preview-date");
+    const previewLocation = document.getElementById("preview-location");
+    const previewLink = document.getElementById("preview-link");
+    const statusBox = document.getElementById("studio-status");
+
+    const successModal = document.getElementById("success-modal");
+    const closeSuccess = document.getElementById("close-success");
+
+    function setStatus(message) {
+      if (statusBox) {
+        statusBox.textContent = message;
+      }
+    }
+
+    function formatDateLabel(value) {
+      if (!value) {
+        return "Date to be confirmed";
+      }
+
+      const date = new Date(value);
+
+      if (Number.isNaN(date.getTime())) {
+        return "Date to be confirmed";
+      }
+
+      return date.toLocaleString("en-GB", {
+        day: "2-digit",
+        month: "short",
+        year: "numeric",
+        hour: "2-digit",
+        minute: "2-digit",
+      });
+    }
+
+    function updatePreview() {
+      previewTitle.textContent =
+        titleInput.value.trim() || "Webinar title will appear here";
+
+      previewDescription.textContent =
+        descriptionInput.value.trim() ||
+        "Add a webinar description. This preview shows how the webinar card will be prepared before publishing.";
+
+      previewStatus.textContent = statusInput.value || "Upcoming";
+      previewDate.textContent = formatDateLabel(dateInput.value);
+      previewLocation.textContent = locationInput.value.trim() || "Online";
+      previewLink.textContent = linkInput.value.trim() || "No link added yet";
+    }
+
+    function resetForm() {
+      form.reset();
+      locationInput.value = "Online";
+      setStatus("Ready to create a new webinar entry.");
+      updatePreview();
+    }
+
+    [
+      titleInput,
+      descriptionInput,
+      dateInput,
+      statusInput,
+      locationInput,
+      speakerInput,
+      linkInput,
+      detailsInput,
+    ].forEach((input) => {
+      input.addEventListener("input", updatePreview);
+      input.addEventListener("change", updatePreview);
+    });
+
+    resetButton.addEventListener("click", resetForm);
+
+    if (closeSuccess && successModal) {
+      closeSuccess.addEventListener("click", () => {
+        successModal.hidden = true;
+      });
+    }
+
+    form.addEventListener("submit", async (event) => {
+      event.preventDefault();
+
+      try {
+        if (!window.netlifyIdentity) {
+          setStatus("Netlify Identity is not loaded.");
+          return;
+        }
+
+        const user = window.netlifyIdentity.currentUser();
+
+        if (!user) {
+          setStatus("Please log in before publishing.");
+          window.netlifyIdentity.open("login");
+          return;
+        }
+
+        publishButton.disabled = true;
+        publishButton.textContent = "Publishing...";
+        setStatus("Creating webinar entry...");
+
+        const token = await user.jwt();
+
+        const response = await fetch("/.netlify/functions/create-webinar-link", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${token}`,
+          },
+          body: JSON.stringify({
+            title: titleInput.value.trim(),
+            description: descriptionInput.value.trim(),
+            date: dateInput.value,
+            status: statusInput.value,
+            location: locationInput.value.trim(),
+            speaker: speakerInput.value.trim(),
+            link: linkInput.value.trim(),
+            details: detailsInput.value.trim(),
+          }),
+        });
+
+        const result = await response.json();
+
+        if (!response.ok) {
+          throw new Error(result.error || "Could not publish webinar.");
+        }
+
+        setStatus("Webinar published. Netlify is redeploying the website.");
+
+        if (successModal) {
+          successModal.hidden = false;
+        }
+
+        publishButton.textContent = "Published";
+      } catch (error) {
+        setStatus(error.message || "Something went wrong.");
+        publishButton.disabled = false;
+        publishButton.textContent = "Publish Webinar";
+      }
+    });
+
+    updatePreview();
+  </script>
+</BaseLayout>
