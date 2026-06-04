@@ -1,0 +1,684 @@
+---
+import BaseLayout from "../layouts/BaseLayout.astro";
+import { getCollection } from "astro:content";
+
+const resources = await getCollection("resources");
+
+const packs = resources
+  .map((entry) => ({
+    code: entry.data.code || "",
+    skill: entry.data.skill || "Practical Skills",
+    scenario: entry.data.scenario || entry.data.title,
+    difficulty: entry.data.difficulty || "Intermediate",
+    summary:
+      entry.data.summary ||
+      entry.data.description ||
+      "A LawBridge practical skills simulation pack.",
+  }))
+  .filter((pack) => pack.code || pack.scenario);
+
+const popularPacks = packs.slice(0, 5);
+---
+
+<BaseLayout title="AI Skills Coach | LawBridge">
+  <section class="coach-shell">
+    <div class="container">
+      <div class="coach-topbar">
+        <a href="/resources" class="coach-back">← Back to Resources</a>
+        <span class="coach-status">Educational support only</span>
+      </div>
+
+      <header class="coach-hero">
+        <div>
+          <p class="coach-eyebrow">LawBridge AI Skills Coach</p>
+          <h1>Ask about any LawBridge Student Pack.</h1>
+          <p>
+            Get hints, understand tasks, structure your answer, find evidence and improve your practical legal skills work.
+          </p>
+        </div>
+
+        <aside class="coach-focus-card">
+          <p class="coach-eyebrow">Current focus</p>
+          <h2 id="current-pack-title">All Student Packs</h2>
+          <p id="current-pack-skill">
+            Ask about any practical skills simulation.
+          </p>
+          <button id="change-pack-button" class="coach-button secondary" type="button">
+            Change Pack
+          </button>
+        </aside>
+      </header>
+
+      <div class="coach-layout">
+        <aside class="coach-sidebar">
+          <div class="coach-panel">
+            <p class="coach-eyebrow">Choose a pack</p>
+
+            <label class="coach-select-label">
+              Student Pack
+              <select id="pack-select">
+                <option value="all">All Student Packs</option>
+                {packs.map((pack) => (
+                  <option
+                    value={pack.code}
+                    data-skill={pack.skill}
+                    data-scenario={pack.scenario}
+                    data-difficulty={pack.difficulty}
+                  >
+                    {pack.code ? `${pack.code} | ${pack.scenario}` : pack.scenario}
+                  </option>
+                ))}
+              </select>
+            </label>
+
+            <div class="popular-list">
+              <p class="coach-eyebrow">Popular packs</p>
+              {popularPacks.length > 0 ? (
+                popularPacks.map((pack) => (
+                  <button
+                    class="popular-pack"
+                    type="button"
+                    data-pack-code={pack.code}
+                    data-pack-skill={pack.skill}
+                    data-pack-scenario={pack.scenario}
+                  >
+                    <strong>{pack.code}</strong>
+                    <span>{pack.scenario}</span>
+                  </button>
+                ))
+              ) : (
+                <p class="empty-note">No packs found yet.</p>
+              )}
+            </div>
+          </div>
+
+          <div class="coach-panel dark-panel">
+            <p class="coach-eyebrow">How I can help</p>
+            <ul>
+              <li>Give hints without writing the full answer.</li>
+              <li>Explain tasks in plain language.</li>
+              <li>Help structure student responses.</li>
+              <li>Point students towards relevant evidence.</li>
+              <li>Give feedback on draft answers.</li>
+            </ul>
+          </div>
+        </aside>
+
+        <main class="chat-card">
+          <div class="coach-mode-row">
+            <button class="mode-button active" type="button" data-mode="Ask Anything">
+              Ask Anything
+            </button>
+            <button class="mode-button" type="button" data-mode="Give Me a Hint">
+              Give Me a Hint
+            </button>
+            <button class="mode-button" type="button" data-mode="Explain the Task">
+              Explain the Task
+            </button>
+            <button class="mode-button" type="button" data-mode="Structure My Answer">
+              Structure My Answer
+            </button>
+            <button class="mode-button" type="button" data-mode="Find Evidence">
+              Find Evidence
+            </button>
+            <button class="mode-button" type="button" data-mode="Check My Answer">
+              Check My Answer
+            </button>
+          </div>
+
+          <div class="chat-window" id="chat-window">
+            <article class="chat-message assistant-message">
+              <div class="avatar">LB</div>
+              <div class="message-bubble">
+                <strong>LawBridge AI Skills Coach</strong>
+                <p>
+                  Hello. I can help you with any LawBridge practical skills simulation.
+                </p>
+                <p>
+                  Choose a pack, pick a support mode, then ask a question about the task, evidence, structure or your draft answer.
+                </p>
+              </div>
+            </article>
+
+            <article class="chat-message user-message">
+              <div class="message-bubble">
+                I’m working on CI-01. What should I include in my interview plan?
+              </div>
+            </article>
+
+            <article class="chat-message assistant-message">
+              <div class="avatar">LB</div>
+              <div class="message-bubble">
+                <strong>Example response</strong>
+                <p>
+                  A strong interview plan should help you gather the right information efficiently and professionally.
+                </p>
+                <ol>
+                  <li><strong>Purpose of the interview</strong> — clarify what you need to understand and why.</li>
+                  <li><strong>Opening and rapport</strong> — build trust and explain confidentiality and expectations.</li>
+                  <li><strong>Timeline of events</strong> — walk through the matter from start to current position.</li>
+                  <li><strong>Client objectives</strong> — identify what the client wants to achieve.</li>
+                  <li><strong>Documents and evidence</strong> — identify what exists and what is missing.</li>
+                  <li><strong>Next steps</strong> — confirm what action is needed after the interview.</li>
+                </ol>
+                <p>
+                  This is a design preview. The live AI connection will be added in a later step.
+                </p>
+              </div>
+            </article>
+          </div>
+
+          <form class="chat-input-bar" id="chat-form">
+            <input
+              id="chat-input"
+              type="text"
+              placeholder="Ask a question about a Student Pack..."
+              autocomplete="off"
+            />
+            <button class="send-button" type="submit" aria-label="Send message">
+              →
+            </button>
+          </form>
+
+          <p class="coach-disclaimer">
+            LawBridge AI Skills Coach provides educational support only and does not provide legal advice.
+          </p>
+        </main>
+
+        <aside class="coach-rightbar">
+          <div class="coach-panel">
+            <p class="coach-eyebrow">Behind the scenes</p>
+
+            <div class="behind-item">
+              <strong>Student Pack aware</strong>
+              <span>Designed to answer around LawBridge simulation packs.</span>
+            </div>
+
+            <div class="behind-item">
+              <strong>Tutor Guide ready</strong>
+              <span>Later, hidden tutor guidance can support feedback mode.</span>
+            </div>
+
+            <div class="behind-item">
+              <strong>LawBridge tone</strong>
+              <span>Helpful, practical, educational and evidence-focused.</span>
+            </div>
+          </div>
+
+          <div class="coach-panel">
+            <p class="coach-eyebrow">Quality rules</p>
+            <ul class="quality-list">
+              <li>No legal advice.</li>
+              <li>No pretending uncertain law is settled.</li>
+              <li>No full model answers by default.</li>
+              <li>Encourage evidence-based answers.</li>
+            </ul>
+          </div>
+        </aside>
+      </div>
+    </div>
+  </section>
+
+  <style is:inline>
+    .coach-shell {
+      min-height: 100vh;
+      padding: 2rem 0 4rem;
+      background:
+        radial-gradient(circle at top right, rgba(231, 182, 95, 0.18), transparent 32%),
+        linear-gradient(180deg, #f8f1e4 0%, #fbf7ef 100%);
+      color: #061b31;
+    }
+
+    .coach-topbar {
+      display: flex;
+      justify-content: space-between;
+      gap: 1rem;
+      align-items: center;
+      margin-bottom: 2rem;
+    }
+
+    .coach-back,
+    .coach-status {
+      display: inline-flex;
+      align-items: center;
+      min-height: 42px;
+      padding: 0.7rem 1rem;
+      border-radius: 999px;
+      text-decoration: none;
+      font-weight: 900;
+      font-size: 0.92rem;
+    }
+
+    .coach-back {
+      background: #061b31;
+      color: #ffffff;
+    }
+
+    .coach-status {
+      background: rgba(255, 255, 255, 0.82);
+      color: #061b31;
+      border: 1px solid rgba(201, 150, 82, 0.28);
+    }
+
+    .coach-hero {
+      display: grid;
+      grid-template-columns: minmax(0, 1.8fr) minmax(320px, 0.8fr);
+      gap: 1.5rem;
+      align-items: stretch;
+      padding: clamp(1.5rem, 4vw, 3rem);
+      border-radius: 34px;
+      background: rgba(255, 255, 255, 0.78);
+      border: 1px solid rgba(201, 150, 82, 0.3);
+      box-shadow: 0 28px 90px rgba(6, 27, 49, 0.12);
+    }
+
+    .coach-eyebrow {
+      margin: 0 0 0.7rem;
+      color: #b37b32;
+      font-weight: 900;
+      text-transform: uppercase;
+      letter-spacing: 0.12em;
+      font-size: 0.78rem;
+    }
+
+    .coach-hero h1 {
+      max-width: 920px;
+      margin: 0;
+      font-family: Georgia, "Times New Roman", serif;
+      font-size: clamp(2.8rem, 6vw, 5.6rem);
+      line-height: 0.95;
+      letter-spacing: -0.045em;
+      color: #061b31;
+      overflow-wrap: anywhere;
+    }
+
+    .coach-hero p:not(.coach-eyebrow),
+    .coach-focus-card p,
+    .coach-panel p,
+    .coach-panel li {
+      color: #334155;
+      line-height: 1.65;
+    }
+
+    .coach-hero > div > p:not(.coach-eyebrow) {
+      max-width: 760px;
+      margin: 1rem 0 0;
+      font-size: 1.08rem;
+    }
+
+    .coach-focus-card,
+    .coach-panel,
+    .chat-card {
+      border: 1px solid rgba(201, 150, 82, 0.28);
+      background: rgba(255, 255, 255, 0.86);
+      box-shadow: 0 18px 52px rgba(6, 27, 49, 0.09);
+    }
+
+    .coach-focus-card {
+      padding: 1.3rem;
+      border-radius: 24px;
+    }
+
+    .coach-focus-card h2 {
+      margin: 0;
+      color: #061b31;
+      font-family: Georgia, "Times New Roman", serif;
+      font-size: 1.8rem;
+      line-height: 1.05;
+    }
+
+    .coach-layout {
+      display: grid;
+      grid-template-columns: minmax(260px, 0.65fr) minmax(0, 1.65fr) minmax(280px, 0.7fr);
+      gap: 1rem;
+      margin-top: 1.5rem;
+      align-items: start;
+    }
+
+    .coach-sidebar,
+    .coach-rightbar {
+      display: grid;
+      gap: 1rem;
+    }
+
+    .coach-panel {
+      padding: 1.2rem;
+      border-radius: 24px;
+    }
+
+    .dark-panel {
+      background: #061b31;
+      border-color: rgba(255, 255, 255, 0.08);
+    }
+
+    .dark-panel .coach-eyebrow,
+    .dark-panel li {
+      color: #ffffff;
+    }
+
+    .coach-select-label {
+      display: grid;
+      gap: 0.5rem;
+      color: #061b31;
+      font-weight: 900;
+    }
+
+    .coach-select-label select,
+    .chat-input-bar input {
+      width: 100%;
+      border: 1px solid rgba(201, 150, 82, 0.34);
+      border-radius: 16px;
+      padding: 0.9rem 1rem;
+      font: inherit;
+      color: #061b31;
+      background: #ffffff;
+    }
+
+    .popular-list {
+      display: grid;
+      gap: 0.55rem;
+      margin-top: 1.2rem;
+    }
+
+    .popular-pack {
+      display: grid;
+      gap: 0.2rem;
+      width: 100%;
+      text-align: left;
+      padding: 0.8rem;
+      border-radius: 16px;
+      border: 1px solid rgba(201, 150, 82, 0.24);
+      background: rgba(248, 241, 228, 0.52);
+      cursor: pointer;
+    }
+
+    .popular-pack strong {
+      color: #061b31;
+    }
+
+    .popular-pack span,
+    .empty-note {
+      color: #64748b;
+      font-weight: 700;
+    }
+
+    .chat-card {
+      padding: 1rem;
+      border-radius: 26px;
+    }
+
+    .coach-mode-row {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.55rem;
+      margin-bottom: 1rem;
+    }
+
+    .mode-button,
+    .coach-button,
+    .send-button {
+      border: 0;
+      min-height: 40px;
+      padding: 0.65rem 0.9rem;
+      border-radius: 999px;
+      font-weight: 900;
+      cursor: pointer;
+      text-decoration: none;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .mode-button {
+      background: #ffffff;
+      color: #061b31;
+      border: 1px solid rgba(201, 150, 82, 0.28);
+      font-size: 0.86rem;
+    }
+
+    .mode-button.active,
+    .coach-button.primary,
+    .send-button {
+      background: linear-gradient(135deg, #e7b65f, #d39b45);
+      color: #061b31;
+      box-shadow: 0 12px 28px rgba(211, 155, 69, 0.22);
+    }
+
+    .coach-button.secondary {
+      margin-top: 0.8rem;
+      background: #ffffff;
+      color: #061b31;
+      border: 1px solid rgba(201, 150, 82, 0.32);
+    }
+
+    .chat-window {
+      display: grid;
+      gap: 1rem;
+      min-height: 460px;
+      max-height: 620px;
+      overflow: auto;
+      padding: 1rem;
+      border-radius: 22px;
+      background:
+        radial-gradient(circle at top right, rgba(231, 182, 95, 0.08), transparent 32%),
+        #fbf7ef;
+      border: 1px solid rgba(201, 150, 82, 0.18);
+    }
+
+    .chat-message {
+      display: flex;
+      gap: 0.8rem;
+      align-items: flex-start;
+    }
+
+    .user-message {
+      justify-content: flex-end;
+    }
+
+    .avatar {
+      width: 42px;
+      height: 42px;
+      flex: 0 0 42px;
+      display: grid;
+      place-items: center;
+      border-radius: 50%;
+      background: #061b31;
+      color: #e7b65f;
+      font-family: Georgia, "Times New Roman", serif;
+      font-weight: 900;
+    }
+
+    .message-bubble {
+      max-width: min(720px, 100%);
+      padding: 1rem 1.1rem;
+      border-radius: 20px;
+      background: #ffffff;
+      border: 1px solid rgba(201, 150, 82, 0.22);
+      color: #061b31;
+      line-height: 1.65;
+      box-shadow: 0 12px 34px rgba(6, 27, 49, 0.06);
+    }
+
+    .message-bubble p {
+      margin: 0.4rem 0;
+    }
+
+    .message-bubble ol {
+      margin-bottom: 0;
+      padding-left: 1.2rem;
+    }
+
+    .user-message .message-bubble {
+      background: #061b31;
+      color: #ffffff;
+      border-color: #061b31;
+    }
+
+    .chat-input-bar {
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) auto;
+      gap: 0.7rem;
+      margin-top: 1rem;
+    }
+
+    .send-button {
+      width: 48px;
+      height: 48px;
+      font-size: 1.4rem;
+    }
+
+    .coach-disclaimer {
+      margin: 0.8rem 0 0;
+      color: #64748b;
+      font-size: 0.9rem;
+      line-height: 1.5;
+    }
+
+    .behind-item {
+      display: grid;
+      gap: 0.25rem;
+      padding: 0.8rem;
+      border-radius: 16px;
+      background: rgba(248, 241, 228, 0.58);
+      margin-top: 0.7rem;
+    }
+
+    .behind-item strong {
+      color: #061b31;
+    }
+
+    .behind-item span {
+      color: #64748b;
+      line-height: 1.5;
+      font-weight: 700;
+    }
+
+    .quality-list {
+      margin: 0;
+      padding-left: 1.2rem;
+      display: grid;
+      gap: 0.5rem;
+    }
+
+    @media (max-width: 1180px) {
+      .coach-layout,
+      .coach-hero {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    @media (max-width: 720px) {
+      .coach-topbar,
+      .chat-input-bar {
+        grid-template-columns: 1fr;
+      }
+
+      .coach-topbar {
+        align-items: flex-start;
+        flex-direction: column;
+      }
+
+      .coach-back,
+      .coach-status,
+      .mode-button,
+      .coach-button,
+      .send-button {
+        width: 100%;
+      }
+
+      .send-button {
+        height: 46px;
+      }
+
+      .user-message {
+        justify-content: flex-start;
+      }
+    }
+  </style>
+
+  <script is:inline>
+    const packSelect = document.getElementById("pack-select");
+    const currentPackTitle = document.getElementById("current-pack-title");
+    const currentPackSkill = document.getElementById("current-pack-skill");
+    const popularPacks = document.querySelectorAll(".popular-pack");
+    const modeButtons = document.querySelectorAll(".mode-button");
+    const chatForm = document.getElementById("chat-form");
+    const chatInput = document.getElementById("chat-input");
+    const chatWindow = document.getElementById("chat-window");
+
+    function setCurrentPack({ code, scenario, skill }) {
+      if (currentPackTitle) {
+        currentPackTitle.textContent =
+          code && scenario ? `${code} | ${scenario}` : "All Student Packs";
+      }
+
+      if (currentPackSkill) {
+        currentPackSkill.textContent = skill || "Ask about any practical skills simulation.";
+      }
+    }
+
+    function addPreviewMessage(text) {
+      const wrapper = document.createElement("article");
+      wrapper.className = "chat-message user-message";
+
+      const bubble = document.createElement("div");
+      bubble.className = "message-bubble";
+      bubble.textContent = text;
+
+      wrapper.appendChild(bubble);
+      chatWindow.appendChild(wrapper);
+      chatWindow.scrollTop = chatWindow.scrollHeight;
+    }
+
+    packSelect?.addEventListener("change", () => {
+      const selectedOption = packSelect.selectedOptions[0];
+
+      if (!selectedOption || selectedOption.value === "all") {
+        setCurrentPack({});
+        return;
+      }
+
+      setCurrentPack({
+        code: selectedOption.value,
+        scenario: selectedOption.dataset.scenario,
+        skill: selectedOption.dataset.skill,
+      });
+    });
+
+    popularPacks.forEach((button) => {
+      button.addEventListener("click", () => {
+        const code = button.dataset.packCode;
+
+        if (packSelect && code) {
+          packSelect.value = code;
+        }
+
+        setCurrentPack({
+          code,
+          scenario: button.dataset.packScenario,
+          skill: button.dataset.packSkill,
+        });
+      });
+    });
+
+    modeButtons.forEach((button) => {
+      button.addEventListener("click", () => {
+        modeButtons.forEach((item) => item.classList.remove("active"));
+        button.classList.add("active");
+      });
+    });
+
+    chatForm?.addEventListener("submit", (event) => {
+      event.preventDefault();
+
+      const message = chatInput.value.trim();
+
+      if (!message) {
+        return;
+      }
+
+      addPreviewMessage(message);
+      chatInput.value = "";
+    });
+  </script>
+</BaseLayout>
