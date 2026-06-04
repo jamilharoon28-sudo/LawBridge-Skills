@@ -119,6 +119,9 @@ const resources = defineCollection({
   }),
 });
 
+// <<< NEW: Export legacyResources to fix Netlify build >>>
+export const legacyResources: any[] = [];
+
 export const collections = {
   pages,
   blog,
