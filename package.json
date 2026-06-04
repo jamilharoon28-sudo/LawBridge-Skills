@@ -1,5 +1,5 @@
 {
-  "name": "lawbridge-v2",
+  "name": "lawbridge-skills",
   "version": "1.0.0",
   "private": true,
   "type": "module",
@@ -9,6 +9,7 @@
     "preview": "astro preview"
   },
   "dependencies": {
-    "astro": "^4.16.18"
+    "astro": "^4.16.18",
+    "mammoth": "^1.8.0"
   }
 }
