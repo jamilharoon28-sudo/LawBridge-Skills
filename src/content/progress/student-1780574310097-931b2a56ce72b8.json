@@ -1,6 +1,6 @@
 {
   "studentId": "student-1780574310097-931b2a56ce72b8",
-  "updatedAt": "2026-06-04T22:10:57.517Z",
+  "updatedAt": "2026-06-04T22:13:30.957Z",
   "packs": {
     "AN-01": {
       "packCode": "AN-01",
@@ -37,16 +37,27 @@
       "updatedAt": "2026-06-04T22:07:32.279Z",
       "lastOpenedAt": "2026-06-04T22:07:32.279Z",
       "draftSavedAt": "2026-06-04T22:07:32.279Z"
+    },
+    "LD-01": {
+      "packCode": "LD-01",
+      "packTitle": "AI Ownership Clause",
+      "skill": "Legal Drafting",
+      "answerRoute": "/answer-pack?pack=LD-01",
+      "mode": "Opened from resources dashboard",
+      "status": "In progress",
+      "updatedAt": "2026-06-04T22:13:30.957Z",
+      "lastOpenedAt": "2026-06-04T22:13:30.957Z",
+      "draftSavedAt": "2026-06-04T22:13:30.957Z"
     }
   },
-  "latestPackCode": "AN-01",
+  "latestPackCode": "LD-01",
   "summary": {
-    "totalStarted": 3,
-    "inProgress": 3,
+    "totalStarted": 4,
+    "inProgress": 4,
     "submittedForAiCheck": 0,
     "completed": 0,
-    "latestPackCode": "AN-01",
+    "latestPackCode": "LD-01",
     "latestStatus": "In progress",
-    "updatedAt": "2026-06-04T22:10:57.517Z"
+    "updatedAt": "2026-06-04T22:13:30.957Z"
   }
 }
