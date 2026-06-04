@@ -58,6 +58,8 @@ const contentStudioCards = [
     description: "Upload a .docx blog article and publish it as a formatted LawBridge blog post.",
     actionText: "Add Blog",
     actionPath: "/admin/content/blog/new",
+    manageText: "Manage Blogs",
+    managePath: "/admin/content/blog/manage",
     previewPath: "/blog",
   },
   {
@@ -65,6 +67,8 @@ const contentStudioCards = [
     description: "Upload a Word, PDF, PowerPoint or spreadsheet resource and create a resource card.",
     actionText: "Add Resource",
     actionPath: "/admin/content/resources/new",
+    manageText: "Manage Resources",
+    managePath: "/admin/content/resources/manage",
     previewPath: "/resources",
   },
   {
@@ -72,6 +76,8 @@ const contentStudioCards = [
     description: "Create a webinar entry using a title, date, description and registration link.",
     actionText: "Add Webinar",
     actionPath: "/admin/content/webinars/new",
+    manageText: "Manage Webinars",
+    managePath: "/admin/content/webinars/manage",
     previewPath: "/webinars",
   },
   {
@@ -79,37 +85,43 @@ const contentStudioCards = [
     description: "Create a workshop entry using a title, date, description and booking link.",
     actionText: "Add Workshop",
     actionPath: "/admin/content/workshops/new",
+    manageText: "Manage Workshops",
+    managePath: "/admin/content/workshops/manage",
     previewPath: "/workshops",
   },
 ];
 
-const backupCmsCards = [
+const manageCards = [
   {
     title: "Manage Blog Posts",
-    description: "Use the full CMS if you need to edit existing blog entries directly.",
-    managePath: "/cms/#/collections/blog",
+    description: "Review, preview and delete published blog posts from a clean visual management page.",
+    managePath: "/admin/content/blog/manage",
+    addPath: "/admin/content/blog/new",
   },
   {
     title: "Manage Resources",
-    description: "Use the full CMS if you need to edit existing resource entries directly.",
-    managePath: "/cms/#/collections/resources",
+    description: "Review, preview and delete published resources and uploaded resource files.",
+    managePath: "/admin/content/resources/manage",
+    addPath: "/admin/content/resources/new",
   },
   {
     title: "Manage Webinars",
-    description: "Use the full CMS if you need to edit existing webinar entries directly.",
-    managePath: "/cms/#/collections/webinars",
+    description: "Review, preview and delete webinar entries published through the Content Studio.",
+    managePath: "/admin/content/webinars/manage",
+    addPath: "/admin/content/webinars/new",
   },
   {
     title: "Manage Workshops",
-    description: "Use the full CMS if you need to edit existing workshop entries directly.",
-    managePath: "/cms/#/collections/workshops",
+    description: "Review, preview and delete workshop entries published through the Content Studio.",
+    managePath: "/admin/content/workshops/manage",
+    addPath: "/admin/content/workshops/new",
   },
 ];
 
 const workflowSteps = [
   "Choose a page or content tool.",
-  "Edit visually or upload new content.",
-  "Publish your changes.",
+  "Edit visually, upload content or add a link.",
+  "Publish or delete the item.",
   "Wait for Netlify to redeploy.",
   "Review the live page.",
 ];
@@ -135,7 +147,7 @@ const workflowSteps = [
           <p class="admin-eyebrow">Private LawBridge Area</p>
           <h1>LawBridge Admin Dashboard</h1>
           <p>
-            Manage the website, publish new content and update LawBridge pages from one clean admin workspace.
+            Manage the website, publish new content, delete outdated items and update LawBridge pages from one clean admin workspace.
           </p>
         </div>
 
@@ -170,7 +182,34 @@ const workflowSteps = [
 
               <div class="admin-actions">
                 <a href={card.actionPath} class="admin-button primary">{card.actionText}</a>
+                <a href={card.managePath} class="admin-button secondary">{card.manageText}</a>
                 <a href={card.previewPath} class="admin-button secondary" target="_blank">Preview</a>
+              </div>
+            </article>
+          ))}
+        </div>
+      </section>
+
+      <section class="admin-section-block">
+        <div class="admin-section-heading">
+          <div>
+            <p class="admin-eyebrow">Manage Content</p>
+            <h2>Review and delete items</h2>
+          </div>
+        </div>
+
+        <div class="admin-card-grid manage-grid">
+          {manageCards.map((card) => (
+            <article class="admin-card manage-card">
+              <div>
+                <span class="admin-card-tag subtle">Manage</span>
+                <h3>{card.title}</h3>
+                <p>{card.description}</p>
+              </div>
+
+              <div class="admin-actions">
+                <a href={card.managePath} class="admin-button primary">Manage / Delete</a>
+                <a href={card.addPath} class="admin-button secondary">Add New</a>
               </div>
             </article>
           ))}
@@ -205,27 +244,18 @@ const workflowSteps = [
       <section class="admin-section-block">
         <div class="admin-section-heading">
           <div>
-            <p class="admin-eyebrow">Advanced Management</p>
-            <h2>Existing content</h2>
+            <p class="admin-eyebrow">Advanced Backup</p>
+            <h2>Full CMS access</h2>
           </div>
 
           <a href="/cms/" class="admin-button secondary">Open Full CMS</a>
         </div>
 
-        <div class="admin-card-grid backup-grid">
-          {backupCmsCards.map((card) => (
-            <article class="admin-card backup-card">
-              <div>
-                <span class="admin-card-tag subtle">Backup CMS</span>
-                <h3>{card.title}</h3>
-                <p>{card.description}</p>
-              </div>
-
-              <div class="admin-actions">
-                <a href={card.managePath} class="admin-button secondary">Manage</a>
-              </div>
-            </article>
-          ))}
+        <div class="admin-note-card">
+          <h3>Use this only as a backup</h3>
+          <p>
+            The Content Studio is now the main editing area. The full CMS remains available for advanced manual edits if needed.
+          </p>
         </div>
       </section>
     </div>
@@ -322,10 +352,12 @@ const workflowSteps = [
       line-height: 0.95;
       letter-spacing: -0.045em;
       color: #061b31;
+      overflow-wrap: anywhere;
     }
 
     .admin-hero-panel p:not(.admin-eyebrow),
-    .admin-card p {
+    .admin-card p,
+    .admin-note-card p {
       color: #334155;
       line-height: 1.65;
     }
@@ -383,15 +415,9 @@ const workflowSteps = [
       gap: 1rem;
     }
 
-    .studio-grid {
-      grid-template-columns: repeat(4, minmax(0, 1fr));
-    }
-
+    .studio-grid,
+    .manage-grid,
     .pages-grid {
-      grid-template-columns: repeat(4, minmax(0, 1fr));
-    }
-
-    .backup-grid {
       grid-template-columns: repeat(4, minmax(0, 1fr));
     }
 
@@ -406,24 +432,48 @@ const workflowSteps = [
       flex-direction: column;
       justify-content: space-between;
       gap: 1rem;
+      overflow: hidden;
     }
 
     .studio-card {
-      min-height: 260px;
+      min-height: 285px;
       background:
         radial-gradient(circle at top right, rgba(231, 182, 95, 0.25), transparent 36%),
         linear-gradient(145deg, #ffffff, #fbf3e5);
       border-color: rgba(211, 155, 69, 0.36);
     }
 
-    .backup-card {
-      min-height: 205px;
-      background: rgba(255, 255, 255, 0.72);
+    .manage-card {
+      min-height: 240px;
+      background:
+        radial-gradient(circle at top right, rgba(6, 27, 49, 0.06), transparent 35%),
+        rgba(255, 255, 255, 0.86);
+    }
+
+    .admin-note-card {
+      padding: 1.5rem;
+      border-radius: 24px;
+      background: rgba(255, 255, 255, 0.76);
+      border: 1px solid rgba(201, 150, 82, 0.28);
+      box-shadow: 0 18px 52px rgba(6, 27, 49, 0.08);
+    }
+
+    .admin-note-card h3 {
+      margin: 0 0 0.5rem;
+      font-family: Georgia, "Times New Roman", serif;
+      font-size: 1.5rem;
+      color: #061b31;
+    }
+
+    .admin-note-card p {
+      margin: 0;
+      max-width: 760px;
     }
 
     .admin-card-tag {
       display: inline-flex;
       width: fit-content;
+      max-width: 100%;
       margin-bottom: 0.75rem;
       padding: 0.42rem 0.7rem;
       border-radius: 999px;
@@ -446,6 +496,8 @@ const workflowSteps = [
       font-size: 1.45rem;
       color: #061b31;
       letter-spacing: -0.02em;
+      overflow-wrap: anywhere;
+      hyphens: auto;
     }
 
     .studio-card h3 {
@@ -455,6 +507,7 @@ const workflowSteps = [
     .admin-card p {
       margin: 0;
       font-size: 0.95rem;
+      overflow-wrap: anywhere;
     }
 
     .admin-actions {
@@ -474,6 +527,7 @@ const workflowSteps = [
       font-weight: 900;
       letter-spacing: 0.01em;
       transition: transform 0.2s ease, box-shadow 0.2s ease;
+      text-align: center;
     }
 
     .admin-button:hover {
@@ -494,8 +548,8 @@ const workflowSteps = [
 
     @media (max-width: 1180px) {
       .studio-grid,
-      .pages-grid,
-      .backup-grid {
+      .manage-grid,
+      .pages-grid {
         grid-template-columns: repeat(2, minmax(0, 1fr));
       }
 
@@ -512,8 +566,8 @@ const workflowSteps = [
       }
 
       .studio-grid,
-      .pages-grid,
-      .backup-grid {
+      .manage-grid,
+      .pages-grid {
         grid-template-columns: 1fr;
       }
 
