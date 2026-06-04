@@ -1,6 +1,6 @@
 {
   "studentId": "student-1780574310097-931b2a56ce72b8",
-  "updatedAt": "2026-06-04T12:34:27.222Z",
+  "updatedAt": "2026-06-04T12:34:28.996Z",
   "packs": {
     "AN-01": {
       "packCode": "AN-01",
@@ -8,7 +8,7 @@
       "skill": "Attendance Notes and Legal Analysis",
       "status": "In progress",
       "mode": "Opened from resources dashboard",
-      "updatedAt": "2026-06-04T12:34:27.222Z"
+      "updatedAt": "2026-06-04T12:34:28.996Z"
     }
   }
 }
