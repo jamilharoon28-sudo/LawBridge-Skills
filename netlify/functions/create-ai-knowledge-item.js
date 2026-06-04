@@ -1,163 +1,153 @@
----
----
+const DEFAULT_OWNER = "jamilharoon28-sudo";
+const DEFAULT_REPO = "LawBridge-Skills";
+const DEFAULT_BRANCH = "main";
 
-<!doctype html>
-<html lang="en">
-  <head>
-    <meta charset="UTF-8" />
-    <title>Add AI Resource | LawBridge Admin</title>
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+function json(statusCode, body) {
+  return {
+    statusCode,
+    headers: {
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify(body),
+  };
+}
 
-    <style>
-      body {
-        margin: 0;
-        background: #f8f1e4;
-        color: #061b31;
-        font-family: Inter, system-ui, sans-serif;
-      }
+function slugify(value) {
+  return String(value || "")
+    .toLowerCase()
+    .trim()
+    .replace(/[^a-z0-9]+/g, "-")
+    .replace(/^-+|-+$/g, "");
+}
 
-      .shell {
-        max-width: 900px;
-        margin: 0 auto;
-        padding: 40px 20px 80px;
-      }
+function escapeYaml(value) {
+  return String(value || "")
+    .replace(/\\/g, "\\\\")
+    .replace(/"/g, '\\"')
+    .replace(/\n/g, " ");
+}
 
-      h1 {
-        font-family: Georgia, serif;
-        font-size: 3rem;
-        margin: 0 0 1rem;
-      }
+async function githubRequest(url, options = {}) {
+  const token = process.env.GITHUB_TOKEN || process.env.GITHUB_PAT;
 
-      .card {
-        background: white;
-        border-radius: 28px;
-        padding: 28px;
-        border: 1px solid rgba(201, 150, 82, 0.3);
-        box-shadow: 0 18px 52px rgba(6, 27, 49, 0.09);
-      }
+  if (!token) {
+    throw new Error("Missing GitHub token. Add GITHUB_TOKEN to Netlify environment variables.");
+  }
 
-      label {
-        display: block;
-        font-weight: 900;
-        margin-top: 1rem;
-        margin-bottom: 0.4rem;
-      }
+  const response = await fetch(url, {
+    ...options,
+    headers: {
+      Authorization: `Bearer ${token}`,
+      Accept: "application/vnd.github+json",
+      "X-GitHub-Api-Version": "2022-11-28",
+      ...(options.headers || {}),
+    },
+  });
 
-      input,
-      select,
-      textarea {
-        width: 100%;
-        box-sizing: border-box;
-        border: 1px solid rgba(6, 27, 49, 0.18);
-        border-radius: 16px;
-        padding: 0.9rem 1rem;
-        font: inherit;
-      }
+  const text = await response.text();
 
-      textarea {
-        min-height: 130px;
-        resize: vertical;
-      }
+  let data;
+  try {
+    data = text ? JSON.parse(text) : {};
+  } catch {
+    data = { raw: text };
+  }
 
-      .button {
-        margin-top: 1.5rem;
-        border: 0;
-        border-radius: 999px;
-        padding: 0.85rem 1.3rem;
-        background: linear-gradient(135deg, #e7b65f, #d39b45);
-        color: #061b31;
-        font-weight: 900;
-        cursor: pointer;
-      }
+  if (!response.ok && response.status !== 404) {
+    throw new Error(data.message || `GitHub request failed with status ${response.status}`);
+  }
 
-      .secondary {
-        display: inline-flex;
-        margin-top: 1rem;
-        color: #061b31;
-        font-weight: 900;
-        text-decoration: none;
-      }
+  return {
+    status: response.status,
+    data,
+  };
+}
 
-      .message {
-        margin-top: 1rem;
-        font-weight: 800;
-      }
-    </style>
-  </head>
+exports.handler = async function handler(event) {
+  if (event.httpMethod !== "POST") {
+    return json(405, { error: "Method not allowed." });
+  }
 
-  <body>
-    <main class="shell">
-      <a class="secondary" href="/admin">← Back to Admin</a>
+  try {
+    const body = JSON.parse(event.body || "{}");
 
-      <h1>Add AI Resource</h1>
+    const code = String(body.code || "").trim();
+    const title = String(body.title || "").trim();
+    const skill = String(body.skill || "").trim();
+    const scenario = String(body.scenario || title).trim();
+    const difficulty = String(body.difficulty || "Intermediate").trim();
+    const summary = String(body.summary || "").trim();
+    const studentKnowledge = String(body.studentKnowledge || "").trim();
+    const tutorGuidance = String(body.tutorGuidance || "").trim();
 
-      <div class="card">
-        <form id="aiForm">
-          <label>Pack Code</label>
-          <input name="code" placeholder="Example: CI-01" required />
-
-          <label>Pack Title</label>
-          <input name="title" placeholder="Example: Failed Software Launch" required />
-
-          <label>Skill Area</label>
-          <input name="skill" placeholder="Example: Client Interviewing" required />
-
-          <label>Difficulty</label>
-          <select name="difficulty">
-            <option>Beginner</option>
-            <option>Intermediate</option>
-            <option>Advanced</option>
-          </select>
-
-          <label>Student-Facing Summary</label>
-          <textarea name="summary" placeholder="Briefly explain what this pack helps students practise." required></textarea>
-
-          <label>Student Pack Knowledge</label>
-          <textarea name="studentKnowledge" placeholder="Paste key content, tasks, scenarios, outcomes, etc."></textarea>
-
-          <label>Hidden Tutor Guidance</label>
-          <textarea name="tutorGuidance" placeholder="Paste tutor-only hints, marking guidance, and internal notes."></textarea>
-
-          <button class="button" type="submit">Save AI Resource</button>
-
-          <p id="message" class="message"></p>
-        </form>
-      </div>
-    </main>
-
-    <script>
-      const form = document.getElementById("aiForm");
-      const message = document.getElementById("message");
-
-      form.addEventListener("submit", async (event) => {
-        event.preventDefault();
-
-        message.textContent = "Saving...";
-
-        const formData = new FormData(form);
-        const payload = Object.fromEntries(formData.entries());
-
-        try {
-          const response = await fetch("/.netlify/functions/create-ai-knowledge-item", {
-            method: "POST",
-            headers: {
-              "Content-Type": "application/json",
-            },
-            body: JSON.stringify(payload),
-          });
-
-          const result = await response.json();
-
-          if (!response.ok) {
-            throw new Error(result.error || "Save failed.");
-          }
-
-          message.textContent = "AI resource saved. Netlify will redeploy shortly.";
-          form.reset();
-        } catch (error) {
-          message.textContent = error.message;
-        }
+    if (!code || !title || !skill || !summary) {
+      return json(400, {
+        error: "Pack code, title, skill and summary are required.",
       });
-    </script>
-  </body>
-</html>
+    }
+
+    const owner = process.env.GITHUB_OWNER || DEFAULT_OWNER;
+    const repo = process.env.GITHUB_REPO || DEFAULT_REPO;
+    const branch = process.env.GITHUB_BRANCH || DEFAULT_BRANCH;
+
+    const slug = `${slugify(code)}-${slugify(title)}`;
+    const filePath = `src/content/ai-knowledge/${slug}.md`;
+
+    const markdown = `---
+code: "${escapeYaml(code)}"
+title: "${escapeYaml(title)}"
+skill: "${escapeYaml(skill)}"
+scenario: "${escapeYaml(scenario)}"
+difficulty: "${escapeYaml(difficulty)}"
+summary: "${escapeYaml(summary)}"
+---
+
+# ${title}
+
+## Student Pack Knowledge
+
+${studentKnowledge || "No student pack knowledge added yet."}
+
+## Hidden Tutor Guidance
+
+${tutorGuidance || "No hidden tutor guidance added yet."}
+`;
+
+    const encodedPath = filePath
+      .split("/")
+      .map((part) => encodeURIComponent(part))
+      .join("/");
+
+    const url = `https://api.github.com/repos/${owner}/${repo}/contents/${encodedPath}`;
+
+    const existing = await githubRequest(`${url}?ref=${encodeURIComponent(branch)}`);
+
+    const payload = {
+      message: `Add AI knowledge resource: ${code}`,
+      content: Buffer.from(markdown, "utf8").toString("base64"),
+      branch,
+    };
+
+    if (existing.status === 200 && existing.data?.sha) {
+      payload.sha = existing.data.sha;
+      payload.message = `Update AI knowledge resource: ${code}`;
+    }
+
+    await githubRequest(url, {
+      method: "PUT",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify(payload),
+    });
+
+    return json(200, {
+      success: true,
+      path: filePath,
+    });
+  } catch (error) {
+    return json(500, {
+      error: error.message || "Failed to create AI knowledge item.",
+    });
+  }
+};
