@@ -9,10 +9,51 @@ const packs = resources
     title: entry.data.scenario || entry.data.title || "Untitled Pack",
     skill: entry.data.skill || "Practical Skills",
     difficulty: entry.data.difficulty || "Intermediate",
+    categoryGroup: entry.data.categoryGroup || entry.data.category || "Legal Practice Skills",
     sheetType: entry.data.sheetType || "student",
     answerCount: Array.isArray(entry.data.tasks) ? entry.data.tasks.length : 0,
   }))
   .filter((pack) => pack.code || pack.title);
+
+const groupedPacks = packs.reduce((map, pack) => {
+  const categoryGroup = pack.categoryGroup || "Legal Practice Skills";
+  const skill = pack.skill || "Practical Skills";
+  const sheetType = pack.sheetType || "student";
+
+  if (!map.has(categoryGroup)) {
+    map.set(categoryGroup, new Map());
+  }
+
+  if (!map.get(categoryGroup).has(skill)) {
+    map.get(categoryGroup).set(skill, new Map());
+  }
+
+  if (!map.get(categoryGroup).get(skill).has(sheetType)) {
+    map.get(categoryGroup).get(skill).set(sheetType, []);
+  }
+
+  map.get(categoryGroup).get(skill).get(sheetType).push(pack);
+  return map;
+}, new Map());
+
+const orderedCategories = [
+  "Legal Practice Skills",
+  "Professional Skills",
+];
+
+const categoryEntries = [
+  ...orderedCategories
+    .filter((category) => groupedPacks.has(category))
+    .map((category) => [category, groupedPacks.get(category)]),
+  ...Array.from(groupedPacks.entries()).filter(
+    ([category]) => !orderedCategories.includes(category)
+  ),
+];
+
+const sheetTypeLabels = {
+  student: "Student Packs",
+  tutor: "Tutor Guides",
+};
 ---
 
 <section class="dashboard-shell">
@@ -48,54 +89,91 @@ const packs = resources
         </button>
       </div>
 
-      <div class="progress-grid" id="progress-grid">
-        {packs.map((pack) => (
-          <article
-            class="progress-card"
-            data-pack-code={pack.code}
-            data-pack-title={pack.title}
-            data-pack-skill={pack.skill}
-            data-answer-count={pack.answerCount}
-          >
-            <div>
-              <span class="pack-code">{pack.code || "PACK"}</span>
-              <h3>{pack.title}</h3>
-              <p>{pack.skill}</p>
-              <small>{pack.difficulty}</small>
-            </div>
+      <div class="progress-dropdowns" id="progress-grid">
+        {categoryEntries.length > 0 ? (
+          categoryEntries.map(([categoryGroup, skillMap]) => (
+            <details class="progress-category-block" open>
+              <summary class="progress-category-summary">
+                <span>{categoryGroup}</span>
+                <small>{Array.from(skillMap.keys()).length} topics</small>
+              </summary>
 
-            <div class="pack-progress-bar" aria-label="Answer Pack progress">
-              <div class="pack-progress-track">
-                <span class="pack-progress-fill" data-progress-fill={pack.code}></span>
+              <div class="progress-skill-list">
+                {Array.from(skillMap.entries()).map(([skill, sheetTypeMap]) => (
+                  <details class="progress-skill-block">
+                    <summary class="progress-skill-summary">
+                      <span>{skill}</span>
+                      <small>{Array.from(sheetTypeMap.values()).flat().length} packs</small>
+                    </summary>
+
+                    <div class="progress-sheet-list">
+                      {Array.from(sheetTypeMap.entries()).map(([sheetType, sheetPacks]) => (
+                        <details class="progress-sheet-block" open={sheetType === "student"}>
+                          <summary class="progress-sheet-summary">
+                            <span>{sheetTypeLabels[sheetType] || sheetType}</span>
+                            <small>{sheetPacks.length} packs</small>
+                          </summary>
+
+                          <div class="progress-grid">
+                            {sheetPacks.map((pack) => (
+                              <article
+                                class="progress-card"
+                                data-pack-code={pack.code}
+                                data-pack-title={pack.title}
+                                data-pack-skill={pack.skill}
+                                data-answer-count={pack.answerCount}
+                              >
+                                <div>
+                                  <span class="pack-code">{pack.code || "PACK"}</span>
+                                  <h3>{pack.title}</h3>
+                                  <p>{pack.skill}</p>
+                                  <small>{pack.difficulty}</small>
+                                </div>
+
+                                <div class="pack-progress-bar" aria-label="Answer Pack progress">
+                                  <div class="pack-progress-track">
+                                    <span class="pack-progress-fill" data-progress-fill={pack.code}></span>
+                                  </div>
+                                  <small data-progress-label={pack.code}>0% complete</small>
+                                </div>
+
+                                <div class="progress-actions">
+                                  <span class="status-pill not-started" data-status-for={pack.code}>
+                                    Not started
+                                  </span>
+
+                                  <a
+                                    class="dashboard-button secondary open-pack-link"
+                                    href={`/ai-skills-coach?pack=${encodeURIComponent(pack.code)}&scenario=${encodeURIComponent(pack.title)}&skill=${encodeURIComponent(pack.skill)}`}
+                                    data-pack-code={pack.code}
+                                    data-pack-title={pack.title}
+                                    data-pack-skill={pack.skill}
+                                  >
+                                    Open Pack
+                                  </a>
+
+                                  <a
+                                    class="dashboard-button secondary answer-pack-link"
+                                    href={`/answer-pack?pack=${encodeURIComponent(pack.code)}`}
+                                    data-pack-code={pack.code}
+                                  >
+                                    Continue Answer Pack
+                                  </a>
+                                </div>
+                              </article>
+                            ))}
+                          </div>
+                        </details>
+                      ))}
+                    </div>
+                  </details>
+                ))}
               </div>
-              <small data-progress-label={pack.code}>0% complete</small>
-            </div>
-
-            <div class="progress-actions">
-              <span class="status-pill not-started" data-status-for={pack.code}>
-                Not started
-              </span>
-
-              <a
-                class="dashboard-button secondary open-pack-link"
-                href={`/ai-skills-coach?pack=${encodeURIComponent(pack.code)}&scenario=${encodeURIComponent(pack.title)}&skill=${encodeURIComponent(pack.skill)}`}
-                data-pack-code={pack.code}
-                data-pack-title={pack.title}
-                data-pack-skill={pack.skill}
-              >
-                Open Pack
-              </a>
-
-              <a
-                class="dashboard-button secondary answer-pack-link"
-                href={`/answer-pack?pack=${encodeURIComponent(pack.code)}`}
-                data-pack-code={pack.code}
-              >
-                Continue Answer Pack
-              </a>
-            </div>
-          </article>
-        ))}
+            </details>
+          ))
+        ) : (
+          <p class="empty-progress-message">No simulation packs are available yet.</p>
+        )}
       </div>
     </section>
   </div>
@@ -219,10 +297,119 @@ const packs = resources
       color: #061b31;
     }
 
+    .progress-dropdowns {
+      display: grid;
+      gap: 1rem;
+    }
+
+    .progress-category-block {
+      padding: clamp(1rem, 2vw, 1.5rem);
+      border-radius: 30px;
+      background: rgba(255, 255, 255, 0.72);
+      border: 1px solid rgba(201, 150, 82, 0.24);
+      box-shadow: 0 18px 52px rgba(6, 27, 49, 0.06);
+    }
+
+    .progress-category-summary,
+    .progress-skill-summary,
+    .progress-sheet-summary {
+      display: flex;
+      justify-content: space-between;
+      gap: 1rem;
+      align-items: center;
+      cursor: pointer;
+      list-style: none;
+    }
+
+    .progress-category-summary::-webkit-details-marker,
+    .progress-skill-summary::-webkit-details-marker,
+    .progress-sheet-summary::-webkit-details-marker {
+      display: none;
+    }
+
+    .progress-category-summary {
+      font-family: Georgia, "Times New Roman", serif;
+      font-size: clamp(1.8rem, 3vw, 2.6rem);
+      color: #061b31;
+      font-weight: 900;
+    }
+
+    .progress-category-summary::before,
+    .progress-skill-summary::before,
+    .progress-sheet-summary::before {
+      content: "▸";
+      display: inline-flex;
+      margin-right: 0.55rem;
+      color: #b37b32;
+      transition: transform 0.2s ease;
+    }
+
+    .progress-category-block[open] > .progress-category-summary::before,
+    .progress-skill-block[open] > .progress-skill-summary::before,
+    .progress-sheet-block[open] > .progress-sheet-summary::before {
+      transform: rotate(90deg);
+    }
+
+    .progress-category-summary span,
+    .progress-skill-summary span,
+    .progress-sheet-summary span {
+      flex: 1;
+    }
+
+    .progress-category-summary small,
+    .progress-skill-summary small,
+    .progress-sheet-summary small {
+      font-family: inherit;
+      color: #64748b;
+      font-size: 0.82rem;
+      font-weight: 900;
+    }
+
+    .progress-skill-list {
+      display: grid;
+      gap: 1rem;
+      margin-top: 1.2rem;
+    }
+
+    .progress-skill-block {
+      padding: 1rem;
+      border-radius: 24px;
+      background: rgba(248, 241, 228, 0.74);
+      border: 1px solid rgba(201, 150, 82, 0.22);
+    }
+
+    .progress-skill-summary {
+      color: #061b31;
+      font-weight: 900;
+      font-size: 1.15rem;
+    }
+
+    .progress-sheet-list {
+      display: grid;
+      gap: 0.9rem;
+      margin-top: 1rem;
+    }
+
+    .progress-sheet-block {
+      padding: 0.9rem;
+      border-radius: 20px;
+      background: rgba(255, 255, 255, 0.76);
+      border: 1px solid rgba(201, 150, 82, 0.2);
+    }
+
+    .progress-sheet-summary {
+      color: #8a5a18;
+      font-size: 0.9rem;
+      text-transform: uppercase;
+      letter-spacing: 0.12em;
+      font-weight: 900;
+    }
+
     .progress-grid {
       display: grid;
       grid-template-columns: repeat(3, minmax(0, 1fr));
       gap: 1rem;
+      margin-top: 1rem;
     }
 
     .progress-card {
@@ -337,6 +524,13 @@ const packs = resources
     .status-pill.needs-feedback {
       background: rgba(220, 38, 38, 0.12);
       color: #991b1b;
+    }
+
+    .empty-progress-message {
+      margin: 0;
+      color: #64748b;
+      line-height: 1.6;
+      font-weight: 700;
     }
 
     @media (max-width: 1100px) {
@@ -509,17 +703,19 @@ const packs = resources
         }
 
         if (nextPackDetail) {
-          nextPackDetail.textContent = pack.code
-            ? `Continue with ${pack.code}.`
-            : "Continue with your next available LawBridge simulation.";
+          nextPackDetail.textContent = pack.completionPercent
+            ? `${pack.completionPercent}% complete. Continue with ${pack.code}.`
+            : pack.code
+              ? `Continue with ${pack.code}.`
+              : "Continue with your next available LawBridge simulation.";
         }
 
         if (nextPackLink) {
           const code = encodeURIComponent(pack.code || "");
-          const title = encodeURIComponent(pack.title || "");
-          const skill = encodeURIComponent(pack.skill || "");
+          const answerRoute = pack.answerRoute || `/answer-pack?pack=${code}`;
 
-          nextPackLink.href = `/ai-skills-coach?pack=${code}&scenario=${title}&skill=${skill}`;
+          nextPackLink.href = answerRoute;
+          nextPackLink.textContent = "Continue Answer Pack";
         }
       } catch (error) {
         console.warn("Could not load next pack:", error);
