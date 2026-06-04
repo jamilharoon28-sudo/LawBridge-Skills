@@ -108,7 +108,6 @@ const resources = defineCollection({
   }),
 });
 
-// <<< EXPORT LEGACY RESOURCES FOR NETLIFY BUILD >>>
 export const legacyResources: any[] = [];
 
 export const collections = {
