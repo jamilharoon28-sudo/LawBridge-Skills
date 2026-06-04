@@ -74,8 +74,11 @@ const packs = resources
                 </span>
 
                 <a
-                  class="dashboard-button secondary"
+                  class="dashboard-button secondary open-pack-link"
                   href={`/ai-skills-coach?pack=${encodeURIComponent(pack.code)}&scenario=${encodeURIComponent(pack.title)}&skill=${encodeURIComponent(pack.skill)}`}
+                  data-pack-code={pack.code}
+                  data-pack-title={pack.title}
+                  data-pack-skill={pack.skill}
                 >
                   Open Pack
                 </a>
@@ -319,6 +322,7 @@ const packs = resources
 
   <script is:inline>
     const progressCards = document.querySelectorAll(".progress-card");
+    const openPackLinks = document.querySelectorAll(".open-pack-link");
     const refreshButton = document.getElementById("refresh-progress");
     const nextPackTitle = document.getElementById("next-pack-title");
     const nextPackDetail = document.getElementById("next-pack-detail");
@@ -381,6 +385,31 @@ const packs = resources
       }
     }
 
+    async function saveOpenedProgress(link) {
+      const packCode = link.dataset.packCode;
+      const packTitle = link.dataset.packTitle;
+      const skill = link.dataset.packSkill;
+
+      if (!packCode) {
+        return;
+      }
+
+      await fetch("/.netlify/functions/save-progress", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          studentId: getStudentId(),
+          packCode,
+          packTitle,
+          skill,
+          mode: "Opened from dashboard",
+          status: "In progress",
+        }),
+      });
+    }
+
     async function loadNextPack() {
       try {
         const response = await fetch("/.netlify/functions/next-pack", {
@@ -414,13 +443,28 @@ const packs = resources
         if (nextPackLink) {
           const code = encodeURIComponent(pack.code || "");
           const title = encodeURIComponent(pack.title || "");
+          const skill = encodeURIComponent(pack.skill || "");
 
-          nextPackLink.href = `/ai-skills-coach?pack=${code}&scenario=${title}`;
+          nextPackLink.href = `/ai-skills-coach?pack=${code}&scenario=${title}&skill=${skill}`;
         }
       } catch (error) {
         console.warn("Could not load next pack:", error);
       }
     }
+
+    openPackLinks.forEach((link) => {
+      link.addEventListener("click", async (event) => {
+        event.preventDefault();
+
+        try {
+          await saveOpenedProgress(link);
+        } catch (error) {
+          console.warn("Could not save opened progress:", error);
+        }
+
+        window.location.href = link.href;
+      });
+    });
 
     refreshButton?.addEventListener("click", async () => {
       await loadProgress();
