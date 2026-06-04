@@ -92,6 +92,12 @@ const resources = defineCollection({
     category: z.string().optional(),
     type: z.string().optional(),
 
+    categoryGroup: z.string().optional(),
+    sheetType: z.string().optional(),
+    skillSlug: z.string().optional(),
+    packNumber: z.number().optional(),
+    answerRoute: z.string().optional(),
+
     studentLink: z.string().optional(),
     tutorLink: z.string().optional(),
 
@@ -100,6 +106,16 @@ const resources = defineCollection({
 
     downloadLink: z.string().optional(),
     link: z.string().optional(),
+
+    tasks: z
+      .array(
+        z.object({
+          id: z.string(),
+          title: z.string(),
+          instructions: z.string().optional(),
+        })
+      )
+      .optional(),
   }),
 });
 
