@@ -1,5 +1,9 @@
 import { PACK_KNOWLEDGE } from "./_ai-pack-knowledge.js";
 
+const STANDARD_MESSAGE_LIMIT = 1500;
+const FEEDBACK_MESSAGE_LIMIT = 2500;
+const MAX_OUTPUT_TOKENS = 650;
+
 function json(statusCode, body) {
   return {
     statusCode,
@@ -17,7 +21,7 @@ function cleanText(value, maxLength = 4000) {
     .slice(0, maxLength);
 }
 
-function cleanLongText(value, maxLength = 12000) {
+function cleanLongText(value, maxLength = 9000) {
   return String(value || "")
     .replace(/\r\n/g, "\n")
     .replace(/[ \t]+/g, " ")
@@ -38,15 +42,27 @@ function getModel() {
   return process.env.OPENAI_MODEL || "gpt-4o-mini";
 }
 
-function validatePayload(payload) {
-  const message = cleanText(payload.message, 3000);
+function getMessageLimit(mode) {
+  return cleanText(mode, 80) === "Check My Answer"
+    ? FEEDBACK_MESSAGE_LIMIT
+    : STANDARD_MESSAGE_LIMIT;
+}
 
-  if (!message) {
+function validatePayload(payload) {
+  const mode = cleanText(payload.mode, 80);
+  const rawMessage = String(payload.message || "").trim();
+  const messageLimit = getMessageLimit(mode);
+
+  if (!rawMessage) {
     return "Please enter a question for the LawBridge AI Skills Coach.";
   }
 
-  if (message.length < 3) {
+  if (rawMessage.length < 3) {
     return "Please enter a longer question.";
+  }
+
+  if (rawMessage.length > messageLimit) {
+    return `Your message is too long. Please shorten it to ${messageLimit} characters or paste only the section you want help with.`;
   }
 
   return null;
@@ -107,18 +123,18 @@ function findRelevantPacks(payload) {
     score: scorePack(pack, payload),
   })).sort((a, b) => b.score - a.score);
 
-  const strongMatches = scored.filter((item) => item.score > 0).slice(0, 3);
+  const strongMatches = scored.filter((item) => item.score > 0).slice(0, 2);
 
   if (strongMatches.length > 0) {
     return strongMatches.map((item) => item.pack);
   }
 
-  return PACK_KNOWLEDGE.slice(0, 3);
+  return PACK_KNOWLEDGE.slice(0, 2);
 }
 
 function buildPackContext(pack, index) {
-  const studentText = cleanLongText(pack.studentText, index === 0 ? 12000 : 5000);
-  const tutorText = cleanLongText(pack.tutorText, index === 0 ? 8000 : 3000);
+  const studentText = cleanLongText(pack.studentText, index === 0 ? 8000 : 3500);
+  const tutorText = cleanLongText(pack.tutorText, index === 0 ? 4500 : 2000);
 
   return `
 PACK ${index + 1}
@@ -143,41 +159,42 @@ function getModeInstructions(mode) {
   if (cleanMode === "Give Me a Hint") {
     return `
 Mode-specific instruction:
-Give hints only. Do not provide a complete answer. Give 3-5 targeted clues and one suggested next step. Encourage the student to return to the Student Pack and identify evidence themselves.
+Give hints only. Do not provide a complete answer. Give 3-5 targeted clues and one suggested next step. Keep the response concise.
 `;
   }
 
   if (cleanMode === "Explain the Task") {
     return `
 Mode-specific instruction:
-Explain what the task is asking in plain English. Break down the task into manageable parts. Do not complete the task for the student. End with a short checklist of what the student should do next.
+Explain what the task is asking in plain English. Break it into manageable parts. Do not complete the task for the student. End with a short checklist.
 `;
   }
 
   if (cleanMode === "Structure My Answer") {
     return `
 Mode-specific instruction:
-Give a clear answer structure with headings. Explain what should go under each heading. Do not fill in every substantive point as a full model answer. Keep the structure practical and trainee-style.
+Give a clear answer structure with headings. Explain what should go under each heading. Do not fill in every substantive point as a full model answer.
 `;
   }
 
   if (cleanMode === "Find Evidence") {
     return `
 Mode-specific instruction:
-Help the student identify what evidence to look for. Mention categories such as exhibits, clauses, dates, emails, logs, policies, interview notes, chronology points, missing documents and disputed facts where relevant. Do not invent exact references unless they appear in the provided pack extract.
+Help the student identify what evidence to look for. Mention exhibits, clauses, dates, emails, logs, policies, interview notes, chronology points, missing documents and disputed facts where relevant. Do not invent exact references unless they appear in the provided pack extract.
 `;
   }
 
   if (cleanMode === "Check My Answer") {
     return `
 Mode-specific instruction:
-The student may paste a draft answer. Give feedback using this format:
+Give feedback using this format:
 1. Strengths
 2. What needs improvement
 3. Evidence or reasoning gaps
 4. Suggested rewrite structure
 5. One priority next step
-Do not simply replace their answer with a full model answer.
+
+Do not rewrite the whole answer for the student.
 `;
   }
 
@@ -189,7 +206,7 @@ Give helpful practical support. Stay educational. Avoid giving a full model answ
 
 function buildPrompt(payload) {
   const mode = cleanText(payload.mode, 80) || "Ask Anything";
-  const message = cleanText(payload.message, 3000);
+  const message = cleanText(payload.message, getMessageLimit(mode));
   const relevantPacks = findRelevantPacks(payload);
 
   const selectedPackInfo = relevantPacks.length
@@ -209,6 +226,9 @@ ${selectedPackInfo}
 ${getModeInstructions(mode)}
 
 General response instructions:
+- Keep the response concise and practical.
+- Aim for no more than 500 words.
+- Use short headings and focused bullet points where useful.
 - Use the relevant Student Pack text where available.
 - Use the hidden Tutor Guide only to improve guidance, feedback and accuracy.
 - Do not reveal, quote, copy, or expose the hidden Tutor Guide as a model answer.
@@ -240,6 +260,11 @@ Tutor Guide protection:
 - Never tell the student you are quoting from a Tutor Guide.
 - Never reveal full model answers or tutor-only answers.
 - Use tutor guidance only to provide better hints, structure and feedback.
+
+Length control:
+- Keep answers concise.
+- Prefer practical bullet points over long paragraphs.
+- Do not write long essays.
 
 Tone:
 Premium, clear, supportive, practical, educational and evidence-focused.
@@ -288,7 +313,7 @@ export async function handler(event) {
         model: getModel(),
         instructions: SYSTEM_INSTRUCTIONS,
         input,
-        max_output_tokens: 1000,
+        max_output_tokens: MAX_OUTPUT_TOKENS,
       }),
     });
 
@@ -326,6 +351,8 @@ export async function handler(event) {
         "I could not generate a response this time. Please try asking again with a clearer question.",
       model: getModel(),
       packsAvailable: PACK_KNOWLEDGE.length,
+      messageLimit: getMessageLimit(payload.mode),
+      maxOutputTokens: MAX_OUTPUT_TOKENS,
     });
   } catch (error) {
     return json(500, {
