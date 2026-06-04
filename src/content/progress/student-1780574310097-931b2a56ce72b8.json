@@ -1,6 +1,6 @@
 {
   "studentId": "student-1780574310097-931b2a56ce72b8",
-  "updatedAt": "2026-06-04T21:59:57.104Z",
+  "updatedAt": "2026-06-04T22:07:32.279Z",
   "packs": {
     "AN-01": {
       "packCode": "AN-01",
@@ -23,16 +23,30 @@
       "status": "In progress",
       "mode": "Ask Anything",
       "updatedAt": "2026-06-04T13:07:38.742Z"
+    },
+    "AO-01": {
+      "packCode": "AO-01",
+      "packTitle": "Business Interruption Insurance Dispute",
+      "skill": "Advocacy",
+      "category": "Legal Practice Skills",
+      "categoryGroup": "Legal Practice Skills",
+      "answerRoute": "/answer-pack?pack=AO-01",
+      "mode": "Answer Pack",
+      "status": "In progress",
+      "answerCount": 5,
+      "updatedAt": "2026-06-04T22:07:32.279Z",
+      "lastOpenedAt": "2026-06-04T22:07:32.279Z",
+      "draftSavedAt": "2026-06-04T22:07:32.279Z"
     }
   },
-  "latestPackCode": "AN-01",
+  "latestPackCode": "AO-01",
   "summary": {
-    "totalStarted": 2,
-    "inProgress": 2,
+    "totalStarted": 3,
+    "inProgress": 3,
     "submittedForAiCheck": 0,
     "completed": 0,
-    "latestPackCode": "AN-01",
+    "latestPackCode": "AO-01",
     "latestStatus": "In progress",
-    "updatedAt": "2026-06-04T21:59:57.104Z"
+    "updatedAt": "2026-06-04T22:07:32.279Z"
   }
 }
