@@ -1,152 +1,460 @@
 ---
-import { getCollection } from "astro:content";
+import BaseLayout from "../layouts/BaseLayout.astro";
 import Dashboard from "../components/Dashboard.astro";
-import { legacyResources } from "../content/config";
+import { getCollection } from "astro:content";
 
-// Load studio resources
-const studioResources = await getCollection("resources");
+const resources = await getCollection("resources");
 
-// Merge legacy + studio
-const allResources = [...legacyResources, ...studioResources];
-
-// Filters / search / view toggle logic
-let filterCategory = Astro.request.query.get("category") || "all";
-let filterType = Astro.request.query.get("type") || "all";
-let viewMode = Astro.request.query.get("view") || "folders";
-
-// Map resources by category group (Legal Practice / Professional Skills)
-const resourceMap = allResources.reduce((acc, res) => {
-  const categoryGroup = res.categoryGroup || "Uncategorized";
-  if (!acc[categoryGroup]) acc[categoryGroup] = [];
-  acc[categoryGroup].push(res);
-  return acc;
-}, {});
-
-function getResourceKey(res) {
-  return res.packCode || res.slug || res.title || "unknown";
+function normaliseText(value, fallback = "") {
+  return String(value || fallback).trim();
 }
 
-function getCoachLink(res) {
-  return `/ai-skills-coach?pack=${res.packCode}`;
+function slugify(value) {
+  return String(value || "")
+    .toLowerCase()
+    .trim()
+    .replace(/&/g, "and")
+    .replace(/[^a-z0-9]+/g, "-")
+    .replace(/^-+|-+$/g, "");
 }
 
-function filteredResources(resources) {
-  return resources.filter((res) => {
-    let categoryMatch = filterCategory === "all" || res.categoryGroup === filterCategory;
-    let typeMatch = filterType === "all" || res.sheetType === filterType;
-    return categoryMatch && typeMatch;
-  });
+function getCategoryGroup(resource) {
+  return (
+    resource.data.categoryGroup ||
+    resource.data.category ||
+    "Legal Practice Skills"
+  );
 }
+
+function getSheetType(resource) {
+  const rawType = String(resource.data.sheetType || resource.data.type || "student").toLowerCase();
+
+  if (rawType.includes("tutor")) {
+    return "tutor";
+  }
+
+  return "student";
+}
+
+function getPackCode(resource) {
+  return resource.data.code || resource.slug || "";
+}
+
+function getPackTitle(resource) {
+  return (
+    resource.data.scenario ||
+    resource.data.title ||
+    "LawBridge simulation pack"
+  );
+}
+
+function getStudentLink(resource) {
+  return resource.data.studentLink || resource.data.downloadLink || resource.data.link || "";
+}
+
+function getTutorLink(resource) {
+  return resource.data.tutorLink || "";
+}
+
+const groupedResources = resources.reduce((map, resource) => {
+  const categoryGroup = getCategoryGroup(resource);
+
+  if (!map.has(categoryGroup)) {
+    map.set(categoryGroup, []);
+  }
+
+  map.get(categoryGroup).push(resource);
+  return map;
+}, new Map());
+
+const orderedCategories = [
+  "Legal Practice Skills",
+  "Professional Skills",
+];
+
+const categoryEntries = [
+  ...orderedCategories
+    .filter((category) => groupedResources.has(category))
+    .map((category) => [category, groupedResources.get(category)]),
+  ...Array.from(groupedResources.entries()).filter(
+    ([category]) => !orderedCategories.includes(category)
+  ),
+];
 ---
 
-<!-- Page Header / Navbar is preserved -->
-<main class="resources-page">
-  <!-- Hero section already exists -->
+<BaseLayout title="Resources | LawBridge">
   <section class="hero">
-    <h1>Resources</h1>
-    <p>Explore Student and Tutor Sheets for Legal & Professional Skills.</p>
+    <div class="container hero-grid">
+      <div>
+        <p class="eyebrow">LawBridge Resources</p>
+        <h1>Practical Legal Skills Simulations</h1>
+        <p>
+          Explore Student Packs, Tutor Guides and AI-supported practical skills simulations organised by skill area.
+        </p>
+      </div>
+    </div>
   </section>
 
-  <!-- Dashboard section -->
-  <section class="dashboard-section">
-    <Dashboard />
+  <Dashboard />
+
+  <section class="section resource-intro-section">
+    <div class="container">
+      <div class="resource-intro-card">
+        <p class="eyebrow">AI-supported learning</p>
+        <h2>Work through practical packs with structured guidance.</h2>
+        <p>
+          Use the Student Packs to practise realistic legal and professional skills tasks, then use the AI Skills Coach for educational feedback and next-step guidance.
+        </p>
+        <a class="primary-link" href="/ai-skills-coach">Open AI Skills Coach</a>
+      </div>
+    </div>
   </section>
 
-  <!-- AI Skills Coach banner -->
-  <section class="ai-coach-banner">
-    <a href="/ai-skills-coach" class="btn btn-gold">Ask AI Skills Coach</a>
-  </section>
-
-  <!-- Search / Filter / View Toggle -->
-  <section class="filter-bar">
-    <form method="get">
-      <select name="category" onchange="this.form.submit()">
-        <option value="all">All Categories</option>
-        <option value="Legal Practice Skills" selected={filterCategory==='Legal Practice Skills'}>Legal Practice Skills</option>
-        <option value="Professional Skills" selected={filterCategory==='Professional Skills'}>Professional Skills</option>
-      </select>
-
-      <select name="type" onchange="this.form.submit()">
-        <option value="all">All Types</option>
-        <option value="student" selected={filterType==='student'}>Student Sheets</option>
-        <option value="tutor" selected={filterType==='tutor'}>Tutor Sheets</option>
-      </select>
-
-      <select name="view" onchange="this.form.submit()">
-        <option value="folders" selected={viewMode==='folders'}>View as Folders</option>
-        <option value="list" selected={viewMode==='list'}>View as List</option>
-      </select>
-    </form>
-  </section>
-
-  <!-- Resource Library -->
-  <section class="resource-library">
-    {Object.entries(resourceMap).map(([categoryGroup, resources]) => {
-      const filtered = filteredResources(resources);
-      if (!filtered.length) return null;
-
-      return (
-        <div class="category-group" key={categoryGroup}>
-          <h2>{categoryGroup}</h2>
-          <div class={viewMode==='folders' ? 'folder-view' : 'list-view'}>
-            {filtered.map((res) => (
-              <div class="resource-card" key={getResourceKey(res)}>
-                <h3>{res.title}</h3>
-                <p>Skill: {res.skill}</p>
-                <p>Type: {res.sheetType}</p>
-                <p>Difficulty: {res.difficulty || 'N/A'}</p>
-                <p>Category: {res.categoryGroup}</p>
-
-                <div class="buttons">
-                  {res.sheetType === 'student' && res.studentLink && (
-                    <>
-                      <a href={res.studentLink} target="_blank" class="btn btn-primary">Open Student Sheet</a>
-                      <a href={`/answer-pack?pack=${res.packCode}`} class="btn btn-gold">Answer Pack</a>
-                    </>
-                  )}
-
-                  {res.sheetType === 'tutor' && res.tutorLink && (
-                    <a href={res.tutorLink} target="_blank" class="btn btn-secondary">Open Tutor Sheet</a>
-                  )}
-
-                  <a href={getCoachLink(res)} class="btn btn-outline">Ask AI Skills Coach</a>
-                </div>
-              </div>
-            ))}
-          </div>
+  <section class="section resource-library-section">
+    <div class="container">
+      <div class="section-heading-row">
+        <div>
+          <p class="eyebrow">Resource Library</p>
+          <h2>All simulation packs</h2>
         </div>
-      );
-    })}
+      </div>
+
+      {categoryEntries.length > 0 ? (
+        categoryEntries.map(([categoryGroup, categoryResources]) => {
+          const studentResources = categoryResources.filter((resource) => getSheetType(resource) === "student");
+          const tutorResources = categoryResources.filter((resource) => getSheetType(resource) === "tutor");
+
+          return (
+            <div class="category-block">
+              <h3>{categoryGroup}</h3>
+
+              <div class="resource-subsection">
+                <h4>Student Sheets</h4>
+
+                {studentResources.length > 0 ? (
+                  <div class="resource-grid">
+                    {studentResources.map((resource) => {
+                      const packCode = getPackCode(resource);
+                      const title = getPackTitle(resource);
+                      const skill = normaliseText(resource.data.skill, "Practical Skills");
+                      const difficulty = normaliseText(resource.data.difficulty, "Intermediate");
+                      const studentLink = getStudentLink(resource);
+
+                      return (
+                        <article
+                          class="resource-card"
+                          data-category={slugify(categoryGroup)}
+                          data-type="student"
+                          data-skill={slugify(skill)}
+                        >
+                          <div>
+                            <span class="pack-code">{packCode || "PACK"}</span>
+                            <h5>{title}</h5>
+                            <p>{skill}</p>
+                            <small>{difficulty}</small>
+                          </div>
+
+                          <div class="resource-actions">
+                            {studentLink && (
+                              <a class="resource-button secondary" href={studentLink} target="_blank">
+                                Open Student Sheet
+                              </a>
+                            )}
+
+                            {packCode && (
+                              <a class="resource-button primary" href={`/answer-pack?pack=${encodeURIComponent(packCode)}`}>
+                                Answer Pack
+                              </a>
+                            )}
+
+                            <a
+                              class="resource-button ghost"
+                              href={`/ai-skills-coach?pack=${encodeURIComponent(packCode)}&scenario=${encodeURIComponent(title)}&skill=${encodeURIComponent(skill)}`}
+                            >
+                              Ask AI Skills Coach
+                            </a>
+                          </div>
+                        </article>
+                      );
+                    })}
+                  </div>
+                ) : (
+                  <p class="empty-message">No student sheets available in this section yet.</p>
+                )}
+              </div>
+
+              <div class="resource-subsection">
+                <h4>Tutor Sheets</h4>
+
+                {tutorResources.length > 0 ? (
+                  <div class="resource-grid">
+                    {tutorResources.map((resource) => {
+                      const packCode = getPackCode(resource);
+                      const title = getPackTitle(resource);
+                      const skill = normaliseText(resource.data.skill, "Practical Skills");
+                      const difficulty = normaliseText(resource.data.difficulty, "Intermediate");
+                      const tutorLink = getTutorLink(resource);
+
+                      return (
+                        <article
+                          class="resource-card tutor-card"
+                          data-category={slugify(categoryGroup)}
+                          data-type="tutor"
+                          data-skill={slugify(skill)}
+                        >
+                          <div>
+                            <span class="pack-code">{packCode || "PACK"}</span>
+                            <h5>{title}</h5>
+                            <p>{skill}</p>
+                            <small>{difficulty}</small>
+                          </div>
+
+                          <div class="resource-actions">
+                            {tutorLink && (
+                              <a class="resource-button secondary" href={tutorLink} target="_blank">
+                                Open Tutor Guide
+                              </a>
+                            )}
+
+                            <a
+                              class="resource-button ghost"
+                              href={`/ai-skills-coach?pack=${encodeURIComponent(packCode)}&scenario=${encodeURIComponent(title)}&skill=${encodeURIComponent(skill)}`}
+                            >
+                              Ask AI Skills Coach
+                            </a>
+                          </div>
+                        </article>
+                      );
+                    })}
+                  </div>
+                ) : (
+                  <p class="empty-message">No tutor sheets available in this section yet.</p>
+                )}
+              </div>
+            </div>
+          );
+        })
+      ) : (
+        <p class="empty-message">No resources are available yet.</p>
+      )}
+    </div>
   </section>
 
-  <!-- Disclaimer -->
-  <section class="disclaimer">
-    <small>
-      LawBridge resources are provided for educational and training purposes only.
-      They do not constitute legal advice and are not intended as guidance for any particular jurisdiction,
-      legal system, regulator, court, firm policy or client matter.
-      Students should always check the applicable law, rules and professional requirements in the relevant jurisdiction.
-    </small>
+  <section class="section disclaimer-section">
+    <div class="container">
+      <p>
+        LawBridge resources are provided for educational and training purposes only. They do not constitute legal advice and are not intended as guidance for any particular jurisdiction, legal system, regulator, court, firm policy or client matter. Students should always check the applicable law, rules and professional requirements in the relevant jurisdiction.
+      </p>
+    </div>
   </section>
-</main>
+</BaseLayout>
 
-<style>
-.resources-page { padding: 2rem; font-family: Georgia, serif; }
-.hero { text-align: center; margin-bottom: 2rem; }
-.dashboard-section { margin-bottom: 2rem; }
-.ai-coach-banner { text-align: center; margin-bottom: 1.5rem; }
-.filter-bar { display: flex; gap: 1rem; justify-content: center; margin-bottom: 2rem; }
-.resource-library { display: flex; flex-direction: column; gap: 2rem; }
-.category-group h2 { font-size: 1.75rem; margin-bottom: 1rem; }
-.folder-view { display: flex; flex-wrap: wrap; gap: 1rem; }
-.list-view { display: flex; flex-direction: column; gap: 1rem; }
-.resource-card { background: #fff; border-radius: 8px; padding: 1rem; box-shadow: 0 2px 8px rgba(0,0,0,0.1); width: 250px; }
-.resource-card h3 { margin-top: 0; }
-.resource-card .buttons { display: flex; flex-direction: column; gap: 0.5rem; margin-top: 0.5rem; }
-.btn { padding: 0.5rem 1rem; border-radius: 4px; text-decoration: none; text-align: center; display: inline-block; }
-.btn-primary { background-color: #061b31; color: #fff; }
-.btn-secondary { background-color: #d39b45; color: #fff; }
-.btn-gold { background-color: #e7b65f; color: #061b31; }
-.btn-outline { border: 1px solid #061b31; color: #061b31; background: transparent; }
-.disclaimer { margin-top: 3rem; text-align: center; font-size: 0.8rem; color: #555; }
+<style is:inline>
+  .resource-intro-section {
+    padding-top: 2rem;
+  }
+
+  .resource-intro-card {
+    padding: clamp(1.4rem, 3vw, 2.2rem);
+    border-radius: 28px;
+    background: #061b31;
+    color: #ffffff;
+    box-shadow: 0 24px 70px rgba(6, 27, 49, 0.14);
+  }
+
+  .resource-intro-card h2 {
+    margin: 0;
+    max-width: 850px;
+    font-family: Georgia, "Times New Roman", serif;
+    font-size: clamp(2rem, 4vw, 3.6rem);
+    line-height: 1;
+    letter-spacing: -0.04em;
+    color: #ffffff;
+  }
+
+  .resource-intro-card p:not(.eyebrow) {
+    max-width: 760px;
+    color: rgba(255, 255, 255, 0.82);
+    line-height: 1.7;
+  }
+
+  .primary-link {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 44px;
+    margin-top: 0.7rem;
+    padding: 0.75rem 1rem;
+    border-radius: 999px;
+    background: linear-gradient(135deg, #e7b65f, #d39b45);
+    color: #061b31;
+    text-decoration: none;
+    font-weight: 900;
+  }
+
+  .section-heading-row {
+    display: flex;
+    justify-content: space-between;
+    gap: 1rem;
+    align-items: end;
+    margin-bottom: 1.5rem;
+  }
+
+  .section-heading-row h2 {
+    margin: 0;
+    font-family: Georgia, "Times New Roman", serif;
+    font-size: clamp(2rem, 4vw, 3.4rem);
+    color: #061b31;
+    letter-spacing: -0.04em;
+  }
+
+  .category-block {
+    margin-top: 2rem;
+    padding: clamp(1rem, 2vw, 1.5rem);
+    border-radius: 30px;
+    background: rgba(255, 255, 255, 0.72);
+    border: 1px solid rgba(201, 150, 82, 0.24);
+  }
+
+  .category-block h3 {
+    margin: 0 0 1.2rem;
+    font-family: Georgia, "Times New Roman", serif;
+    font-size: clamp(1.8rem, 3vw, 2.6rem);
+    color: #061b31;
+  }
+
+  .resource-subsection {
+    margin-top: 1.4rem;
+  }
+
+  .resource-subsection h4 {
+    margin: 0 0 0.9rem;
+    color: #8a5a18;
+    font-size: 0.9rem;
+    text-transform: uppercase;
+    letter-spacing: 0.12em;
+    font-weight: 900;
+  }
+
+  .resource-grid {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 1rem;
+  }
+
+  .resource-card {
+    min-height: 250px;
+    padding: 1.2rem;
+    border-radius: 24px;
+    background: rgba(255, 255, 255, 0.92);
+    border: 1px solid rgba(201, 150, 82, 0.26);
+    box-shadow: 0 18px 52px rgba(6, 27, 49, 0.08);
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    gap: 1rem;
+  }
+
+  .tutor-card {
+    background: rgba(248, 241, 228, 0.72);
+  }
+
+  .pack-code {
+    display: inline-flex;
+    width: fit-content;
+    max-width: 100%;
+    margin-bottom: 0.75rem;
+    padding: 0.42rem 0.7rem;
+    border-radius: 999px;
+    background: rgba(211, 155, 69, 0.14);
+    color: #8a5a18;
+    font-size: 0.72rem;
+    font-weight: 900;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+  }
+
+  .resource-card h5 {
+    margin: 0 0 0.55rem;
+    font-family: Georgia, "Times New Roman", serif;
+    font-size: 1.35rem;
+    line-height: 1.12;
+    color: #061b31;
+    letter-spacing: -0.02em;
+  }
+
+  .resource-card p {
+    margin: 0;
+    color: #334155;
+    font-weight: 800;
+    line-height: 1.5;
+  }
+
+  .resource-card small {
+    display: inline-block;
+    margin-top: 0.55rem;
+    color: #64748b;
+    font-weight: 800;
+  }
+
+  .resource-actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.6rem;
+  }
+
+  .resource-button {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 40px;
+    padding: 0.65rem 0.85rem;
+    border-radius: 999px;
+    text-decoration: none;
+    font-weight: 900;
+    font-size: 0.9rem;
+  }
+
+  .resource-button.primary {
+    background: linear-gradient(135deg, #e7b65f, #d39b45);
+    color: #061b31;
+  }
+
+  .resource-button.secondary {
+    background: #061b31;
+    color: #ffffff;
+  }
+
+  .resource-button.ghost {
+    background: #ffffff;
+    color: #061b31;
+    border: 1px solid rgba(201, 150, 82, 0.32);
+  }
+
+  .empty-message {
+    margin: 0;
+    color: #64748b;
+    line-height: 1.6;
+    font-weight: 700;
+  }
+
+  .disclaimer-section {
+    padding-top: 0;
+  }
+
+  .disclaimer-section p {
+    margin: 0;
+    padding: 1rem 1.2rem;
+    border-radius: 18px;
+    background: rgba(6, 27, 49, 0.05);
+    color: #475569;
+    font-size: 0.92rem;
+    line-height: 1.7;
+  }
+
+  @media (max-width: 1100px) {
+    .resource-grid {
+      grid-template-columns: 1fr;
+    }
+  }
 </style>
