@@ -5,6 +5,7 @@
   "type": "module",
   "scripts": {
     "dev": "astro dev",
+    "prebuild": "node scripts/build-ai-knowledge.mjs",
     "build": "astro build",
     "preview": "astro preview"
   },
