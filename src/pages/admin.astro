@@ -4,7 +4,7 @@ import BaseLayout from "../layouts/BaseLayout.astro";
 const pageCards = [
   {
     title: "Homepage",
-    description: "Manage the main landing page, hero messaging and key content sections.",
+    description: "Edit the main landing page, hero messaging, cards and call-to-action sections.",
     editPath: "/admin/edit/home",
     previewPath: "/",
   },
@@ -27,63 +27,91 @@ const pageCards = [
     previewPath: "/mentors",
   },
   {
-    title: "Resources",
-    description: "Update the resources landing page and supporting content blocks.",
+    title: "Resources Page",
+    description: "Update the main Resources page content and page-level sections.",
     editPath: "/admin/edit/resources",
     previewPath: "/resources",
   },
   {
-    title: "Blog",
-    description: "Edit the blog landing page and related introduction content.",
+    title: "Blog Page",
+    description: "Edit the blog landing page introduction and supporting content.",
     editPath: "/admin/edit/blog",
     previewPath: "/blog",
   },
   {
-    title: "Webinars",
+    title: "Webinars Page",
     description: "Update webinar page messaging, page sections and buttons.",
     editPath: "/admin/edit/webinars",
     previewPath: "/webinars",
   },
   {
-    title: "Workshops",
+    title: "Workshops Page",
     description: "Manage workshop page messaging, page sections and buttons.",
     editPath: "/admin/edit/workshops",
     previewPath: "/workshops",
   },
 ];
 
-const collectionCards = [
+const contentStudioCards = [
   {
-    title: "Blog Posts",
-    description: "Create, edit and manage published LawBridge articles.",
-    managePath: "/cms/#/collections/blog",
+    title: "Add Blog from Word",
+    description: "Upload a .docx blog article and publish it as a formatted LawBridge blog post.",
+    actionText: "Add Blog",
+    actionPath: "/admin/content/blog/new",
     previewPath: "/blog",
   },
   {
-    title: "Webinars",
-    description: "Create and manage webinar listings, dates, status and details.",
-    managePath: "/cms/#/collections/webinars",
+    title: "Add Resource",
+    description: "Upload a Word, PDF, PowerPoint or spreadsheet resource and create a resource card.",
+    actionText: "Add Resource",
+    actionPath: "/admin/content/resources/new",
+    previewPath: "/resources",
+  },
+  {
+    title: "Add Webinar Link",
+    description: "Create a webinar entry using a title, date, description and registration link.",
+    actionText: "Add Webinar",
+    actionPath: "/admin/content/webinars/new",
     previewPath: "/webinars",
   },
   {
-    title: "Workshops",
-    description: "Create and manage workshop listings, dates, status and details.",
-    managePath: "/cms/#/collections/workshops",
+    title: "Add Workshop Link",
+    description: "Create a workshop entry using a title, date, description and booking link.",
+    actionText: "Add Workshop",
+    actionPath: "/admin/content/workshops/new",
     previewPath: "/workshops",
   },
+];
+
+const backupCmsCards = [
   {
-    title: "Resource Entries",
-    description: "Create and manage resource cards, categories and download links.",
+    title: "Manage Blog Posts",
+    description: "Use the full CMS if you need to edit existing blog entries directly.",
+    managePath: "/cms/#/collections/blog",
+  },
+  {
+    title: "Manage Resources",
+    description: "Use the full CMS if you need to edit existing resource entries directly.",
     managePath: "/cms/#/collections/resources",
-    previewPath: "/resources",
+  },
+  {
+    title: "Manage Webinars",
+    description: "Use the full CMS if you need to edit existing webinar entries directly.",
+    managePath: "/cms/#/collections/webinars",
+  },
+  {
+    title: "Manage Workshops",
+    description: "Use the full CMS if you need to edit existing workshop entries directly.",
+    managePath: "/cms/#/collections/workshops",
   },
 ];
 
 const workflowSteps = [
-  "Choose a page or collection.",
-  "Edit the relevant content.",
+  "Choose a page or content tool.",
+  "Edit visually or upload new content.",
   "Publish your changes.",
-  "Review the live page after deployment.",
+  "Wait for Netlify to redeploy.",
+  "Review the live page.",
 ];
 ---
 
@@ -107,7 +135,7 @@ const workflowSteps = [
           <p class="admin-eyebrow">Private LawBridge Area</p>
           <h1>LawBridge Admin Dashboard</h1>
           <p>
-            Manage website pages, published content and key platform updates from one central dashboard.
+            Manage the website, publish new content and update LawBridge pages from one clean admin workspace.
           </p>
         </div>
 
@@ -118,17 +146,43 @@ const workflowSteps = [
               <li>{step}</li>
             ))}
           </ol>
-          <a href="/cms/" class="admin-button primary full">Open Full CMS</a>
         </aside>
       </header>
 
       <section class="admin-section-block">
         <div class="admin-section-heading">
           <div>
-            <p class="admin-eyebrow">Main website pages</p>
-            <h2>Visual page editor</h2>
+            <p class="admin-eyebrow">Content Studio</p>
+            <h2>Create new content</h2>
           </div>
+
           <a href="/" class="admin-button secondary" target="_blank">Preview Website</a>
+        </div>
+
+        <div class="admin-card-grid studio-grid">
+          {contentStudioCards.map((card) => (
+            <article class="admin-card studio-card">
+              <div>
+                <span class="admin-card-tag">Content Studio</span>
+                <h3>{card.title}</h3>
+                <p>{card.description}</p>
+              </div>
+
+              <div class="admin-actions">
+                <a href={card.actionPath} class="admin-button primary">{card.actionText}</a>
+                <a href={card.previewPath} class="admin-button secondary" target="_blank">Preview</a>
+              </div>
+            </article>
+          ))}
+        </div>
+      </section>
+
+      <section class="admin-section-block">
+        <div class="admin-section-heading">
+          <div>
+            <p class="admin-eyebrow">Visual Page Editor</p>
+            <h2>Edit website pages</h2>
+          </div>
         </div>
 
         <div class="admin-card-grid pages-grid">
@@ -151,22 +205,24 @@ const workflowSteps = [
       <section class="admin-section-block">
         <div class="admin-section-heading">
           <div>
-            <p class="admin-eyebrow">Content collections</p>
-            <h2>Manage listings</h2>
+            <p class="admin-eyebrow">Advanced Management</p>
+            <h2>Existing content</h2>
           </div>
+
+          <a href="/cms/" class="admin-button secondary">Open Full CMS</a>
         </div>
 
-        <div class="admin-card-grid content-grid">
-          {collectionCards.map((card) => (
-            <article class="admin-card feature-card">
+        <div class="admin-card-grid backup-grid">
+          {backupCmsCards.map((card) => (
+            <article class="admin-card backup-card">
               <div>
+                <span class="admin-card-tag subtle">Backup CMS</span>
                 <h3>{card.title}</h3>
                 <p>{card.description}</p>
               </div>
 
               <div class="admin-actions">
-                <a href={card.managePath} class="admin-button primary">Manage</a>
-                <a href={card.previewPath} class="admin-button secondary" target="_blank">Preview</a>
+                <a href={card.managePath} class="admin-button secondary">Manage</a>
               </div>
             </article>
           ))}
@@ -327,11 +383,15 @@ const workflowSteps = [
       gap: 1rem;
     }
 
+    .studio-grid {
+      grid-template-columns: repeat(4, minmax(0, 1fr));
+    }
+
     .pages-grid {
       grid-template-columns: repeat(4, minmax(0, 1fr));
     }
 
-    .content-grid {
+    .backup-grid {
       grid-template-columns: repeat(4, minmax(0, 1fr));
     }
 
@@ -348,6 +408,38 @@ const workflowSteps = [
       gap: 1rem;
     }
 
+    .studio-card {
+      min-height: 260px;
+      background:
+        radial-gradient(circle at top right, rgba(231, 182, 95, 0.25), transparent 36%),
+        linear-gradient(145deg, #ffffff, #fbf3e5);
+      border-color: rgba(211, 155, 69, 0.36);
+    }
+
+    .backup-card {
+      min-height: 205px;
+      background: rgba(255, 255, 255, 0.72);
+    }
+
+    .admin-card-tag {
+      display: inline-flex;
+      width: fit-content;
+      margin-bottom: 0.75rem;
+      padding: 0.42rem 0.7rem;
+      border-radius: 999px;
+      background: rgba(211, 155, 69, 0.14);
+      color: #8a5a18;
+      font-size: 0.72rem;
+      font-weight: 900;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+    }
+
+    .admin-card-tag.subtle {
+      background: rgba(6, 27, 49, 0.06);
+      color: #334155;
+    }
+
     .admin-card h3 {
       margin: 0 0 0.45rem;
       font-family: Georgia, "Times New Roman", serif;
@@ -356,14 +448,13 @@ const workflowSteps = [
       letter-spacing: -0.02em;
     }
 
+    .studio-card h3 {
+      font-size: 1.6rem;
+    }
+
     .admin-card p {
       margin: 0;
       font-size: 0.95rem;
-    }
-
-    .feature-card {
-      min-height: 205px;
-      background: linear-gradient(145deg, #ffffff, #fbf3e5);
     }
 
     .admin-actions {
@@ -401,14 +492,10 @@ const workflowSteps = [
       color: #061b31;
     }
 
-    .admin-button.full {
-      width: 100%;
-      margin-top: 1.25rem;
-    }
-
     @media (max-width: 1180px) {
+      .studio-grid,
       .pages-grid,
-      .content-grid {
+      .backup-grid {
         grid-template-columns: repeat(2, minmax(0, 1fr));
       }
 
@@ -424,14 +511,20 @@ const workflowSteps = [
         flex-direction: column;
       }
 
+      .studio-grid,
       .pages-grid,
-      .content-grid {
+      .backup-grid {
         grid-template-columns: 1fr;
       }
 
       .admin-auth-panel {
         border-radius: 20px;
         align-items: flex-start;
+      }
+
+      .admin-actions,
+      .admin-button {
+        width: 100%;
       }
     }
   </style>
@@ -450,13 +543,6 @@ const workflowSteps = [
       window.netlifyIdentity.on("init", (user) => {
         if (!user) {
           updateAdminStatus("Not signed in");
-          return;
-        }
-
-        const roles = user.app_metadata?.roles || [];
-
-        if (!roles.includes("admin")) {
-          updateAdminStatus("Signed in, but admin role is missing");
           return;
         }
 
