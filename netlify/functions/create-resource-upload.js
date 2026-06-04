@@ -10,7 +10,7 @@ import {
   createExcerpt,
 } from "./_github.js";
 
-const ALLOWED_EXTENSIONS = [".docx", ".pdf", ".pptx", ".xlsx"];
+const ALLOWED_EXTENSIONS = [".docx", ".pdf"];
 
 function getBase64Payload(fileBase64) {
   const raw = String(fileBase64 || "");
@@ -27,45 +27,86 @@ function getFileExtension(fileName) {
   return match ? match[0] : "";
 }
 
-function getSafeFileName(title, originalFileName) {
+function isAllowedFile(fileName) {
+  return ALLOWED_EXTENSIONS.includes(getFileExtension(fileName));
+}
+
+function getSafeFileName({ code, title, packType, originalFileName }) {
   const extension = getFileExtension(originalFileName);
-  const slug = slugify(title) || `resource-${Date.now()}`;
-  return `${slug}${extension}`;
+  const codePart = slugify(code);
+  const titlePart = slugify(title);
+  const packPart = slugify(packType);
+
+  const baseName = [codePart, titlePart, packPart]
+    .filter(Boolean)
+    .join("-")
+    .slice(0, 120);
+
+  return `${baseName || `resource-${Date.now()}`}${extension}`;
 }
 
 function validatePayload(payload) {
   const title = String(payload.title || "").trim();
-  const fileName = String(payload.fileName || "").trim();
-  const fileBase64 = String(payload.fileBase64 || "").trim();
-  const extension = getFileExtension(fileName);
+  const code = String(payload.code || "").trim();
+  const skill = String(payload.skill || "").trim();
+  const scenario = String(payload.scenario || "").trim();
+  const difficulty = String(payload.difficulty || "").trim();
+
+  const studentFileName = String(payload.studentFileName || "").trim();
+  const studentFileBase64 = String(payload.studentFileBase64 || "").trim();
+
+  const tutorFileName = String(payload.tutorFileName || "").trim();
+  const tutorFileBase64 = String(payload.tutorFileBase64 || "").trim();
 
   if (!title) {
     return "Please enter a resource title.";
   }
 
-  if (!fileName) {
-    return "Please upload a resource file.";
+  if (!code) {
+    return "Please enter a resource code, for example CI-01 or AO-02.";
   }
 
-  if (!ALLOWED_EXTENSIONS.includes(extension)) {
-    return "Please upload a .docx, .pdf, .pptx or .xlsx file.";
+  if (!skill) {
+    return "Please choose or enter a skill area.";
   }
 
-  if (!fileBase64) {
-    return "Please upload a file before publishing.";
+  if (!scenario) {
+    return "Please enter the scenario title.";
+  }
+
+  if (!difficulty) {
+    return "Please enter the difficulty level.";
+  }
+
+  if (!studentFileName || !studentFileBase64) {
+    return "Please upload a Student Pack file.";
+  }
+
+  if (!isAllowedFile(studentFileName)) {
+    return "Please upload the Student Pack as a .docx or .pdf file.";
+  }
+
+  if (tutorFileName || tutorFileBase64) {
+    if (!tutorFileName || !tutorFileBase64) {
+      return "Please upload both the Tutor Guide file name and file content.";
+    }
+
+    if (!isAllowedFile(tutorFileName)) {
+      return "Please upload the Tutor Guide as a .docx or .pdf file.";
+    }
   }
 
   return null;
 }
 
-async function extractDocxDescription(fileName, buffer) {
+async function extractDocxSummary(fileName, buffer) {
   if (!fileName.toLowerCase().endsWith(".docx")) {
     return "";
   }
 
   try {
     const result = await mammoth.extractRawText({ buffer });
-    return createExcerpt(result.value || "", 190);
+    return createExcerpt(result.value || "", 220);
   } catch {
     return "";
   }
@@ -103,72 +144,113 @@ export async function handler(event, context) {
   }
 
   const title = String(payload.title || "").trim();
-  const category = String(payload.category || "Student").trim();
-  const type = String(payload.type || "Guide").trim();
-  const skill = String(payload.skill || "Legal Skills").trim();
-  const difficulty = String(payload.difficulty || "Beginner").trim();
-  const fileName = String(payload.fileName || "").trim();
-  const base64Payload = getBase64Payload(payload.fileBase64);
-  const buffer = Buffer.from(base64Payload, "base64");
+  const code = String(payload.code || "").trim();
+  const skill = String(payload.skill || "").trim();
+  const scenario = String(payload.scenario || "").trim();
+  const difficulty = String(payload.difficulty || "").trim();
+  const category = String(payload.category || "Practical Skills").trim();
 
-  const safeFileName = getSafeFileName(title, fileName);
-  const slug = slugify(title) || `resource-${Date.now()}`;
+  const studentFileName = String(payload.studentFileName || "").trim();
+  const studentBase64Payload = getBase64Payload(payload.studentFileBase64);
+  const studentBuffer = Buffer.from(studentBase64Payload, "base64");
 
-  const uploadedFilePath = `public/uploads/resources/${safeFileName}`;
-  const publicDownloadLink = `/uploads/resources/${safeFileName}`;
+  const tutorFileName = String(payload.tutorFileName || "").trim();
+  const tutorBase64Payload = getBase64Payload(payload.tutorFileBase64);
+
+  const slug = slugify(`${code}-${scenario}`) || slugify(title) || `resource-${Date.now()}`;
+
+  const studentSafeFileName = getSafeFileName({
+    code,
+    title: scenario,
+    packType: "student-pack",
+    originalFileName: studentFileName,
+  });
+
+  const studentUploadPath = `public/uploads/resources/${studentSafeFileName}`;
+  const studentPublicLink = `/uploads/resources/${studentSafeFileName}`;
+
+  let tutorUploadPath = "";
+  let tutorPublicLink = "";
+
+  if (tutorFileName && tutorBase64Payload) {
+    const tutorSafeFileName = getSafeFileName({
+      code,
+      title: scenario,
+      packType: "tutor-guide",
+      originalFileName: tutorFileName,
+    });
+
+    tutorUploadPath = `public/uploads/resources/${tutorSafeFileName}`;
+    tutorPublicLink = `/uploads/resources/${tutorSafeFileName}`;
+  }
+
+  const extractedSummary = await extractDocxSummary(studentFileName, studentBuffer);
+
+  const summary =
+    String(payload.summary || "").trim() ||
+    extractedSummary ||
+    "A LawBridge practical skills simulation pack for structured legal skills development.";
+
   const contentPath = `src/content/resources/${slug}.md`;
-
-  const extractedDescription = await extractDocxDescription(fileName, buffer);
-
-  const description =
-    String(payload.description || "").trim() ||
-    extractedDescription ||
-    "A LawBridge resource for practical legal development.";
 
   const frontmatter = buildFrontmatter({
     title,
-    description,
-    category,
-    type,
+    code,
     skill,
+    scenario,
     difficulty,
-    downloadLink: publicDownloadLink,
+    summary,
+    description: summary,
+    category,
+    type: "Simulation Pack",
+    studentLink: studentPublicLink,
+    tutorLink: tutorPublicLink,
+    student: studentPublicLink,
+    tutor: tutorPublicLink,
+    downloadLink: studentPublicLink,
   });
 
-  const notes = String(payload.notes || "").trim();
-
-  const markdownContent = notes
-    ? `${frontmatter}${notes}\n`
-    : `${frontmatter}Download this resource using the link provided on the resource card.\n`;
+  const markdownContent = `${frontmatter}${summary}\n`;
 
   try {
     await putBase64File({
       ...githubConfig,
-      path: uploadedFilePath,
-      message: `Upload resource file: ${title}`,
-      base64Content: base64Payload,
+      path: studentUploadPath,
+      message: `Upload student pack: ${code} ${scenario}`,
+      base64Content: studentBase64Payload,
     });
+
+    if (tutorUploadPath && tutorBase64Payload) {
+      await putBase64File({
+        ...githubConfig,
+        path: tutorUploadPath,
+        message: `Upload tutor guide: ${code} ${scenario}`,
+        base64Content: tutorBase64Payload,
+      });
+    }
 
     await putTextFile({
       ...githubConfig,
       path: contentPath,
-      message: `Add resource entry: ${title}`,
+      message: `Add resource simulation: ${code} ${scenario}`,
       content: markdownContent,
     });
   } catch (error) {
     return json(500, {
-      error: "Could not publish the resource to GitHub.",
+      error: "Could not publish the resource simulation to GitHub.",
       details: error.message,
     });
   }
 
   return json(200, {
     success: true,
-    message: "Resource published. Netlify will redeploy the website.",
+    message: "Resource simulation published. Netlify will redeploy the website.",
     slug,
     contentPath,
-    uploadedFilePath,
-    downloadLink: publicDownloadLink,
+    studentUploadPath,
+    tutorUploadPath,
+    studentLink: studentPublicLink,
+    tutorLink: tutorPublicLink,
     previewPath: "/resources",
   });
 }
