@@ -1,0 +1,66 @@
+---
+import BaseLayout from "../../layouts/BaseLayout.astro";
+
+const adminCards = [
+  {
+    title: "Global Website Editor",
+    description: "Edit all main website page content from one place.",
+    href: "/admin/edit/global",
+    button: "Open Global Editor",
+  },
+  {
+    title: "Homepage Editor",
+    description: "Edit the homepage content and homepage cards.",
+    href: "/admin/edit/home",
+    button: "Edit Homepage",
+  },
+  {
+    title: "Manage Resources",
+    description: "Add, review, manage and delete LawBridge simulation resources.",
+    href: "/admin/content/resources/manage",
+    button: "Manage Resources",
+  },
+  {
+    title: "Upload New Resource",
+    description: "Create a new Student Pack and optional Tutor Guide resource.",
+    href: "/admin/content/resources/new",
+    button: "Upload Resource",
+  },
+  {
+    title: "AI Skills Coach",
+    description: "View the public AI Skills Coach page and check pack-aware links.",
+    href: "/ai-skills-coach",
+    button: "View AI Coach",
+  },
+  {
+    title: "Content Studio",
+    description: "Access LawBridge content management tools.",
+    href: "/admin/content",
+    button: "Open Content Studio",
+  },
+];
+---
+
+<BaseLayout title="LawBridge Admin Dashboard">
+  <section class="section cream">
+    <div class="container">
+      <p class="eyebrow">LawBridge Admin</p>
+      <h1>Admin Dashboard</h1>
+      <p class="section-intro">
+        Manage LawBridge website content, resources and editing tools from one place.
+      </p>
+
+      <div class="grid g3">
+        {adminCards.map((card) => (
+          <article class="card">
+            <h3>{card.title}</h3>
+            <p>{card.description}</p>
+            <a class="btn secondary" href={card.href}>
+              {card.button}
+            </a>
+          </article>
+        ))}
+      </div>
+    </div>
+  </section>
+</BaseLayout>
