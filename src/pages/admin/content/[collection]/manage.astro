@@ -2,47 +2,43 @@
 import BaseLayout from "../../../../layouts/BaseLayout.astro";
 import { getCollection } from "astro:content";
 
-const collectionPages = [
-  {
-    slug: "blog",
-    collection: "blog",
-    label: "Blog Posts",
-    singular: "blog post",
-    adminPath: "/admin/content/blog/manage",
-    addPath: "/admin/content/blog/new",
-    previewPath: "/blog",
-  },
-  {
-    slug: "resources",
-    collection: "resources",
-    label: "Resources",
-    singular: "resource",
-    adminPath: "/admin/content/resources/manage",
-    addPath: "/admin/content/resources/new",
-    previewPath: "/resources",
-  },
-  {
-    slug: "webinars",
-    collection: "webinars",
-    label: "Webinars",
-    singular: "webinar",
-    adminPath: "/admin/content/webinars/manage",
-    addPath: "/admin/content/webinars/new",
-    previewPath: "/webinars",
-  },
-  {
-    slug: "workshops",
-    collection: "workshops",
-    label: "Workshops",
-    singular: "workshop",
-    adminPath: "/admin/content/workshops/manage",
-    addPath: "/admin/content/workshops/new",
-    previewPath: "/workshops",
-  },
-];
-
 export function getStaticPaths() {
-  return collectionPages.map((page) => ({
+  const pages = [
+    {
+      slug: "blog",
+      collection: "blog",
+      label: "Blog Posts",
+      singular: "blog post",
+      addPath: "/admin/content/blog/new",
+      previewPath: "/blog",
+    },
+    {
+      slug: "resources",
+      collection: "resources",
+      label: "Resources",
+      singular: "resource",
+      addPath: "/admin/content/resources/new",
+      previewPath: "/resources",
+    },
+    {
+      slug: "webinars",
+      collection: "webinars",
+      label: "Webinars",
+      singular: "webinar",
+      addPath: "/admin/content/webinars/new",
+      previewPath: "/webinars",
+    },
+    {
+      slug: "workshops",
+      collection: "workshops",
+      label: "Workshops",
+      singular: "workshop",
+      addPath: "/admin/content/workshops/new",
+      previewPath: "/workshops",
+    },
+  ];
+
+  return pages.map((page) => ({
     params: { collection: page.slug },
     props: { pageMeta: page },
   }));
@@ -91,47 +87,18 @@ function getItemPreviewPath(entry) {
     return `/blog/${entry.slug}`;
   }
 
-  if (pageMeta.slug === "resources") {
-    return "/resources";
-  }
-
-  if (pageMeta.slug === "webinars") {
-    return "/webinars";
-  }
-
-  if (pageMeta.slug === "workshops") {
-    return "/workshops";
-  }
-
   return pageMeta.previewPath;
 }
 
 function getMetaTags(entry) {
   const tags = [];
 
-  if (entry.data.category) {
-    tags.push(entry.data.category);
-  }
-
-  if (entry.data.status) {
-    tags.push(entry.data.status);
-  }
-
-  if (entry.data.type) {
-    tags.push(entry.data.type);
-  }
-
-  if (entry.data.skill) {
-    tags.push(entry.data.skill);
-  }
-
-  if (entry.data.difficulty) {
-    tags.push(entry.data.difficulty);
-  }
-
-  if (entry.data.location) {
-    tags.push(entry.data.location);
-  }
+  if (entry.data.category) tags.push(entry.data.category);
+  if (entry.data.status) tags.push(entry.data.status);
+  if (entry.data.type) tags.push(entry.data.type);
+  if (entry.data.skill) tags.push(entry.data.skill);
+  if (entry.data.difficulty) tags.push(entry.data.difficulty);
+  if (entry.data.location) tags.push(entry.data.location);
 
   return tags;
 }
@@ -583,7 +550,6 @@ function getMetaTags(entry) {
 
     function openDeleteModal(card) {
       selectedCard = card;
-
       const title = card.dataset.title || "this item";
 
       if (deleteTitle) {
