@@ -1,0 +1,211 @@
+---
+import { getCollection } from "astro:content";
+
+const resources = await getCollection("resources");
+
+const packs = resources
+  .map((entry) => ({
+    code: entry.data.code || "",
+    title: entry.data.scenario || entry.data.title || "Untitled Pack",
+    skill: entry.data.skill || "Practical Skills",
+    difficulty: entry.data.difficulty || "Intermediate",
+  }))
+  .filter((pack) => pack.code || pack.title);
+---
+
+<section class="dashboard-shell">
+  <div class="container">
+    <header class="dashboard-hero">
+      <div>
+        <p class="dashboard-eyebrow">LawBridge Student Dashboard</p>
+        <h1>Your practical skills progress.</h1>
+        <p>
+          Track your LawBridge simulation progress, continue packs and see your next recommended task.
+        </p>
+      </div>
+
+      <aside class="recommendation-card">
+        <p class="dashboard-eyebrow">Recommended next</p>
+        <h2 id="next-pack-title">Loading recommendation...</h2>
+        <p id="next-pack-detail">Checking your current progress.</p>
+        <a id="next-pack-link" class="dashboard-button primary" href="/ai-skills-coach">
+          Continue with AI Coach
+        </a>
+      </aside>
+    </header>
+
+    <section class="dashboard-section">
+      <div class="dashboard-section-heading">
+        <div>
+          <p class="dashboard-eyebrow">Pack Progress</p>
+          <h2>All simulations</h2>
+        </div>
+
+        <button id="refresh-progress" class="dashboard-button secondary" type="button">
+          Refresh Progress
+        </button>
+      </div>
+
+      <div class="progress-grid" id="progress-grid">
+        {packs.map((pack) => (
+          <article
+            class="progress-card"
+            data-pack-code={pack.code}
+            data-pack-title={pack.title}
+            data-pack-skill={pack.skill}
+          >
+            <div>
+              <span class="pack-code">{pack.code || "PACK"}</span>
+              <h3>{pack.title}</h3>
+              <p>{pack.skill}</p>
+              <small>{pack.difficulty}</small>
+            </div>
+
+            <div class="progress-actions">
+              <span class="status-pill not-started" data-status-for={pack.code}>
+                Not started
+              </span>
+
+              <a
+                class="dashboard-button secondary open-pack-link"
+                href={`/ai-skills-coach?pack=${encodeURIComponent(pack.code)}&scenario=${encodeURIComponent(pack.title)}&skill=${encodeURIComponent(pack.skill)}`}
+                data-pack-code={pack.code}
+                data-pack-title={pack.title}
+                data-pack-skill={pack.skill}
+              >
+                Open Pack
+              </a>
+            </div>
+          </article>
+        ))}
+      </div>
+    </section>
+  </div>
+
+  <script is:inline>
+    const progressCards = document.querySelectorAll(".progress-card");
+    const openPackLinks = document.querySelectorAll(".open-pack-link");
+    const refreshButton = document.getElementById("refresh-progress");
+    const nextPackTitle = document.getElementById("next-pack-title");
+    const nextPackDetail = document.getElementById("next-pack-detail");
+    const nextPackLink = document.getElementById("next-pack-link");
+
+    function getStudentId() {
+      const existing = localStorage.getItem("lawbridgeStudentId");
+
+      if (existing) return existing;
+
+      const created = `student-${Date.now()}-${Math.random().toString(16).slice(2)}`;
+      localStorage.setItem("lawbridgeStudentId", created);
+      return created;
+    }
+
+    function normaliseStatusClass(status) {
+      return String(status || "Not started")
+        .toLowerCase()
+        .replace(/[^a-z0-9]+/g, "-")
+        .replace(/^-+|-+$/g, "");
+    }
+
+    function applyProgress(progress) {
+      const packs = progress?.packs || {};
+
+      progressCards.forEach((card) => {
+        const code = card.dataset.packCode;
+        const statusElement = card.querySelector("[data-status-for]");
+        const saved = packs[code];
+        const status = saved?.status || "Not started";
+        const className = normaliseStatusClass(status);
+
+        statusElement.textContent = status;
+        statusElement.className = `status-pill ${className}`;
+      });
+    }
+
+    async function loadProgress() {
+      try {
+        const response = await fetch("/.netlify/functions/load-progress", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ studentId: getStudentId() }),
+        });
+
+        const result = await response.json().catch(() => ({}));
+
+        if (response.ok) applyProgress(result.progress || {});
+      } catch (error) {
+        console.warn("Could not load progress:", error);
+      }
+    }
+
+    async function saveOpenedProgress(link) {
+      const packCode = link.dataset.packCode;
+      const packTitle = link.dataset.packTitle;
+      const skill = link.dataset.packSkill;
+
+      if (!packCode) return;
+
+      await fetch("/.netlify/functions/save-progress", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          studentId: getStudentId(),
+          packCode,
+          packTitle,
+          skill,
+          mode: "Opened from dashboard",
+          status: "In progress",
+        }),
+      });
+    }
+
+    async function loadNextPack() {
+      try {
+        const response = await fetch("/.netlify/functions/next-pack", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ studentId: getStudentId() }),
+        });
+
+        const result = await response.json().catch(() => ({}));
+
+        if (!response.ok || !result.nextPack) return;
+
+        const pack = result.nextPack;
+        if (nextPackTitle) nextPackTitle.textContent = pack.title || pack.code || "Recommended pack";
+        if (nextPackDetail)
+          nextPackDetail.textContent = pack.code
+            ? `Continue with ${pack.code}.`
+            : "Continue with your next available LawBridge simulation.";
+        if (nextPackLink) {
+          const code = encodeURIComponent(pack.code || "");
+          const title = encodeURIComponent(pack.title || "");
+          const skill = encodeURIComponent(pack.skill || "");
+          nextPackLink.href = `/ai-skills-coach?pack=${code}&scenario=${title}&skill=${skill}`;
+        }
+      } catch (error) {
+        console.warn("Could not load next pack:", error);
+      }
+    }
+
+    openPackLinks.forEach((link) => {
+      link.addEventListener("click", async (event) => {
+        event.preventDefault();
+        try {
+          await saveOpenedProgress(link);
+        } catch (error) {
+          console.warn("Could not save opened progress:", error);
+        }
+        window.location.href = link.href;
+      });
+    });
+
+    refreshButton?.addEventListener("click", async () => {
+      await loadProgress();
+      await loadNextPack();
+    });
+
+    loadProgress();
+    loadNextPack();
+  </script>
+</section>
