@@ -4,11 +4,9 @@ const pages = defineCollection({
   type: "content",
   schema: z.object({
     title: z.string(),
-
     eyebrow: z.string().optional(),
     heading: z.string().optional(),
     description: z.string().optional(),
-
     hero: z
       .object({
         eyebrow: z.string().optional(),
@@ -22,7 +20,6 @@ const pages = defineCollection({
         tertiaryButtonLink: z.string().optional(),
       })
       .optional(),
-
     dashboard: z
       .object({
         label: z.string().optional(),
@@ -31,7 +28,6 @@ const pages = defineCollection({
         items: z.array(z.string()).optional(),
       })
       .optional(),
-
     sections: z.any().optional(),
     cards: z.any().optional(),
     buttons: z.any().optional(),
@@ -81,32 +77,25 @@ const resources = defineCollection({
   type: "content",
   schema: z.object({
     title: z.string(),
-
     code: z.string().optional(),
     skill: z.string().optional(),
     scenario: z.string().optional(),
     difficulty: z.string().optional(),
     summary: z.string().optional(),
-
     description: z.string().optional(),
     category: z.string().optional(),
     type: z.string().optional(),
-
     categoryGroup: z.string().optional(),
     sheetType: z.string().optional(),
     skillSlug: z.string().optional(),
     packNumber: z.number().optional(),
     answerRoute: z.string().optional(),
-
     studentLink: z.string().optional(),
     tutorLink: z.string().optional(),
-
     student: z.string().optional(),
     tutor: z.string().optional(),
-
     downloadLink: z.string().optional(),
     link: z.string().optional(),
-
     tasks: z
       .array(
         z.object({
@@ -119,7 +108,7 @@ const resources = defineCollection({
   }),
 });
 
-// <<< NEW: Export legacyResources to fix Netlify build >>>
+// <<< EXPORT LEGACY RESOURCES FOR NETLIFY BUILD >>>
 export const legacyResources: any[] = [];
 
 export const collections = {
