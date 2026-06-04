@@ -26,6 +26,10 @@ function getCategoryGroup(resource) {
   );
 }
 
+function getSkill(resource) {
+  return resource.data.skill || "General Skills";
+}
+
 function getSheetType(resource) {
   const rawType = String(resource.data.sheetType || resource.data.type || "student").toLowerCase();
 
@@ -58,12 +62,22 @@ function getTutorLink(resource) {
 
 const groupedResources = resources.reduce((map, resource) => {
   const categoryGroup = getCategoryGroup(resource);
+  const skill = getSkill(resource);
+  const sheetType = getSheetType(resource);
 
   if (!map.has(categoryGroup)) {
-    map.set(categoryGroup, []);
+    map.set(categoryGroup, new Map());
   }
 
-  map.get(categoryGroup).push(resource);
+  if (!map.get(categoryGroup).has(skill)) {
+    map.get(categoryGroup).set(skill, new Map());
+  }
+
+  if (!map.get(categoryGroup).get(skill).has(sheetType)) {
+    map.get(categoryGroup).get(skill).set(sheetType, []);
+  }
+
+  map.get(categoryGroup).get(skill).get(sheetType).push(resource);
   return map;
 }, new Map());
 
@@ -80,6 +94,13 @@ const categoryEntries = [
     ([category]) => !orderedCategories.includes(category)
   ),
 ];
+
+const sheetTypeLabels = {
+  student: "Student Packs",
+  tutor: "Tutor Guides",
+};
+
+const orderedSheetTypes = ["student", "tutor"];
 ---
 
 <BaseLayout title="Resources | LawBridge">
@@ -120,120 +141,99 @@ const categoryEntries = [
       </div>
 
       {categoryEntries.length > 0 ? (
-        categoryEntries.map(([categoryGroup, categoryResources]) => {
-          const studentResources = categoryResources.filter((resource) => getSheetType(resource) === "student");
-          const tutorResources = categoryResources.filter((resource) => getSheetType(resource) === "tutor");
+        categoryEntries.map(([categoryGroup, skillMap]) => (
+          <details class="category-block" open>
+            <summary class="category-summary">
+              <span>{categoryGroup}</span>
+              <small>{Array.from(skillMap.keys()).length} topics</small>
+            </summary>
 
-          return (
-            <div class="category-block">
-              <h3>{categoryGroup}</h3>
+            <div class="skill-dropdown-list">
+              {Array.from(skillMap.entries()).map(([skill, sheetTypeMap]) => (
+                <details class="skill-block">
+                  <summary class="skill-summary">
+                    <span>{skill}</span>
+                    <small>
+                      {Array.from(sheetTypeMap.values()).flat().length} resources
+                    </small>
+                  </summary>
 
-              <div class="resource-subsection">
-                <h4>Student Sheets</h4>
+                  <div class="sheet-type-list">
+                    {orderedSheetTypes
+                      .filter((sheetType) => sheetTypeMap.has(sheetType))
+                      .map((sheetType) => {
+                        const sheetResources = sheetTypeMap.get(sheetType) || [];
 
-                {studentResources.length > 0 ? (
-                  <div class="resource-grid">
-                    {studentResources.map((resource) => {
-                      const packCode = getPackCode(resource);
-                      const title = getPackTitle(resource);
-                      const skill = normaliseText(resource.data.skill, "Practical Skills");
-                      const difficulty = normaliseText(resource.data.difficulty, "Intermediate");
-                      const studentLink = getStudentLink(resource);
+                        return (
+                          <details class="sheet-type-block" open={sheetType === "student"}>
+                            <summary class="sheet-type-summary">
+                              <span>{sheetTypeLabels[sheetType] || sheetType}</span>
+                              <small>{sheetResources.length} files</small>
+                            </summary>
 
-                      return (
-                        <article
-                          class="resource-card"
-                          data-category={slugify(categoryGroup)}
-                          data-type="student"
-                          data-skill={slugify(skill)}
-                        >
-                          <div>
-                            <span class="pack-code">{packCode || "PACK"}</span>
-                            <h5>{title}</h5>
-                            <p>{skill}</p>
-                            <small>{difficulty}</small>
-                          </div>
+                            <div class="resource-grid">
+                              {sheetResources.map((resource) => {
+                                const packCode = getPackCode(resource);
+                                const title = getPackTitle(resource);
+                                const resourceSkill = normaliseText(resource.data.skill, "Practical Skills");
+                                const difficulty = normaliseText(resource.data.difficulty, "Intermediate");
+                                const studentLink = getStudentLink(resource);
+                                const tutorLink = getTutorLink(resource);
+                                const isStudent = sheetType === "student";
 
-                          <div class="resource-actions">
-                            {studentLink && (
-                              <a class="resource-button secondary" href={studentLink} target="_blank">
-                                Open Student Sheet
-                              </a>
-                            )}
+                                return (
+                                  <article
+                                    class={`resource-card ${isStudent ? "" : "tutor-card"}`}
+                                    data-category={slugify(categoryGroup)}
+                                    data-type={sheetType}
+                                    data-skill={slugify(resourceSkill)}
+                                  >
+                                    <div>
+                                      <span class="pack-code">{packCode || "PACK"}</span>
+                                      <h5>{title}</h5>
+                                      <p>{resourceSkill}</p>
+                                      <small>{difficulty}</small>
+                                    </div>
 
-                            {packCode && (
-                              <a class="resource-button primary" href={`/answer-pack?pack=${encodeURIComponent(packCode)}`}>
-                                Answer Pack
-                              </a>
-                            )}
+                                    <div class="resource-actions">
+                                      {isStudent && studentLink && (
+                                        <a class="resource-button secondary" href={studentLink} target="_blank">
+                                          Open Student Sheet
+                                        </a>
+                                      )}
 
-                            <a
-                              class="resource-button ghost"
-                              href={`/ai-skills-coach?pack=${encodeURIComponent(packCode)}&scenario=${encodeURIComponent(title)}&skill=${encodeURIComponent(skill)}`}
-                            >
-                              Ask AI Skills Coach
-                            </a>
-                          </div>
-                        </article>
-                      );
-                    })}
+                                      {!isStudent && tutorLink && (
+                                        <a class="resource-button secondary" href={tutorLink} target="_blank">
+                                          Open Tutor Guide
+                                        </a>
+                                      )}
+
+                                      {isStudent && packCode && (
+                                        <a class="resource-button primary" href={`/answer-pack?pack=${encodeURIComponent(packCode)}`}>
+                                          Answer Pack
+                                        </a>
+                                      )}
+
+                                      <a
+                                        class="resource-button ghost"
+                                        href={`/ai-skills-coach?pack=${encodeURIComponent(packCode)}&scenario=${encodeURIComponent(title)}&skill=${encodeURIComponent(resourceSkill)}`}
+                                      >
+                                        Ask AI Skills Coach
+                                      </a>
+                                    </div>
+                                  </article>
+                                );
+                              })}
+                            </div>
+                          </details>
+                        );
+                      })}
                   </div>
-                ) : (
-                  <p class="empty-message">No student sheets available in this section yet.</p>
-                )}
-              </div>
-
-              <div class="resource-subsection">
-                <h4>Tutor Sheets</h4>
-
-                {tutorResources.length > 0 ? (
-                  <div class="resource-grid">
-                    {tutorResources.map((resource) => {
-                      const packCode = getPackCode(resource);
-                      const title = getPackTitle(resource);
-                      const skill = normaliseText(resource.data.skill, "Practical Skills");
-                      const difficulty = normaliseText(resource.data.difficulty, "Intermediate");
-                      const tutorLink = getTutorLink(resource);
-
-                      return (
-                        <article
-                          class="resource-card tutor-card"
-                          data-category={slugify(categoryGroup)}
-                          data-type="tutor"
-                          data-skill={slugify(skill)}
-                        >
-                          <div>
-                            <span class="pack-code">{packCode || "PACK"}</span>
-                            <h5>{title}</h5>
-                            <p>{skill}</p>
-                            <small>{difficulty}</small>
-                          </div>
-
-                          <div class="resource-actions">
-                            {tutorLink && (
-                              <a class="resource-button secondary" href={tutorLink} target="_blank">
-                                Open Tutor Guide
-                              </a>
-                            )}
-
-                            <a
-                              class="resource-button ghost"
-                              href={`/ai-skills-coach?pack=${encodeURIComponent(packCode)}&scenario=${encodeURIComponent(title)}&skill=${encodeURIComponent(skill)}`}
-                            >
-                              Ask AI Skills Coach
-                            </a>
-                          </div>
-                        </article>
-                      );
-                    })}
-                  </div>
-                ) : (
-                  <p class="empty-message">No tutor sheets available in this section yet.</p>
-                )}
-              </div>
+                </details>
+              ))}
             </div>
-          );
-        })
+          </details>
+        ))
       ) : (
         <p class="empty-message">No resources are available yet.</p>
       )}
@@ -323,6 +323,101 @@ const categoryEntries = [
     color: #061b31;
   }
 
+  .category-summary,
+  .skill-summary,
+  .sheet-type-summary {
+    display: flex;
+    justify-content: space-between;
+    gap: 1rem;
+    align-items: center;
+    cursor: pointer;
+    list-style: none;
+  }
+
+  .category-summary::-webkit-details-marker,
+  .skill-summary::-webkit-details-marker,
+  .sheet-type-summary::-webkit-details-marker {
+    display: none;
+  }
+
+  .category-summary {
+    font-family: Georgia, "Times New Roman", serif;
+    font-size: clamp(1.8rem, 3vw, 2.6rem);
+    color: #061b31;
+    font-weight: 900;
+  }
+
+  .category-summary::before,
+  .skill-summary::before,
+  .sheet-type-summary::before {
+    content: "▸";
+    display: inline-flex;
+    margin-right: 0.55rem;
+    color: #b37b32;
+    transition: transform 0.2s ease;
+  }
+
+  .category-block[open] > .category-summary::before,
+  .skill-block[open] > .skill-summary::before,
+  .sheet-type-block[open] > .sheet-type-summary::before {
+    transform: rotate(90deg);
+  }
+
+  .category-summary span,
+  .skill-summary span,
+  .sheet-type-summary span {
+    flex: 1;
+  }
+
+  .category-summary small,
+  .skill-summary small,
+  .sheet-type-summary small {
+    font-family: inherit;
+    color: #64748b;
+    font-size: 0.82rem;
+    font-weight: 900;
+  }
+
+  .skill-dropdown-list {
+    display: grid;
+    gap: 1rem;
+    margin-top: 1.2rem;
+  }
+
+  .skill-block {
+    padding: 1rem;
+    border-radius: 24px;
+    background: rgba(248, 241, 228, 0.74);
+    border: 1px solid rgba(201, 150, 82, 0.22);
+  }
+
+  .skill-summary {
+    color: #061b31;
+    font-weight: 900;
+    font-size: 1.15rem;
+  }
+
+  .sheet-type-list {
+    display: grid;
+    gap: 0.9rem;
+    margin-top: 1rem;
+  }
+
+  .sheet-type-block {
+    padding: 0.9rem;
+    border-radius: 20px;
+    background: rgba(255, 255, 255, 0.76);
+    border: 1px solid rgba(201, 150, 82, 0.2);
+  }
+
+  .sheet-type-summary {
+    color: #8a5a18;
+    font-size: 0.9rem;
+    text-transform: uppercase;
+    letter-spacing: 0.12em;
+    font-weight: 900;
+  }
+
   .resource-subsection {
     margin-top: 1.4rem;
   }
@@ -340,6 +435,7 @@ const categoryEntries = [
     display: grid;
     grid-template-columns: repeat(3, minmax(0, 1fr));
     gap: 1rem;
+    margin-top: 1rem;
   }
 
   .resource-card {
