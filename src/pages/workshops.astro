@@ -1,6 +1,6 @@
 ---
 import BaseLayout from "../layouts/BaseLayout.astro";
-import { getEntry } from "astro:content";
+import { getCollection, getEntry } from "astro:content";
 
 const page = await getEntry("pages", "workshops");
 const data = page?.data;
@@ -10,6 +10,38 @@ const sections = data?.sections ?? {};
 const cards = data?.cards ?? {};
 const buttons = data?.buttons ?? {};
 const dashboard = data?.dashboard ?? {};
+
+const workshops = await getCollection("workshops");
+
+const sortedWorkshops = workshops.sort((a, b) => {
+  const aTime = a.data.date ? new Date(a.data.date).getTime() : 0;
+  const bTime = b.data.date ? new Date(b.data.date).getTime() : 0;
+  return bTime - aTime;
+});
+
+function formatDate(dateValue) {
+  if (!dateValue) {
+    return "Date to be confirmed";
+  }
+
+  const date = new Date(dateValue);
+
+  if (Number.isNaN(date.getTime())) {
+    return "Date to be confirmed";
+  }
+
+  return date.toLocaleString("en-GB", {
+    day: "2-digit",
+    month: "short",
+    year: "numeric",
+    hour: "2-digit",
+    minute: "2-digit",
+  });
+}
+
+function getWorkshopLink(workshop) {
+  return workshop.data.registrationLink || workshop.data.link || `/workshops/${workshop.slug}`;
+}
 ---
 
 <BaseLayout title={data?.title ?? "Workshops | LawBridge"}>
@@ -21,19 +53,36 @@ const dashboard = data?.dashboard ?? {};
         <p class="hero-lead">{hero.description}</p>
 
         <div class="hero-actions">
-          {hero.primaryButtonText && <a class="btn primary" href={hero.primaryButtonLink}>{hero.primaryButtonText}</a>}
-          {hero.secondaryButtonText && <a class="btn secondary" href={hero.secondaryButtonLink}>{hero.secondaryButtonText}</a>}
-          {hero.tertiaryButtonText && <a class="btn secondary" href={hero.tertiaryButtonLink}>{hero.tertiaryButtonText}</a>}
+          {hero.primaryButtonText && (
+            <a class="btn primary" href={hero.primaryButtonLink}>
+              {hero.primaryButtonText}
+            </a>
+          )}
+
+          {hero.secondaryButtonText && (
+            <a class="btn secondary" href={hero.secondaryButtonLink}>
+              {hero.secondaryButtonText}
+            </a>
+          )}
+
+          {hero.tertiaryButtonText && (
+            <a class="btn ghost" href={hero.tertiaryButtonLink}>
+              {hero.tertiaryButtonText}
+            </a>
+          )}
         </div>
       </div>
 
-      {dashboard && (
+      {dashboard.heading && (
         <div class="dashboard-card">
           <span class="pill">{dashboard.label}</span>
           <h2>{dashboard.heading}</h2>
           <p>{dashboard.description}</p>
+
           <div class="dashboard-list">
-            {dashboard.items?.map((item) => <span>{item}</span>)}
+            {dashboard.items?.map((item) => (
+              <span>{item}</span>
+            ))}
           </div>
         </div>
       )}
@@ -42,25 +91,75 @@ const dashboard = data?.dashboard ?? {};
 
   <section class="section cream">
     <div class="container">
-      <p class="eyebrow">{sections.problem?.eyebrow}</p>
-      <h2>{sections.problem?.heading}</h2>
-      <p class="section-intro">{sections.problem?.description}</p>
-      <div class="grid g3">
-        {(cards.problem ?? []).map((card) => (
-          <article class="card"><h3>{card.title}</h3><p>{card.description}</p></article>
-        ))}
-      </div>
+      <p class="eyebrow">Upcoming workshops</p>
+      <h2>Explore LawBridge workshop sessions.</h2>
+      <p class="section-intro">
+        Workshops added through the LawBridge Content Studio appear here automatically after Netlify redeploys.
+      </p>
+
+      {sortedWorkshops.length > 0 ? (
+        <div class="grid g3">
+          {sortedWorkshops.map((workshop) => (
+            <article class="card workshop-card">
+              {workshop.data.status && (
+                <span class="pill workshop-status">{workshop.data.status}</span>
+              )}
+
+              <h3>{workshop.data.title}</h3>
+              <p>{workshop.data.description}</p>
+
+              <div class="workshop-meta">
+                <span>{formatDate(workshop.data.date)}</span>
+                {workshop.data.location && <span>{workshop.data.location}</span>}
+                {workshop.data.facilitator && <span>{workshop.data.facilitator}</span>}
+              </div>
+
+              <a class="btn secondary workshop-button" href={getWorkshopLink(workshop)}>
+                Register / View Workshop
+              </a>
+            </article>
+          ))}
+        </div>
+      ) : (
+        <article class="card">
+          <h3>No workshops published yet</h3>
+          <p>
+            Add a workshop from the LawBridge admin dashboard and it will appear here automatically.
+          </p>
+        </article>
+      )}
     </div>
   </section>
 
   <section class="section light">
     <div class="container">
+      <p class="eyebrow">{sections.problem?.eyebrow}</p>
+      <h2>{sections.problem?.heading}</h2>
+      <p class="section-intro">{sections.problem?.description}</p>
+
+      <div class="grid g3">
+        {(cards.problem ?? []).map((card) => (
+          <article class="card">
+            <h3>{card.title}</h3>
+            <p>{card.description}</p>
+          </article>
+        ))}
+      </div>
+    </div>
+  </section>
+
+  <section class="section cream">
+    <div class="container">
       <p class="eyebrow">{sections.method?.eyebrow}</p>
       <h2>{sections.method?.heading}</h2>
       <p class="section-intro">{sections.method?.description}</p>
+
       <div class="grid g4">
         {(cards.method ?? []).map((card) => (
-          <article class="card"><h3>{card.title}</h3><p>{card.description}</p></article>
+          <article class="card">
+            <h3>{card.title}</h3>
+            <p>{card.description}</p>
+          </article>
         ))}
       </div>
     </div>
@@ -71,9 +170,13 @@ const dashboard = data?.dashboard ?? {};
       <p class="eyebrow">{sections.curriculum?.eyebrow}</p>
       <h2>{sections.curriculum?.heading}</h2>
       <p class="section-intro">{sections.curriculum?.description}</p>
+
       <div class="grid g4">
         {(cards.curriculum ?? []).map((card) => (
-          <article class="curric"><h3>{card.title}</h3><p>{card.description}</p></article>
+          <article class="curric">
+            <h3>{card.title}</h3>
+            <p>{card.description}</p>
+          </article>
         ))}
       </div>
     </div>
@@ -84,12 +187,18 @@ const dashboard = data?.dashboard ?? {};
       <p class="eyebrow">{sections.pathways?.eyebrow}</p>
       <h2>{sections.pathways?.heading}</h2>
       <p class="section-intro">{sections.pathways?.description}</p>
+
       <div class="grid g2">
         {(cards.pathways ?? []).map((card) => (
           <article class="card">
             <h3>{card.title}</h3>
             <p>{card.description}</p>
-            {card.buttonText && <a class="btn secondary" href={card.buttonLink}>{card.buttonText}</a>}
+
+            {card.buttonText && (
+              <a class="btn secondary" href={card.buttonLink}>
+                {card.buttonText}
+              </a>
+            )}
           </article>
         ))}
       </div>
@@ -101,10 +210,68 @@ const dashboard = data?.dashboard ?? {};
       <p class="eyebrow">{sections.cta?.eyebrow}</p>
       <h2>{sections.cta?.heading}</h2>
       <p>{sections.cta?.description}</p>
+
       <div class="hero-actions">
-        {buttons.cta?.primaryText && <a class="btn primary" href={buttons.cta.primaryLink}>{buttons.cta.primaryText}</a>}
-        {buttons.cta?.secondaryText && <a class="btn secondary" href={buttons.cta.secondaryLink}>{buttons.cta.secondaryText}</a>}
+        {buttons.cta?.primaryText && (
+          <a class="btn primary" href={buttons.cta.primaryLink}>
+            {buttons.cta.primaryText}
+          </a>
+        )}
+
+        {buttons.cta?.secondaryText && (
+          <a class="btn secondary" href={buttons.cta.secondaryLink}>
+            {buttons.cta.secondaryText}
+          </a>
+        )}
       </div>
     </div>
   </section>
+
+  <style is:inline>
+    .workshop-card {
+      overflow: hidden;
+    }
+
+    .workshop-card h3 {
+      max-width: 100%;
+      overflow-wrap: anywhere;
+      word-break: normal;
+      hyphens: auto;
+      line-height: 1.08;
+    }
+
+    .workshop-card p {
+      overflow-wrap: anywhere;
+    }
+
+    .workshop-status {
+      max-width: 100%;
+      overflow-wrap: anywhere;
+    }
+
+    .workshop-meta {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.5rem;
+      margin: 1rem 0;
+    }
+
+    .workshop-meta span {
+      display: inline-flex;
+      max-width: 100%;
+      padding: 0.42rem 0.7rem;
+      border-radius: 999px;
+      background: rgba(211, 155, 69, 0.12);
+      color: #061b31;
+      font-size: 0.82rem;
+      font-weight: 900;
+      overflow-wrap: anywhere;
+    }
+
+    .workshop-button {
+      max-width: 100%;
+      white-space: normal;
+      text-align: center;
+    }
+  </style>
 </BaseLayout>
