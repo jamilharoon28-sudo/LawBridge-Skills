@@ -24,24 +24,8 @@ const { pageMeta } = Astro.props;
 const page = await getEntry("pages", pageMeta.slug);
 const data = page?.data ?? {};
 
-const homeDashboardFallback =
-  pageMeta.slug === "home"
-    ? {
-        label: "LawBridge Platform",
-        heading: "Practical legal development",
-        description:
-          "Workshops, webinars, mentoring and resources designed to support aspiring lawyers.",
-        items: [
-          "SQE readiness",
-          "QWE preparation",
-          "Commercial awareness",
-          "AI-era legal skills",
-        ],
-      }
-    : {};
-
 const hero = data.hero ?? {};
-const dashboard = data.dashboard ?? homeDashboardFallback;
+const dashboard = data.dashboard ?? {};
 const sections = data.sections ?? {};
 const cards = data.cards ?? {};
 const buttons = data.buttons ?? {};
@@ -92,7 +76,7 @@ const sectionMeta = [
   </div>
 
   <section class="hero visual-edit-section">
-    <div class="container hero-grid">
+    <div class="container hero-grid" data-hero-grid>
       <div>
         <p class="eyebrow editable-text" contenteditable="true" data-field="hero.eyebrow">
           {hero.eyebrow}
@@ -127,8 +111,15 @@ const sectionMeta = [
         </div>
       </div>
 
-      {dashboard?.heading && (
-        <div class="dashboard-card visual-edit-card">
+      {dashboard?.heading ? (
+        <div class="dashboard-card visual-edit-card" data-dashboard-card>
+          <div class="visual-card-tools dashboard-tools">
+            <span>Hero dashboard card</span>
+            <button type="button" data-remove-dashboard-card>
+              Remove dashboard card
+            </button>
+          </div>
+
           <span class="pill editable-text" contenteditable="true" data-field="dashboard.label">
             {dashboard.label}
           </span>
@@ -160,6 +151,18 @@ const sectionMeta = [
               </span>
             ))}
           </div>
+        </div>
+      ) : (
+        <div class="dashboard-card visual-edit-card dashboard-placeholder" data-dashboard-placeholder>
+          <span class="pill">Optional hero card</span>
+          <h2>No dashboard card on this page</h2>
+          <p>
+            Add a hero dashboard card if this page needs a supporting card beside the main heading.
+          </p>
+
+          <button type="button" class="editor-primary dashboard-add-button" data-add-dashboard-card>
+            Add dashboard card
+          </button>
         </div>
       )}
     </div>
@@ -476,7 +479,7 @@ const sectionMeta = [
     }
 
     .dashboard-tools {
-      margin-top: 1.2rem;
+      margin-top: 1rem;
       margin-bottom: 1rem;
       background: rgba(6, 27, 49, 0.04);
       box-shadow: none;
@@ -516,6 +519,16 @@ const sectionMeta = [
     .remove-card-button:hover,
     .visual-dashboard-item button:hover {
       background: rgba(211, 155, 69, 0.16);
+    }
+
+    .dashboard-add-button {
+      margin-top: 1rem;
+      width: fit-content;
+    }
+
+    .dashboard-placeholder {
+      border: 2px dashed rgba(211, 155, 69, 0.36);
+      background: rgba(255, 255, 255, 0.74);
     }
 
     .visual-dashboard-list {
@@ -858,7 +871,14 @@ const sectionMeta = [
     }
 
     function collectDashboardItems() {
-      const items = Array.from(document.querySelectorAll("[data-dashboard-item]"))
+      const dashboardCard = document.querySelector("[data-dashboard-card]");
+
+      if (!dashboardCard) {
+        state.dashboard = {};
+        return;
+      }
+
+      const items = Array.from(dashboardCard.querySelectorAll("[data-dashboard-item]"))
         .map((element) => getText(element))
         .filter(Boolean);
 
@@ -923,6 +943,119 @@ const sectionMeta = [
       return element;
     }
 
+    function createDashboardPlaceholder() {
+      const placeholder = document.createElement("div");
+      placeholder.className = "dashboard-card visual-edit-card dashboard-placeholder";
+      placeholder.dataset.dashboardPlaceholder = "";
+
+      placeholder.innerHTML = `
+        <span class="pill">Optional hero card</span>
+        <h2>No dashboard card on this page</h2>
+        <p>Add a hero dashboard card if this page needs a supporting card beside the main heading.</p>
+        <button type="button" class="editor-primary dashboard-add-button" data-add-dashboard-card>
+          Add dashboard card
+        </button>
+      `;
+
+      return placeholder;
+    }
+
+    function createDashboardItem(textValue = "New bullet point") {
+      const list = document.querySelector("[data-dashboard-list]");
+
+      if (!list) {
+        return;
+      }
+
+      const wrapper = document.createElement("span");
+      wrapper.className = "visual-dashboard-item";
+
+      const text = document.createElement("span");
+      text.className = "editable-text dashboard-item-text";
+      text.contentEditable = "true";
+      text.dataset.dashboardItem = "";
+      text.textContent = textValue;
+
+      const removeButton = document.createElement("button");
+      removeButton.type = "button";
+      removeButton.dataset.removeDashboardItem = "";
+      removeButton.textContent = "Remove";
+
+      wrapper.appendChild(text);
+      wrapper.appendChild(removeButton);
+      list.appendChild(wrapper);
+
+      renumberDashboardItems();
+      attachEditableListeners(wrapper);
+      markUnsaved("Dashboard bullet updated. Press Publish Changes to update the website.");
+    }
+
+    function createDashboardCard() {
+      const heroGrid = document.querySelector("[data-hero-grid]");
+      const placeholder = document.querySelector("[data-dashboard-placeholder]");
+
+      if (!heroGrid) {
+        return;
+      }
+
+      const card = document.createElement("div");
+      card.className = "dashboard-card visual-edit-card";
+      card.dataset.dashboardCard = "";
+
+      card.innerHTML = `
+        <div class="visual-card-tools dashboard-tools">
+          <span>Hero dashboard card</span>
+          <button type="button" data-remove-dashboard-card>
+            Remove dashboard card
+          </button>
+        </div>
+
+        <span class="pill editable-text" contenteditable="true" data-field="dashboard.label">
+          LawBridge Platform
+        </span>
+
+        <h2 class="editable-text" contenteditable="true" data-field="dashboard.heading">
+          Practical legal development
+        </h2>
+
+        <p class="editable-text" contenteditable="true" data-field="dashboard.description">
+          Add a short supporting message for this page.
+        </p>
+
+        <div class="visual-card-tools dashboard-tools">
+          <span>Dashboard bullet points</span>
+          <button type="button" data-add-dashboard-item>
+            Add bullet
+          </button>
+        </div>
+
+        <div class="dashboard-list visual-dashboard-list" data-dashboard-list></div>
+      `;
+
+      if (placeholder) {
+        placeholder.replaceWith(card);
+      } else {
+        heroGrid.appendChild(card);
+      }
+
+      attachEditableListeners(card);
+      createDashboardItem("First bullet point");
+      createDashboardItem("Second bullet point");
+      markUnsaved("Dashboard card added. Press Publish Changes to update the website.");
+    }
+
+    function removeDashboardCard() {
+      const dashboardCard = document.querySelector("[data-dashboard-card]");
+
+      if (!dashboardCard) {
+        return;
+      }
+
+      dashboardCard.replaceWith(createDashboardPlaceholder());
+      state.dashboard = {};
+      markUnsaved("Dashboard card removed. Press Publish Changes to update the website.");
+    }
+
     function createCard(group) {
       const list = document.querySelector(`[data-card-list="${group}"]`);
 
@@ -982,51 +1115,40 @@ const sectionMeta = [
       markUnsaved("New card added. Press Publish Changes to update the website.");
     }
 
-    function createDashboardItem() {
-      const list = document.querySelector("[data-dashboard-list]");
+    document.addEventListener("click", (event) => {
+      const addCardButton = event.target.closest("[data-add-card]");
 
-      if (!list) {
+      if (addCardButton) {
+        createCard(addCardButton.dataset.addCard);
         return;
       }
 
-      const wrapper = document.createElement("span");
-      wrapper.className = "visual-dashboard-item";
+      const addDashboardButton = event.target.closest("[data-add-dashboard-card]");
 
-      const text = document.createElement("span");
-      text.className = "editable-text dashboard-item-text";
-      text.contentEditable = "true";
-      text.dataset.dashboardItem = "";
-      text.textContent = "New bullet point";
+      if (addDashboardButton) {
+        createDashboardCard();
+        return;
+      }
 
-      const removeButton = document.createElement("button");
-      removeButton.type = "button";
-      removeButton.dataset.removeDashboardItem = "";
-      removeButton.textContent = "Remove";
+      const addDashboardItemButton = event.target.closest("[data-add-dashboard-item]");
 
-      wrapper.appendChild(text);
-      wrapper.appendChild(removeButton);
-      list.appendChild(wrapper);
-
-      renumberDashboardItems();
-      attachEditableListeners(wrapper);
-      markUnsaved("New dashboard bullet added. Press Publish Changes to update the website.");
-    }
-
-    document.querySelectorAll("[data-add-card]").forEach((button) => {
-      button.addEventListener("click", () => {
-        createCard(button.dataset.addCard);
-      });
-    });
-
-    const addDashboardButton = document.querySelector("[data-add-dashboard-item]");
-
-    if (addDashboardButton) {
-      addDashboardButton.addEventListener("click", () => {
+      if (addDashboardItemButton) {
         createDashboardItem();
-      });
-    }
+        return;
+      }
 
-    document.addEventListener("click", (event) => {
+      const removeDashboardCardButton = event.target.closest("[data-remove-dashboard-card]");
+
+      if (removeDashboardCardButton) {
+        const confirmed = window.confirm("Remove this hero dashboard card from the page?");
+
+        if (confirmed) {
+          removeDashboardCard();
+        }
+
+        return;
+      }
+
       const removeCardButton = event.target.closest("[data-remove-card]");
 
       if (removeCardButton) {
@@ -1043,10 +1165,10 @@ const sectionMeta = [
         return;
       }
 
-      const removeDashboardButton = event.target.closest("[data-remove-dashboard-item]");
+      const removeDashboardItemButton = event.target.closest("[data-remove-dashboard-item]");
 
-      if (removeDashboardButton) {
-        const item = removeDashboardButton.closest(".visual-dashboard-item");
+      if (removeDashboardItemButton) {
+        const item = removeDashboardItemButton.closest(".visual-dashboard-item");
 
         if (!item) {
           return;
