@@ -1,0 +1,139 @@
+---
+import BaseLayout from "../layouts/BaseLayout.astro";
+import { getCollection } from "astro:content";
+import { Astro } from "astro";
+
+const { pack: packCode, scenario, skill } = Astro.params || {};
+
+const resources = await getCollection("resources");
+
+const pack = resources.find((r) => r.data.code === packCode);
+
+if (!pack) {
+  throw new Error("Pack not found");
+}
+
+const studentText = pack.data.studentText || pack.data.studentLink || "No Student Pack text available.";
+const tutorText = pack.data.tutorText || pack.data.tutorLink || "";
+---
+
+<BaseLayout title={`Pack: ${pack?.data?.title || packCode} | LawBridge`}>
+  <section class="hero">
+    <div class="container hero-grid">
+      <div>
+        <p class="eyebrow">{pack?.data?.skill || skill || "Skill"}</p>
+        <h1>{pack?.data?.title || scenario || "Simulation Pack"}</h1>
+        <p class="hero-lead">{pack?.data?.summary || "Work through this practical simulation."}</p>
+      </div>
+    </div>
+  </section>
+
+  <section class="section cream">
+    <div class="container">
+      <h2>Student Pack</h2>
+      <div class="pack-content">
+        <pre>{studentText}</pre>
+      </div>
+
+      <h2>Draft Answer</h2>
+      <textarea id="student-draft" spellcheck="false" placeholder="Write your answer here..."></textarea>
+
+      <div class="actions">
+        <button id="save-draft">Save Draft</button>
+        <button id="submit-draft">Submit for AI Feedback</button>
+      </div>
+
+      <div id="ai-feedback" class="feedback-panel"></div>
+    </div>
+  </section>
+
+  <style is:inline>
+    .pack-content pre {
+      background: #f8f1e4;
+      padding: 1rem;
+      border-radius: 16px;
+      overflow-x: auto;
+      font-family: "SFMono-Regular", Consolas, monospace;
+    }
+
+    textarea#student-draft {
+      width: 100%;
+      min-height: 300px;
+      padding: 1rem;
+      border-radius: 16px;
+      border: 1px solid #d3d3d3;
+      margin-top: 1rem;
+      font-family: "SFMono-Regular", Consolas, monospace;
+    }
+
+    .actions {
+      display: flex;
+      gap: 1rem;
+      margin-top: 1rem;
+    }
+
+    .feedback-panel {
+      margin-top: 1.5rem;
+      padding: 1rem;
+      background: #e5e7eb;
+      border-radius: 16px;
+      min-height: 120px;
+      font-family: system-ui, sans-serif;
+    }
+
+    button {
+      border: none;
+      border-radius: 999px;
+      padding: 0.6rem 1.2rem;
+      font-weight: 900;
+      cursor: pointer;
+    }
+
+    #save-draft {
+      background: #d39b45;
+      color: #061b31;
+    }
+
+    #submit-draft {
+      background: #061b31;
+      color: #fff;
+    }
+  </style>
+
+  <script is:inline>
+    const draftTextarea = document.getElementById("student-draft");
+    const feedbackPanel = document.getElementById("ai-feedback");
+    const saveButton = document.getElementById("save-draft");
+    const submitButton = document.getElementById("submit-draft");
+
+    const studentId = localStorage.getItem("lawbridgeStudentId") || `student-${Date.now()}`;
+
+    localStorage.setItem("lawbridgeStudentId", studentId);
+
+    saveButton.addEventListener("click", async () => {
+      const draft = draftTextarea.value;
+      await fetch("/.netlify/functions/save-draft", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ studentId, packCode: packCode, draft })
+      });
+      alert("Draft saved!");
+    });
+
+    submitButton.addEventListener("click", async () => {
+      const draft = draftTextarea.value;
+      feedbackPanel.textContent = "Generating AI feedback...";
+      try {
+        const res = await fetch("/.netlify/functions/ai-feedback", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ studentId, packCode: packCode, draft })
+        });
+        const data = await res.json();
+        feedbackPanel.textContent = data.answer || "No feedback generated.";
+      } catch (err) {
+        feedbackPanel.textContent = "Error generating AI feedback.";
+      }
+    });
+  </script>
+</BaseLayout>
