@@ -1,178 +1,510 @@
 ---
 import BaseLayout from "../layouts/BaseLayout.astro";
-import { getEntry } from "astro:content";
+import { getCollection, getEntry } from "astro:content";
 
 const page = await getEntry("pages", "resources");
 const data = page?.data;
 
 const hero = data?.hero ?? {};
+const sections = data?.sections ?? {};
+const cards = data?.cards ?? {};
+const buttons = data?.buttons ?? {};
+const dashboard = data?.dashboard ?? {};
 
-const resources = [
-  { code: "CI-01", skill: "Client Interviewing", scenario: "Failed Software Launch", difficulty: "Foundation to Guided Practice", summary: "Plan and structure a client interview for a failed software launch dispute.", student: "/resources/student/Client Interviewing - Failed Software Launch - Student Pack.docx", tutor: "/resources/tutor/Client Interviewing - Failed Software Launch - Tutor Guide.docx" },
-  { code: "CI-02", skill: "Client Interviewing", scenario: "Dismissal After Raising Concern", difficulty: "Foundation to Guided Practice", summary: "Prepare a careful client interview after dismissal linked to a workplace concern.", student: "/resources/student/Client Interviewing - Dismissal After Raising Concern - Student Pack.docx", tutor: "/resources/tutor/Client Interviewing - Dismissal After Raising Concern - Tutor Guide.docx" },
-  { code: "AN-01", skill: "Attendance Notes and Legal Analysis", scenario: "Cyberattack After Client Interview", difficulty: "Intermediate", summary: "Turn a cyber incident interview into an attendance note and analysis.", student: "/resources/student/Attendance Notes and Legal Analysis - Cyberattack After Client Interview - Student Pack.docx", tutor: "/resources/tutor/Attendance Notes and Legal Analysis - Cyberattack After Client Interview - Tutor Guide.docx" },
-  { code: "AN-02", skill: "Attendance Notes and Legal Analysis", scenario: "Contract Dispute Missing Evidence", difficulty: "Foundation to Intermediate", summary: "Analyse a contract dispute where key documents and evidence are incomplete.", student: "/resources/student/Attendance Notes and Legal Analysis - Contract Dispute Missing Evidence - Student Pack.docx", tutor: "/resources/tutor/Attendance Notes and Legal Analysis - Contract Dispute Missing Evidence - Tutor Guide.docx" },
-  { code: "LW-01", skill: "Legal Writing", scenario: "AI Tool Dispute Advice Email", difficulty: "Intermediate", summary: "Draft a practical client advice email following an AI-generated content dispute.", student: "/resources/student/Legal Writing - AI Tool Dispute Advice Email - Student Pack.docx", tutor: "/resources/tutor/Legal Writing - AI Tool Dispute Advice Email - Tutor Guide.docx" },
-  { code: "LW-02", skill: "Legal Writing", scenario: "Service Failure Complaint Response", difficulty: "Foundation to Intermediate", summary: "Write a professional response to a service failure complaint without over-admitting liability.", student: "/resources/student/Legal Writing - Service Failure Complaint Response - Student Pack.docx", tutor: "/resources/tutor/Legal Writing - Service Failure Complaint Response - Tutor Guide.docx" },
-  { code: "LD-01", skill: "Legal Drafting", scenario: "Limitation of Liability Clause", difficulty: "Intermediate", summary: "Redraft and explain a limitation of liability clause in a technology services agreement.", student: "/resources/student/Legal Drafting - Limitation of Liability Clause - Student Pack.docx", tutor: "/resources/tutor/Legal Drafting - Limitation of Liability Clause - Tutor Guide.docx" },
-  { code: "LD-02", skill: "Legal Drafting", scenario: "AI Ownership Clause", difficulty: "Intermediate", summary: "Draft contract wording dealing with AI outputs, ownership, review and responsibility.", student: "/resources/student/Legal Drafting - AI Ownership Clause - Student Pack.docx", tutor: "/resources/tutor/Legal Drafting - AI Ownership Clause - Tutor Guide.docx" },
-  { code: "AO-01", skill: "Advocacy and Oral Presentation", scenario: "Technology Payment Dispute", difficulty: "Intermediate", summary: "Prepare a short oral submission in a digital delivery and payment dispute.", student: "/resources/student/Advocacy - Technology Payment Dispute - Student Pack.docx", tutor: "/resources/tutor/Advocacy - Technology Payment Dispute - Tutor Guide.docx" },
-  { code: "AO-02", skill: "Advocacy and Oral Presentation", scenario: "Business Interruption Insurance Dispute", difficulty: "Intermediate to Advanced", summary: "Prepare oral arguments in a cyber insurance business interruption dispute.", student: "/resources/student/Advocacy - Business Interruption Insurance Dispute - Student Pack.docx", tutor: "/resources/tutor/Advocacy - Business Interruption Insurance Dispute - Tutor Guide.docx" },
-  { code: "LR-01", skill: "Legal Research", scenario: "Data Breach Reporting Duties", difficulty: "Foundation to Intermediate", summary: "Frame research questions and preliminary findings for data breach reporting duties.", student: "/resources/student/Legal Research - Data Breach Reporting Duties - Student Pack.docx", tutor: "/resources/tutor/Legal Research - Data Breach Reporting Duties - Tutor Guide.docx" },
-  { code: "LR-02", skill: "Legal Research", scenario: "Digital Payments Market Entry", difficulty: "Intermediate", summary: "Research regulatory issues for a digital payments business entering a new market.", student: "/resources/student/Legal Research - Digital Payments Market Entry - Student Pack.docx", tutor: "/resources/tutor/Legal Research - Digital Payments Market Entry - Tutor Guide.docx" },
-  { code: "CMA-01", skill: "Case and Matter Analysis", scenario: "Tech Company Acquisition Red Flags", difficulty: "Intermediate to Advanced", summary: "Analyse due diligence risks in a technology company acquisition.", student: "/resources/student/Case and Matter Analysis - Tech Company Acquisition Red Flags - Student Pack.docx", tutor: "/resources/tutor/Case and Matter Analysis - Tech Company Acquisition Red Flags - Tutor Guide.docx" },
-  { code: "CMA-02", skill: "Case and Matter Analysis", scenario: "Blockchain Payment Dispute", difficulty: "Intermediate to Advanced", summary: "Analyse evidence, risk and strategy in a smart contract payment dispute.", student: "/resources/student/Case and Matter Analysis - Blockchain Payment Dispute - Student Pack.docx", tutor: "/resources/tutor/Case and Matter Analysis - Blockchain Payment Dispute - Tutor Guide.docx" }
-];
+const resources = await getCollection("resources");
 
-const skills = [...new Set(resources.map((r) => r.skill))];
+const sortedResources = resources.sort((a, b) => {
+  const titleA = String(a.data.title ?? "").toLowerCase();
+  const titleB = String(b.data.title ?? "").toLowerCase();
+  return titleA.localeCompare(titleB);
+});
+
+const categories = [...new Set(sortedResources.map((resource) => resource.data.category).filter(Boolean))];
+const types = [...new Set(sortedResources.map((resource) => resource.data.type).filter(Boolean))];
+const skills = [...new Set(sortedResources.map((resource) => resource.data.skill).filter(Boolean))];
+const difficulties = [...new Set(sortedResources.map((resource) => resource.data.difficulty).filter(Boolean))];
+
+function getDownloadLink(resource) {
+  return resource.data.downloadLink || resource.data.link || "";
+}
 ---
 
-<BaseLayout title="Resources | LawBridge">
+<BaseLayout title={data?.title ?? "Resources | LawBridge"}>
   <section class="hero">
     <div class="container hero-grid">
       <div>
-        <p class="eyebrow">{hero.eyebrow ?? "Resources"}</p>
-        <h1>{hero.heading ?? "Practical legal skills resources."}</h1>
-        <p class="hero-lead">
-          {hero.description ?? "Download student packs and tutor guides for LawBridge practical legal skills simulations."}
+        <p class="eyebrow">{hero.eyebrow}</p>
+        <h1>{hero.heading}</h1>
+        <p class="hero-lead">{hero.description}</p>
+
+        <div class="hero-actions">
+          {hero.primaryButtonText && (
+            <a class="btn primary" href={hero.primaryButtonLink}>
+              {hero.primaryButtonText}
+            </a>
+          )}
+
+          {hero.secondaryButtonText && (
+            <a class="btn secondary" href={hero.secondaryButtonLink}>
+              {hero.secondaryButtonText}
+            </a>
+          )}
+
+          {hero.tertiaryButtonText && (
+            <a class="btn ghost" href={hero.tertiaryButtonLink}>
+              {hero.tertiaryButtonText}
+            </a>
+          )}
+        </div>
+      </div>
+
+      {dashboard.heading && (
+        <div class="dashboard-card">
+          <span class="pill">{dashboard.label}</span>
+          <h2>{dashboard.heading}</h2>
+          <p>{dashboard.description}</p>
+
+          <div class="dashboard-list">
+            {dashboard.items?.map((item) => (
+              <span>{item}</span>
+            ))}
+          </div>
+        </div>
+      )}
+    </div>
+  </section>
+
+  <section class="section cream">
+    <div class="container">
+      <p class="eyebrow">Resource Library</p>
+      <h2>Browse LawBridge resources.</h2>
+      <p class="section-intro">
+        Resources uploaded through the LawBridge Content Studio appear here automatically after Netlify redeploys.
+      </p>
+
+      <div class="resource-tools">
+        <label>
+          Search resources
+          <input
+            id="resource-search"
+            type="search"
+            placeholder="Search by title, description, skill or type..."
+          />
+        </label>
+
+        <div class="resource-filter-grid">
+          <label>
+            Category
+            <select id="resource-category-filter">
+              <option value="all">All categories</option>
+              {categories.map((category) => (
+                <option value={category}>{category}</option>
+              ))}
+            </select>
+          </label>
+
+          <label>
+            Type
+            <select id="resource-type-filter">
+              <option value="all">All types</option>
+              {types.map((type) => (
+                <option value={type}>{type}</option>
+              ))}
+            </select>
+          </label>
+
+          <label>
+            Skill
+            <select id="resource-skill-filter">
+              <option value="all">All skills</option>
+              {skills.map((skill) => (
+                <option value={skill}>{skill}</option>
+              ))}
+            </select>
+          </label>
+
+          <label>
+            Difficulty
+            <select id="resource-difficulty-filter">
+              <option value="all">All difficulties</option>
+              {difficulties.map((difficulty) => (
+                <option value={difficulty}>{difficulty}</option>
+              ))}
+            </select>
+          </label>
+        </div>
+      </div>
+
+      <div id="resource-count" class="resource-count">
+        {sortedResources.length} resources available.
+      </div>
+
+      {sortedResources.length > 0 ? (
+        <div class="grid g3 resource-grid" id="resource-grid">
+          {sortedResources.map((resource) => (
+            <article
+              class="card resource-card"
+              data-resource-card
+              data-title={resource.data.title ?? ""}
+              data-description={resource.data.description ?? ""}
+              data-category={resource.data.category ?? ""}
+              data-type={resource.data.type ?? ""}
+              data-skill={resource.data.skill ?? ""}
+              data-difficulty={resource.data.difficulty ?? ""}
+            >
+              <div>
+                {resource.data.category && (
+                  <span class="pill resource-category">{resource.data.category}</span>
+                )}
+
+                <h3>{resource.data.title}</h3>
+                <p>{resource.data.description}</p>
+
+                <div class="resource-meta">
+                  {resource.data.type && <span>{resource.data.type}</span>}
+                  {resource.data.skill && <span>{resource.data.skill}</span>}
+                  {resource.data.difficulty && (
+                    <span class="difficulty-badge">{resource.data.difficulty}</span>
+                  )}
+                </div>
+              </div>
+
+              {getDownloadLink(resource) ? (
+                <a class="btn secondary resource-button" href={getDownloadLink(resource)} download>
+                  Download Resource
+                </a>
+              ) : (
+                <span class="btn secondary resource-button unavailable">
+                  No download link
+                </span>
+              )}
+            </article>
+          ))}
+        </div>
+      ) : (
+        <article class="card">
+          <h3>No resources published yet</h3>
+          <p>
+            Add a resource from the LawBridge admin dashboard and it will appear here automatically.
+          </p>
+        </article>
+      )}
+
+      <article id="resource-empty" class="card resource-empty" hidden>
+        <h3>No matching resources found</h3>
+        <p>
+          Try changing your search or filters.
         </p>
+      </article>
+    </div>
+  </section>
+
+  <section class="section light">
+    <div class="container">
+      <p class="eyebrow">{sections.problem?.eyebrow}</p>
+      <h2>{sections.problem?.heading}</h2>
+      <p class="section-intro">{sections.problem?.description}</p>
+
+      <div class="grid g3">
+        {(cards.problem ?? []).map((card) => (
+          <article class="card">
+            <h3>{card.title}</h3>
+            <p>{card.description}</p>
+          </article>
+        ))}
       </div>
     </div>
   </section>
 
   <section class="section cream">
     <div class="container">
-      <div class="resource-controls">
-        <input
-          id="resourceSearch"
-          class="resource-search"
-          type="search"
-          placeholder="Search by skill, scenario, code or difficulty..."
-          aria-label="Search resources"
-        />
+      <p class="eyebrow">{sections.method?.eyebrow}</p>
+      <h2>{sections.method?.heading}</h2>
+      <p class="section-intro">{sections.method?.description}</p>
 
-        <button class="resource-filter active" data-filter-type="all">All</button>
-        <button class="resource-filter" data-filter-type="student">Student Packs</button>
-        <button class="resource-filter" data-filter-type="tutor">Tutor Guides</button>
-
-        <select id="skillFilter" aria-label="Filter resources by skill">
-          <option value="all">All skills</option>
-          {skills.map((skill) => (
-            <option value={skill}>{skill}</option>
-          ))}
-        </select>
-
-        <button class="resource-filter print-resource-list" type="button">Print List</button>
-      </div>
-
-      <p class="resource-results-count" aria-live="polite">
-        Showing <strong id="visibleResourceCount">{resources.length}</strong> of <strong>{resources.length}</strong> simulations
-      </p>
-
-      <div class="resource-library">
-        {resources.map((res) => (
-          <article
-            class="resource-card is-showing"
-            data-skill={res.skill}
-            data-search={`${res.code} ${res.skill} ${res.scenario} ${res.difficulty} ${res.summary}`.toLowerCase()}
-          >
-            <div>
-              <span class="resource-code">{res.code}</span>
-              <p class="eyebrow">{res.skill}</p>
-              <h3>{res.scenario}</h3>
-              <p class="difficulty-badge">{res.difficulty}</p>
-              <p class="resource-summary">{res.summary}</p>
-            </div>
-
-            <div class="resource-downloads">
-              <a class="btn primary resource-download student-download" href={res.student} download>
-                Download Student Pack
-              </a>
-              <a class="btn secondary resource-download tutor-download" href={res.tutor} download>
-                Download Tutor Guide
-              </a>
-            </div>
+      <div class="grid g4">
+        {(cards.method ?? []).map((card) => (
+          <article class="card">
+            <h3>{card.title}</h3>
+            <p>{card.description}</p>
           </article>
         ))}
-      </div>
-
-      <div class="resource-empty-state" hidden>
-        <h3>No matching resources found</h3>
-        <p>Try searching a different keyword or selecting another skill.</p>
       </div>
     </div>
   </section>
 
-  <script is:inline>
-    const filterButtons = document.querySelectorAll(".resource-filter[data-filter-type]");
-    const skillFilter = document.querySelector("#skillFilter");
-    const searchInput = document.querySelector("#resourceSearch");
-    const cards = document.querySelectorAll(".resource-card");
-    const printButton = document.querySelector(".print-resource-list");
-    const visibleCount = document.querySelector("#visibleResourceCount");
-    const emptyState = document.querySelector(".resource-empty-state");
+  <section class="section navy">
+    <div class="container">
+      <p class="eyebrow">{sections.curriculum?.eyebrow}</p>
+      <h2>{sections.curriculum?.heading}</h2>
+      <p class="section-intro">{sections.curriculum?.description}</p>
 
-    let currentType = "all";
+      <div class="grid g4">
+        {(cards.curriculum ?? []).map((card) => (
+          <article class="curric">
+            <h3>{card.title}</h3>
+            <p>{card.description}</p>
+          </article>
+        ))}
+      </div>
+    </div>
+  </section>
 
-    function applyFilters() {
-      const currentSkill = skillFilter?.value || "all";
-      const searchTerm = searchInput?.value.trim().toLowerCase() || "";
-      let shownCount = 0;
+  <section class="section cream">
+    <div class="container">
+      <p class="eyebrow">{sections.pathways?.eyebrow}</p>
+      <h2>{sections.pathways?.heading}</h2>
+      <p class="section-intro">{sections.pathways?.description}</p>
 
-      cards.forEach((card, index) => {
-        const matchesSkill = currentSkill === "all" || card.dataset.skill === currentSkill;
-        const matchesSearch = !searchTerm || card.dataset.search.includes(searchTerm);
+      <div class="grid g2">
+        {(cards.pathways ?? []).map((card) => (
+          <article class="card">
+            <h3>{card.title}</h3>
+            <p>{card.description}</p>
 
-        const shouldShow = matchesSkill && matchesSearch;
+            {card.buttonText && (
+              <a class="btn secondary" href={card.buttonLink}>
+                {card.buttonText}
+              </a>
+            )}
+          </article>
+        ))}
+      </div>
+    </div>
+  </section>
 
-        const studentButton = card.querySelector(".student-download");
-        const tutorButton = card.querySelector(".tutor-download");
+  <section class="section light">
+    <div class="container cta-panel">
+      <p class="eyebrow">{sections.cta?.eyebrow}</p>
+      <h2>{sections.cta?.heading}</h2>
+      <p>{sections.cta?.description}</p>
 
-        if (studentButton) studentButton.style.display = currentType === "tutor" ? "none" : "inline-flex";
-        if (tutorButton) tutorButton.style.display = currentType === "student" ? "none" : "inline-flex";
+      <div class="hero-actions">
+        {buttons.cta?.primaryText && (
+          <a class="btn primary" href={buttons.cta.primaryLink}>
+            {buttons.cta.primaryText}
+          </a>
+        )}
 
-        if (shouldShow) {
-          shownCount += 1;
-          card.style.display = "flex";
-          card.style.transitionDelay = `${Math.min(index * 25, 220)}ms`;
+        {buttons.cta?.secondaryText && (
+          <a class="btn secondary" href={buttons.cta.secondaryLink}>
+            {buttons.cta.secondaryText}
+          </a>
+        )}
+      </div>
+    </div>
+  </section>
 
-          requestAnimationFrame(() => {
-            card.classList.remove("is-hiding");
-            card.classList.add("is-showing");
-          });
-        } else {
-          card.style.transitionDelay = "0ms";
-          card.classList.remove("is-showing");
-          card.classList.add("is-hiding");
+  <style is:inline>
+    .resource-tools {
+      display: grid;
+      gap: 1rem;
+      margin: 1.5rem 0;
+      padding: 1.25rem;
+      border-radius: 24px;
+      background: rgba(255, 255, 255, 0.78);
+      border: 1px solid rgba(201, 150, 82, 0.28);
+      box-shadow: 0 18px 52px rgba(6, 27, 49, 0.08);
+    }
 
-          setTimeout(() => {
-            if (card.classList.contains("is-hiding")) {
-              card.style.display = "none";
-            }
-          }, 350);
+    .resource-tools label {
+      display: grid;
+      gap: 0.5rem;
+      color: #061b31;
+      font-weight: 900;
+    }
+
+    .resource-tools input,
+    .resource-tools select {
+      width: 100%;
+      border: 1px solid rgba(201, 150, 82, 0.34);
+      border-radius: 16px;
+      padding: 0.9rem 1rem;
+      font: inherit;
+      color: #061b31;
+      background: #ffffff;
+    }
+
+    .resource-tools input:focus,
+    .resource-tools select:focus {
+      outline: 3px solid rgba(211, 155, 69, 0.18);
+      border-color: #d39b45;
+    }
+
+    .resource-filter-grid {
+      display: grid;
+      grid-template-columns: repeat(4, minmax(0, 1fr));
+      gap: 1rem;
+    }
+
+    .resource-count {
+      width: fit-content;
+      margin: 0 0 1.2rem;
+      padding: 0.65rem 0.9rem;
+      border-radius: 999px;
+      background: #061b31;
+      color: #ffffff;
+      font-weight: 900;
+      font-size: 0.9rem;
+    }
+
+    .resource-card {
+      overflow: hidden;
+      min-height: 310px;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+    }
+
+    .resource-card h3 {
+      max-width: 100%;
+      overflow-wrap: anywhere;
+      word-break: normal;
+      hyphens: auto;
+      line-height: 1.08;
+    }
+
+    .resource-card p {
+      overflow-wrap: anywhere;
+    }
+
+    .resource-category {
+      max-width: 100%;
+      overflow-wrap: anywhere;
+    }
+
+    .resource-meta {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.5rem;
+      margin: 1rem 0;
+    }
+
+    .resource-meta span {
+      display: inline-flex;
+      max-width: 100%;
+      padding: 0.42rem 0.7rem;
+      border-radius: 999px;
+      background: rgba(211, 155, 69, 0.12);
+      color: #061b31;
+      font-size: 0.82rem;
+      font-weight: 900;
+      overflow-wrap: anywhere;
+    }
+
+    .resource-meta .difficulty-badge {
+      background: rgba(6, 27, 49, 0.08);
+    }
+
+    .resource-button {
+      max-width: 100%;
+      white-space: normal;
+      text-align: center;
+    }
+
+    .resource-button.unavailable {
+      opacity: 0.65;
+      cursor: not-allowed;
+    }
+
+    .resource-empty {
+      margin-top: 1rem;
+    }
+
+    @media (max-width: 980px) {
+      .resource-filter-grid {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+      }
+    }
+
+    @media (max-width: 640px) {
+      .resource-filter-grid {
+        grid-template-columns: 1fr;
+      }
+    }
+  </style>
+
+  <script>
+    const searchInput = document.getElementById("resource-search");
+    const categoryFilter = document.getElementById("resource-category-filter");
+    const typeFilter = document.getElementById("resource-type-filter");
+    const skillFilter = document.getElementById("resource-skill-filter");
+    const difficultyFilter = document.getElementById("resource-difficulty-filter");
+    const resourceCards = Array.from(document.querySelectorAll("[data-resource-card]"));
+    const resourceCount = document.getElementById("resource-count");
+    const emptyState = document.getElementById("resource-empty");
+
+    function normalise(value) {
+      return String(value || "").toLowerCase().trim();
+    }
+
+    function matchesFilter(value, filterValue) {
+      if (!filterValue || filterValue === "all") {
+        return true;
+      }
+
+      return normalise(value) === normalise(filterValue);
+    }
+
+    function getSearchBlob(card) {
+      return normalise(
+        [
+          card.dataset.title,
+          card.dataset.description,
+          card.dataset.category,
+          card.dataset.type,
+          card.dataset.skill,
+          card.dataset.difficulty,
+        ].join(" ")
+      );
+    }
+
+    function updateResources() {
+      const searchTerm = normalise(searchInput?.value);
+      const selectedCategory = categoryFilter?.value || "all";
+      const selectedType = typeFilter?.value || "all";
+      const selectedSkill = skillFilter?.value || "all";
+      const selectedDifficulty = difficultyFilter?.value || "all";
+
+      let visibleCount = 0;
+
+      resourceCards.forEach((card) => {
+        const searchMatches = !searchTerm || getSearchBlob(card).includes(searchTerm);
+        const categoryMatches = matchesFilter(card.dataset.category, selectedCategory);
+        const typeMatches = matchesFilter(card.dataset.type, selectedType);
+        const skillMatches = matchesFilter(card.dataset.skill, selectedSkill);
+        const difficultyMatches = matchesFilter(card.dataset.difficulty, selectedDifficulty);
+
+        const isVisible =
+          searchMatches &&
+          categoryMatches &&
+          typeMatches &&
+          skillMatches &&
+          difficultyMatches;
+
+        card.hidden = !isVisible;
+
+        if (isVisible) {
+          visibleCount += 1;
         }
       });
 
-      if (visibleCount) visibleCount.textContent = shownCount.toString();
-      if (emptyState) emptyState.hidden = shownCount !== 0;
+      if (resourceCount) {
+        resourceCount.textContent = `${visibleCount} resource${visibleCount === 1 ? "" : "s"} shown.`;
+      }
+
+      if (emptyState) {
+        emptyState.hidden = visibleCount !== 0;
+      }
     }
 
-    filterButtons.forEach((button) => {
-      button.addEventListener("click", () => {
-        filterButtons.forEach((item) => item.classList.remove("active"));
-        button.classList.add("active");
-        currentType = button.dataset.filterType;
-        applyFilters();
-      });
+    [searchInput, categoryFilter, typeFilter, skillFilter, difficultyFilter].forEach((control) => {
+      if (control) {
+        control.addEventListener("input", updateResources);
+        control.addEventListener("change", updateResources);
+      }
     });
 
-    skillFilter?.addEventListener("change", applyFilters);
-    searchInput?.addEventListener("input", applyFilters);
-
-    printButton?.addEventListener("click", () => {
-      window.print();
-    });
-
-    applyFilters();
+    updateResources();
   </script>
 </BaseLayout>
