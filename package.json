@@ -11,6 +11,7 @@
   },
   "dependencies": {
     "astro": "^4.16.18",
-    "mammoth": "^1.8.0"
+    "mammoth": "^1.8.0",
+    "pdf-parse": "^1.1.1"
   }
 }
