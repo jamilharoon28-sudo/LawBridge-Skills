@@ -29,36 +29,24 @@ function cleanText(value, maxLength = 18000) {
 
 function parseFrontmatter(markdown) {
   const match = String(markdown || "").match(/^---\n([\s\S]*?)\n---/);
-
-  if (!match) {
-    return {};
-  }
-
+  if (!match) return {};
   const fields = {};
   const lines = match[1].split("\n");
-
   for (const line of lines) {
     const fieldMatch = line.match(/^([A-Za-z0-9_-]+):\s*(.*)$/);
-
-    if (!fieldMatch) {
-      continue;
-    }
-
+    if (!fieldMatch) continue;
     const key = fieldMatch[1];
     const rawValue = fieldMatch[2].trim();
-
     if (!rawValue) {
       fields[key] = "";
       continue;
     }
-
     try {
       fields[key] = JSON.parse(rawValue);
     } catch {
       fields[key] = rawValue.replace(/^["']|["']$/g, "");
     }
   }
-
   return fields;
 }
 
@@ -69,119 +57,59 @@ function removeFrontmatter(markdown) {
 function extractSection(markdownBody, heading) {
   const text = String(markdownBody || "");
   const escapedHeading = heading.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
-
   const regex = new RegExp(
     `##\\s+${escapedHeading}\\s*\\n([\\s\\S]*?)(?=\\n##\\s+|$)`,
     "i"
   );
-
   const match = text.match(regex);
-
   return cleanText(match?.[1] || "", 18000);
 }
 
-function resolvePublicPath(publicLink) {
-  const link = String(publicLink || "").trim();
-
-  if (!link) {
-    return "";
-  }
-
-  if (link.startsWith("/")) {
-    return path.join(rootDir, "public", link);
-  }
-
-  return path.join(rootDir, "public", link);
-}
-
 async function pathExists(filePath) {
-  try {
-    await fs.access(filePath);
-    return true;
-  } catch {
-    return false;
-  }
+  try { await fs.access(filePath); return true; } catch { return false; }
 }
 
 async function extractDocxText(filePath) {
-  if (!filePath || !filePath.toLowerCase().endsWith(".docx")) {
-    return "";
-  }
-
-  if (!(await pathExists(filePath))) {
-    return "";
-  }
-
+  if (!filePath || !filePath.toLowerCase().endsWith(".docx")) return "";
+  if (!(await pathExists(filePath))) return "";
   try {
     const result = await mammoth.extractRawText({ path: filePath });
     return cleanText(result.value, 18000);
-  } catch (error) {
-    console.warn(`Could not extract DOCX text from ${filePath}: ${error.message}`);
-    return "";
-  }
+  } catch { return ""; }
 }
 
 async function extractPdfText(filePath) {
-  if (!filePath || !filePath.toLowerCase().endsWith(".pdf")) {
-    return "";
-  }
-
-  if (!(await pathExists(filePath))) {
-    return "";
-  }
-
+  if (!filePath || !filePath.toLowerCase().endsWith(".pdf")) return "";
+  if (!(await pathExists(filePath))) return "";
   try {
     const buffer = await fs.readFile(filePath);
     const result = await pdfParse(buffer);
     return cleanText(result.text, 18000);
-  } catch (error) {
-    console.warn(`Could not extract PDF text from ${filePath}: ${error.message}`);
-    return "";
-  }
+  } catch { return ""; }
 }
 
 async function extractPackText(publicLink) {
-  const filePath = resolvePublicPath(publicLink);
-
-  if (!filePath) {
-    return "";
-  }
-
-  if (filePath.toLowerCase().endsWith(".docx")) {
-    return extractDocxText(filePath);
-  }
-
-  if (filePath.toLowerCase().endsWith(".pdf")) {
-    return extractPdfText(filePath);
-  }
-
+  const filePath = publicLink?.startsWith("/") ? path.join(rootDir, "public", publicLink) : publicLink;
+  if (!filePath) return "";
+  if (filePath.toLowerCase().endsWith(".docx")) return extractDocxText(filePath);
+  if (filePath.toLowerCase().endsWith(".pdf")) return extractPdfText(filePath);
   return "";
 }
 
 async function readResourceEntries() {
-  if (!(await pathExists(resourcesDir))) {
-    return [];
-  }
-
+  if (!(await pathExists(resourcesDir))) return [];
   const files = await fs.readdir(resourcesDir);
-  const markdownFiles = files.filter((file) => file.endsWith(".md"));
+  const markdownFiles = files.filter((f) => f.endsWith(".md"));
   const entries = [];
-
   for (const file of markdownFiles) {
     const filePath = path.join(resourcesDir, file);
     const markdown = await fs.readFile(filePath, "utf8");
     const data = parseFrontmatter(markdown);
-
     const slug = file.replace(/\.md$/, "");
-
-    const studentLink =
-      data.studentLink || data.student || data.downloadLink || "";
-
-    const tutorLink = data.tutorLink || data.tutor || "";
-
+    const studentLink = data.studentLink || data.student || "";
+    const tutorLink = data.tutorLink || "";
     const studentText = await extractPackText(studentLink);
     const tutorText = await extractPackText(tutorLink);
-
     entries.push({
       source: "resources",
       slug,
@@ -195,52 +123,26 @@ async function readResourceEntries() {
       tutorLink,
       studentText,
       tutorText,
-      studentTextSource: studentLink.toLowerCase().endsWith(".pdf")
-        ? "pdf"
-        : studentLink.toLowerCase().endsWith(".docx")
-          ? "docx"
-          : "",
-      tutorTextSource: tutorLink.toLowerCase().endsWith(".pdf")
-        ? "pdf"
-        : tutorLink.toLowerCase().endsWith(".docx")
-          ? "docx"
-          : "",
+      studentTextSource: studentLink?.toLowerCase().endsWith(".pdf") ? "pdf" : "docx",
+      tutorTextSource: tutorLink?.toLowerCase().endsWith(".pdf") ? "pdf" : "docx",
     });
   }
-
   return entries;
 }
 
 async function readAiKnowledgeEntries() {
-  if (!(await pathExists(aiKnowledgeDir))) {
-    return [];
-  }
-
+  if (!(await pathExists(aiKnowledgeDir))) return [];
   const files = await fs.readdir(aiKnowledgeDir);
-  const markdownFiles = files.filter(
-    (file) => file.endsWith(".md") && !file.startsWith(".")
-  );
-
+  const markdownFiles = files.filter((f) => f.endsWith(".md") && !f.startsWith("."));
   const entries = [];
-
   for (const file of markdownFiles) {
     const filePath = path.join(aiKnowledgeDir, file);
     const markdown = await fs.readFile(filePath, "utf8");
     const data = parseFrontmatter(markdown);
     const body = removeFrontmatter(markdown);
-
     const slug = file.replace(/\.md$/, "");
-
-    const studentText =
-      extractSection(body, "Student Pack Knowledge") ||
-      extractSection(body, "Student Knowledge") ||
-      "";
-
-    const tutorText =
-      extractSection(body, "Hidden Tutor Guidance") ||
-      extractSection(body, "Tutor Guidance") ||
-      "";
-
+    const studentText = extractSection(body, "Student Pack Knowledge") || "";
+    const tutorText = extractSection(body, "Hidden Tutor Guidance") || "";
     entries.push({
       source: "ai-knowledge",
       slug,
@@ -258,60 +160,31 @@ async function readAiKnowledgeEntries() {
       tutorTextSource: "markdown",
     });
   }
-
   return entries;
 }
 
 function mergeEntries(resourceEntries, aiKnowledgeEntries) {
   const merged = new Map();
-
   for (const entry of resourceEntries) {
     const key = entry.code || entry.slug;
     merged.set(key, entry);
   }
-
   for (const entry of aiKnowledgeEntries) {
     const key = entry.code || entry.slug;
-
     const existing = merged.get(key);
-
-    merged.set(key, {
-      ...(existing || {}),
-      ...entry,
-      studentText: entry.studentText || existing?.studentText || "",
-      tutorText: entry.tutorText || existing?.tutorText || "",
-      source: existing ? `${existing.source}+ai-knowledge` : "ai-knowledge",
-    });
+    merged.set(key, { ...(existing || {}), ...entry, studentText: entry.studentText || existing?.studentText || "", tutorText: entry.tutorText || existing?.tutorText || "", source: existing ? `${existing.source}+ai-knowledge` : "ai-knowledge" });
   }
-
   return [...merged.values()];
 }
 
 async function main() {
   const resourceEntries = await readResourceEntries();
   const aiKnowledgeEntries = await readAiKnowledgeEntries();
-
   const entries = mergeEntries(resourceEntries, aiKnowledgeEntries);
-
-  const output = `// This file is generated automatically by scripts/build-ai-knowledge.mjs.
-// Do not edit manually.
-
-const PACK_KNOWLEDGE = ${JSON.stringify(entries, null, 2)};
-
-export { PACK_KNOWLEDGE };
-`;
-
+  const output = `// This file is generated automatically by scripts/build-ai-knowledge.mjs.\n// Do not edit manually.\n\nconst PACK_KNOWLEDGE = ${JSON.stringify(entries, null, 2)};\n\nexport { PACK_KNOWLEDGE };`;
   await fs.mkdir(path.dirname(outputPath), { recursive: true });
   await fs.writeFile(outputPath, output, "utf8");
-
-  console.log(
-    `Built AI knowledge for ${entries.length} packs. ` +
-      `Resources: ${resourceEntries.length}. ` +
-      `AI knowledge files: ${aiKnowledgeEntries.length}.`
-  );
+  console.log(`Built AI knowledge for ${entries.length} packs. Resources: ${resourceEntries.length}. AI knowledge files: ${aiKnowledgeEntries.length}.`);
 }
 
-main().catch((error) => {
-  console.error("Failed to build AI knowledge:", error);
-  process.exit(1);
-});
+main().catch((error) => { console.error("Failed to build AI knowledge:", error); process.exit(1); });
