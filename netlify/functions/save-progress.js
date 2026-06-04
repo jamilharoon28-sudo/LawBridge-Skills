@@ -20,6 +20,25 @@ function safeKey(value) {
     .replace(/^-+|-+$/g, "");
 }
 
+function cleanText(value) {
+  return String(value || "").trim();
+}
+
+function cleanNumber(value) {
+  const number = Number(value);
+  return Number.isFinite(number) ? number : 0;
+}
+
+function removeEmptyFields(object) {
+  return Object.fromEntries(
+    Object.entries(object).filter(([, value]) => {
+      if (value === undefined || value === null) return false;
+      if (typeof value === "string" && value.trim() === "") return false;
+      return true;
+    })
+  );
+}
+
 async function githubRequest(url, options = {}) {
   const token = process.env.GITHUB_TOKEN || process.env.GITHUB_PAT;
 
@@ -65,15 +84,27 @@ exports.handler = async function handler(event) {
     const body = JSON.parse(event.body || "{}");
 
     const studentId = safeKey(body.studentId || "guest-student");
-    const packCode = String(body.packCode || "").trim();
-    const packTitle = String(body.packTitle || "").trim();
-    const skill = String(body.skill || "").trim();
-    const status = String(body.status || "In progress").trim();
-    const mode = String(body.mode || "").trim();
+    const packCode = cleanText(body.packCode);
+    const now = new Date().toISOString();
 
     if (!packCode) {
       return json(400, { error: "Missing packCode." });
     }
+
+    const status = cleanText(body.status || "In progress");
+    const mode = cleanText(body.mode || "");
+    const packTitle = cleanText(body.packTitle);
+    const skill = cleanText(body.skill);
+    const category = cleanText(body.category || body.categoryGroup);
+    const difficulty = cleanText(body.difficulty);
+    const answerRoute = cleanText(body.answerRoute || `/answer-pack?pack=${encodeURIComponent(packCode)}`);
+
+    const answers = Array.isArray(body.answers) ? body.answers : [];
+    const answerCount = cleanNumber(body.answerCount || answers.length);
+    const answeredCount =
+      body.answeredCount !== undefined
+        ? cleanNumber(body.answeredCount)
+        : answers.filter((item) => cleanText(item?.answer).length > 0).length;
 
     const owner = process.env.GITHUB_OWNER || DEFAULT_OWNER;
     const repo = process.env.GITHUB_REPO || DEFAULT_REPO;
@@ -91,7 +122,8 @@ exports.handler = async function handler(event) {
 
     let progress = {
       studentId,
-      updatedAt: new Date().toISOString(),
+      updatedAt: now,
+      latestPackCode: packCode,
       packs: {},
     };
 
@@ -101,16 +133,57 @@ exports.handler = async function handler(event) {
     }
 
     progress.studentId = studentId;
-    progress.updatedAt = new Date().toISOString();
+    progress.updatedAt = now;
+    progress.latestPackCode = packCode;
     progress.packs = progress.packs || {};
 
-    progress.packs[packCode] = {
+    const previousPack = progress.packs[packCode] || {};
+
+    const timestampFields = {};
+
+    if (status === "In progress") {
+      timestampFields.lastOpenedAt = previousPack.lastOpenedAt || now;
+      timestampFields.draftSavedAt = now;
+    }
+
+    if (status === "Submitted for AI Check") {
+      timestampFields.submittedAt = now;
+    }
+
+    if (status === "Completed") {
+      timestampFields.completedAt = now;
+    }
+
+    const nextPackRecord = removeEmptyFields({
+      ...previousPack,
       packCode,
-      packTitle,
-      skill,
+      packTitle: packTitle || previousPack.packTitle,
+      skill: skill || previousPack.skill,
+      category: category || previousPack.category,
+      categoryGroup: category || previousPack.categoryGroup,
+      difficulty: difficulty || previousPack.difficulty,
+      answerRoute: answerRoute || previousPack.answerRoute,
+      mode: mode || previousPack.mode,
       status,
-      mode,
-      updatedAt: new Date().toISOString(),
+      answerCount: answerCount || previousPack.answerCount,
+      answeredCount: answeredCount || previousPack.answeredCount,
+      feedbackSummary: body.feedbackSummary || previousPack.feedbackSummary,
+      updatedAt: now,
+      ...timestampFields,
+    });
+
+    progress.packs[packCode] = nextPackRecord;
+
+    const allPacks = Object.values(progress.packs);
+
+    progress.summary = {
+      totalStarted: allPacks.length,
+      inProgress: allPacks.filter((pack) => pack.status === "In progress").length,
+      submittedForAiCheck: allPacks.filter((pack) => pack.status === "Submitted for AI Check").length,
+      completed: allPacks.filter((pack) => pack.status === "Completed").length,
+      latestPackCode: packCode,
+      latestStatus: status,
+      updatedAt: now,
     };
 
     const payload = {
