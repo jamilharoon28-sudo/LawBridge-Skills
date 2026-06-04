@@ -92,31 +92,24 @@ const packs = resources
 
     function getStudentId() {
       const existing = localStorage.getItem("lawbridgeStudentId");
-
       if (existing) return existing;
-
       const created = `student-${Date.now()}-${Math.random().toString(16).slice(2)}`;
       localStorage.setItem("lawbridgeStudentId", created);
       return created;
     }
 
     function normaliseStatusClass(status) {
-      return String(status || "Not started")
-        .toLowerCase()
-        .replace(/[^a-z0-9]+/g, "-")
-        .replace(/^-+|-+$/g, "");
+      return String(status || "Not started").toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-+|-+$/g, "");
     }
 
     function applyProgress(progress) {
       const packs = progress?.packs || {};
-
       progressCards.forEach((card) => {
         const code = card.dataset.packCode;
         const statusElement = card.querySelector("[data-status-for]");
         const saved = packs[code];
         const status = saved?.status || "Not started";
         const className = normaliseStatusClass(status);
-
         statusElement.textContent = status;
         statusElement.className = `status-pill ${className}`;
       });
@@ -129,22 +122,16 @@ const packs = resources
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({ studentId: getStudentId() }),
         });
-
         const result = await response.json().catch(() => ({}));
-
         if (response.ok) applyProgress(result.progress || {});
-      } catch (error) {
-        console.warn("Could not load progress:", error);
-      }
+      } catch (error) { console.warn("Could not load progress:", error); }
     }
 
     async function saveOpenedProgress(link) {
       const packCode = link.dataset.packCode;
       const packTitle = link.dataset.packTitle;
       const skill = link.dataset.packSkill;
-
       if (!packCode) return;
-
       await fetch("/.netlify/functions/save-progress", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -166,44 +153,29 @@ const packs = resources
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({ studentId: getStudentId() }),
         });
-
         const result = await response.json().catch(() => ({}));
-
         if (!response.ok || !result.nextPack) return;
-
         const pack = result.nextPack;
         if (nextPackTitle) nextPackTitle.textContent = pack.title || pack.code || "Recommended pack";
-        if (nextPackDetail)
-          nextPackDetail.textContent = pack.code
-            ? `Continue with ${pack.code}.`
-            : "Continue with your next available LawBridge simulation.";
+        if (nextPackDetail) nextPackDetail.textContent = pack.code ? `Continue with ${pack.code}.` : "Continue with your next available LawBridge simulation.";
         if (nextPackLink) {
           const code = encodeURIComponent(pack.code || "");
           const title = encodeURIComponent(pack.title || "");
           const skill = encodeURIComponent(pack.skill || "");
           nextPackLink.href = `/ai-skills-coach?pack=${code}&scenario=${title}&skill=${skill}`;
         }
-      } catch (error) {
-        console.warn("Could not load next pack:", error);
-      }
+      } catch (error) { console.warn("Could not load next pack:", error); }
     }
 
     openPackLinks.forEach((link) => {
       link.addEventListener("click", async (event) => {
         event.preventDefault();
-        try {
-          await saveOpenedProgress(link);
-        } catch (error) {
-          console.warn("Could not save opened progress:", error);
-        }
+        try { await saveOpenedProgress(link); } catch (error) { console.warn("Could not save opened progress:", error); }
         window.location.href = link.href;
       });
     });
 
-    refreshButton?.addEventListener("click", async () => {
-      await loadProgress();
-      await loadNextPack();
-    });
+    refreshButton?.addEventListener("click", async () => { await loadProgress(); await loadNextPack(); });
 
     loadProgress();
     loadNextPack();
