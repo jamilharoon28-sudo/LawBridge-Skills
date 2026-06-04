@@ -1,6 +1,6 @@
 {
   "studentId": "student-1780574310097-931b2a56ce72b8",
-  "updatedAt": "2026-06-04T22:07:32.279Z",
+  "updatedAt": "2026-06-04T22:10:57.517Z",
   "packs": {
     "AN-01": {
       "packCode": "AN-01",
@@ -8,13 +8,13 @@
       "skill": "Attendance Notes and Legal Analysis",
       "status": "In progress",
       "mode": "Answer Pack",
-      "updatedAt": "2026-06-04T21:59:57.104Z",
+      "updatedAt": "2026-06-04T22:10:57.517Z",
       "category": "Legal Practice Skills",
       "categoryGroup": "Legal Practice Skills",
       "answerRoute": "/answer-pack?pack=AN-01",
       "answerCount": 5,
       "lastOpenedAt": "2026-06-04T21:59:57.104Z",
-      "draftSavedAt": "2026-06-04T21:59:57.104Z"
+      "draftSavedAt": "2026-06-04T22:10:57.517Z"
     },
     "AN-02": {
       "packCode": "AN-02",
@@ -39,14 +39,14 @@
       "draftSavedAt": "2026-06-04T22:07:32.279Z"
     }
   },
-  "latestPackCode": "AO-01",
+  "latestPackCode": "AN-01",
   "summary": {
     "totalStarted": 3,
     "inProgress": 3,
     "submittedForAiCheck": 0,
     "completed": 0,
-    "latestPackCode": "AO-01",
+    "latestPackCode": "AN-01",
     "latestStatus": "In progress",
-    "updatedAt": "2026-06-04T22:07:32.279Z"
+    "updatedAt": "2026-06-04T22:10:57.517Z"
   }
 }
