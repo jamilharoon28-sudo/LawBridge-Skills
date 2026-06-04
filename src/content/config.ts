@@ -57,6 +57,9 @@ const webinars = defineCollection({
     date: z.coerce.date().optional(),
     status: z.string().optional(),
     location: z.string().optional(),
+    speaker: z.string().optional(),
+    link: z.string().optional(),
+    registrationLink: z.string().optional(),
   }),
 });
 
@@ -68,6 +71,9 @@ const workshops = defineCollection({
     date: z.coerce.date().optional(),
     status: z.string().optional(),
     location: z.string().optional(),
+    facilitator: z.string().optional(),
+    link: z.string().optional(),
+    registrationLink: z.string().optional(),
   }),
 });
 
@@ -75,9 +81,25 @@ const resources = defineCollection({
   type: "content",
   schema: z.object({
     title: z.string(),
+
+    code: z.string().optional(),
+    skill: z.string().optional(),
+    scenario: z.string().optional(),
+    difficulty: z.string().optional(),
+    summary: z.string().optional(),
+
     description: z.string().optional(),
     category: z.string().optional(),
     type: z.string().optional(),
+
+    studentLink: z.string().optional(),
+    tutorLink: z.string().optional(),
+
+    student: z.string().optional(),
+    tutor: z.string().optional(),
+
+    downloadLink: z.string().optional(),
+    link: z.string().optional(),
   }),
 });
 
