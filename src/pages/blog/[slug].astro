@@ -7,20 +7,275 @@ export async function getStaticPaths() {
 
   return posts.map((post) => ({
     params: { slug: post.slug },
-    props: { post }
+    props: { post },
   }));
 }
 
 const { post } = Astro.props;
 const { Content } = await post.render();
+
+function formatDate(dateValue) {
+  if (!dateValue) {
+    return "Date to be confirmed";
+  }
+
+  const date = new Date(dateValue);
+
+  if (Number.isNaN(date.getTime())) {
+    return "Date to be confirmed";
+  }
+
+  return date.toLocaleDateString("en-GB", {
+    day: "2-digit",
+    month: "long",
+    year: "numeric",
+  });
+}
 ---
 
-<BaseLayout title={`${post.data.title} | LawBridge`}>
-  <main>
-    <article>
-      <h1>{post.data.title}</h1>
-      <p>{post.data.date.toLocaleDateString()}</p>
-      <Content />
-    </article>
-  </main>
+<BaseLayout title={`${post.data.title} | LawBridge Blog`}>
+  <article class="blog-article-shell">
+    <header class="blog-article-hero">
+      <div class="container">
+        <a href="/blog" class="blog-back">← Back to Blog</a>
+
+        {post.data.category && <p class="eyebrow">{post.data.category}</p>}
+
+        <h1>{post.data.title}</h1>
+
+        {post.data.description && (
+          <p class="blog-article-description">{post.data.description}</p>
+        )}
+
+        <div class="blog-article-meta">
+          <span>{formatDate(post.data.date)}</span>
+          {post.data.author && <span>{post.data.author}</span>}
+        </div>
+      </div>
+    </header>
+
+    <section class="section cream">
+      <div class="container blog-article-layout">
+        <div class="blog-content-card">
+          <Content />
+        </div>
+
+        <aside class="blog-sidebar-card">
+          <p class="eyebrow">LawBridge Blog</p>
+          <h2>Practical legal development</h2>
+          <p>
+            Read guidance, insights and practical career support for aspiring lawyers and early legal professionals.
+          </p>
+
+          <a href="/contact" class="btn primary">Join LawBridge</a>
+          <a href="/blog" class="btn secondary">More Articles</a>
+        </aside>
+      </div>
+    </section>
+  </article>
+
+  <style is:inline>
+    .blog-article-shell {
+      background: #fbf7ef;
+      color: #061b31;
+    }
+
+    .blog-article-hero {
+      padding: clamp(6rem, 10vw, 9rem) 0 clamp(3rem, 6vw, 5rem);
+      background:
+        radial-gradient(circle at top right, rgba(231, 182, 95, 0.2), transparent 34%),
+        linear-gradient(180deg, #061b31 0%, #0c2744 100%);
+      color: #ffffff;
+    }
+
+    .blog-back {
+      display: inline-flex;
+      align-items: center;
+      width: fit-content;
+      margin-bottom: 2rem;
+      padding: 0.7rem 1rem;
+      border-radius: 999px;
+      background: rgba(255, 255, 255, 0.1);
+      color: #ffffff;
+      text-decoration: none;
+      font-weight: 900;
+      border: 1px solid rgba(255, 255, 255, 0.18);
+    }
+
+    .blog-article-hero .eyebrow {
+      color: #e7b65f;
+    }
+
+    .blog-article-hero h1 {
+      max-width: 980px;
+      margin: 0;
+      font-family: Georgia, "Times New Roman", serif;
+      font-size: clamp(3rem, 7vw, 6rem);
+      line-height: 0.95;
+      letter-spacing: -0.045em;
+      color: #ffffff;
+      overflow-wrap: anywhere;
+      hyphens: auto;
+    }
+
+    .blog-article-description {
+      max-width: 780px;
+      margin: 1.3rem 0 0;
+      color: rgba(255, 255, 255, 0.82);
+      font-size: 1.15rem;
+      line-height: 1.7;
+      overflow-wrap: anywhere;
+    }
+
+    .blog-article-meta {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.6rem;
+      margin-top: 1.5rem;
+    }
+
+    .blog-article-meta span {
+      display: inline-flex;
+      max-width: 100%;
+      padding: 0.5rem 0.8rem;
+      border-radius: 999px;
+      background: rgba(231, 182, 95, 0.14);
+      color: #ffffff;
+      font-weight: 900;
+      font-size: 0.9rem;
+      overflow-wrap: anywhere;
+    }
+
+    .blog-article-layout {
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) minmax(300px, 0.36fr);
+      gap: 1.5rem;
+      align-items: start;
+    }
+
+    .blog-content-card,
+    .blog-sidebar-card {
+      border-radius: 28px;
+      background: rgba(255, 255, 255, 0.86);
+      border: 1px solid rgba(201, 150, 82, 0.28);
+      box-shadow: 0 18px 52px rgba(6, 27, 49, 0.09);
+    }
+
+    .blog-content-card {
+      padding: clamp(1.4rem, 4vw, 3rem);
+      overflow: hidden;
+    }
+
+    .blog-sidebar-card {
+      position: sticky;
+      top: 1.5rem;
+      display: grid;
+      gap: 0.9rem;
+      padding: 1.4rem;
+    }
+
+    .blog-sidebar-card h2 {
+      margin: 0;
+      font-family: Georgia, "Times New Roman", serif;
+      color: #061b31;
+      font-size: 1.7rem;
+      line-height: 1.05;
+    }
+
+    .blog-sidebar-card p {
+      margin: 0;
+      color: #334155;
+      line-height: 1.65;
+    }
+
+    .blog-content-card :global(h1),
+    .blog-content-card :global(h2),
+    .blog-content-card :global(h3),
+    .blog-content-card :global(h4) {
+      margin: 1.5em 0 0.55em;
+      font-family: Georgia, "Times New Roman", serif;
+      color: #061b31;
+      line-height: 1.08;
+      letter-spacing: -0.025em;
+      overflow-wrap: anywhere;
+      hyphens: auto;
+    }
+
+    .blog-content-card :global(h1:first-child),
+    .blog-content-card :global(h2:first-child),
+    .blog-content-card :global(h3:first-child) {
+      margin-top: 0;
+    }
+
+    .blog-content-card :global(h1) {
+      font-size: clamp(2.2rem, 4vw, 3.4rem);
+    }
+
+    .blog-content-card :global(h2) {
+      font-size: clamp(1.9rem, 3vw, 2.7rem);
+    }
+
+    .blog-content-card :global(h3) {
+      font-size: clamp(1.45rem, 2.2vw, 2rem);
+    }
+
+    .blog-content-card :global(p),
+    .blog-content-card :global(li) {
+      color: #334155;
+      line-height: 1.8;
+      font-size: 1.03rem;
+      overflow-wrap: anywhere;
+    }
+
+    .blog-content-card :global(a) {
+      color: #8a5a18;
+      font-weight: 900;
+      overflow-wrap: anywhere;
+    }
+
+    .blog-content-card :global(ul),
+    .blog-content-card :global(ol) {
+      padding-left: 1.4rem;
+      color: #334155;
+    }
+
+    .blog-content-card :global(blockquote) {
+      margin: 1.5rem 0;
+      padding: 1.2rem 1.4rem;
+      border-left: 4px solid #d39b45;
+      border-radius: 18px;
+      background: rgba(211, 155, 69, 0.1);
+      color: #061b31;
+    }
+
+    .blog-content-card :global(img) {
+      max-width: 100%;
+      height: auto;
+      border-radius: 20px;
+    }
+
+    .blog-content-card :global(table) {
+      width: 100%;
+      border-collapse: collapse;
+      overflow-x: auto;
+      display: block;
+    }
+
+    .blog-content-card :global(th),
+    .blog-content-card :global(td) {
+      padding: 0.8rem;
+      border: 1px solid rgba(201, 150, 82, 0.28);
+      text-align: left;
+    }
+
+    @media (max-width: 980px) {
+      .blog-article-layout {
+        grid-template-columns: 1fr;
+      }
+
+      .blog-sidebar-card {
+        position: static;
+      }
+    }
+  </style>
 </BaseLayout>
