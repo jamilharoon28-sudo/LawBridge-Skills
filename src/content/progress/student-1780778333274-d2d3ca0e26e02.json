@@ -1,0 +1,30 @@
+{
+  "studentId": "student-1780778333274-d2d3ca0e26e02",
+  "updatedAt": "2026-06-06T20:39:41.379Z",
+  "latestPackCode": "LR-02",
+  "packs": {
+    "LR-02": {
+      "packCode": "LR-02",
+      "packTitle": "Digital Payments Market Entry",
+      "skill": "Legal Research",
+      "category": "Legal Practice Skills",
+      "categoryGroup": "Legal Practice Skills",
+      "answerRoute": "/answer-pack?pack=LR-02",
+      "mode": "Answer Pack",
+      "status": "In progress",
+      "answerCount": 5,
+      "updatedAt": "2026-06-06T20:39:41.379Z",
+      "lastOpenedAt": "2026-06-06T20:39:41.379Z",
+      "draftSavedAt": "2026-06-06T20:39:41.379Z"
+    }
+  },
+  "summary": {
+    "totalStarted": 1,
+    "inProgress": 1,
+    "submittedForAiCheck": 0,
+    "completed": 0,
+    "latestPackCode": "LR-02",
+    "latestStatus": "In progress",
+    "updatedAt": "2026-06-06T20:39:41.379Z"
+  }
+}
