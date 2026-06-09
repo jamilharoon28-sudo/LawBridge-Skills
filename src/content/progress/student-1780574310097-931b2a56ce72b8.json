@@ -1,6 +1,6 @@
 {
   "studentId": "student-1780574310097-931b2a56ce72b8",
-  "updatedAt": "2026-06-09T20:21:09.733Z",
+  "updatedAt": "2026-06-09T20:24:31.453Z",
   "packs": {
     "AN-01": {
       "packCode": "AN-01",
@@ -59,16 +59,27 @@
       "updatedAt": "2026-06-09T20:21:09.733Z",
       "lastOpenedAt": "2026-06-09T20:21:09.733Z",
       "draftSavedAt": "2026-06-09T20:21:09.733Z"
+    },
+    "CLA-01": {
+      "packCode": "CLA-01",
+      "packTitle": "Advising on a Failed FinTech Pilot",
+      "skill": "Commercial Legal Analysis",
+      "answerRoute": "/answer-pack?pack=CLA-01",
+      "mode": "Opened from resources dashboard",
+      "status": "In progress",
+      "updatedAt": "2026-06-09T20:24:31.453Z",
+      "lastOpenedAt": "2026-06-09T20:24:31.453Z",
+      "draftSavedAt": "2026-06-09T20:24:31.453Z"
     }
   },
-  "latestPackCode": "AO-02",
+  "latestPackCode": "CLA-01",
   "summary": {
-    "totalStarted": 5,
-    "inProgress": 5,
+    "totalStarted": 6,
+    "inProgress": 6,
     "submittedForAiCheck": 0,
     "completed": 0,
-    "latestPackCode": "AO-02",
+    "latestPackCode": "CLA-01",
     "latestStatus": "In progress",
-    "updatedAt": "2026-06-09T20:21:09.733Z"
+    "updatedAt": "2026-06-09T20:24:31.453Z"
   }
 }
