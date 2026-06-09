@@ -1,6 +1,6 @@
 {
   "studentId": "student-1780574310097-931b2a56ce72b8",
-  "updatedAt": "2026-06-09T20:17:34.360Z",
+  "updatedAt": "2026-06-09T20:21:09.733Z",
   "packs": {
     "AN-01": {
       "packCode": "AN-01",
@@ -48,16 +48,27 @@
       "updatedAt": "2026-06-04T22:13:30.957Z",
       "lastOpenedAt": "2026-06-04T22:13:30.957Z",
       "draftSavedAt": "2026-06-04T22:13:30.957Z"
+    },
+    "AO-02": {
+      "packCode": "AO-02",
+      "packTitle": "Technology Payment Dispute",
+      "skill": "Advocacy",
+      "answerRoute": "/answer-pack?pack=AO-02",
+      "mode": "Opened from resources dashboard",
+      "status": "In progress",
+      "updatedAt": "2026-06-09T20:21:09.733Z",
+      "lastOpenedAt": "2026-06-09T20:21:09.733Z",
+      "draftSavedAt": "2026-06-09T20:21:09.733Z"
     }
   },
-  "latestPackCode": "AN-01",
+  "latestPackCode": "AO-02",
   "summary": {
-    "totalStarted": 4,
-    "inProgress": 4,
+    "totalStarted": 5,
+    "inProgress": 5,
     "submittedForAiCheck": 0,
     "completed": 0,
-    "latestPackCode": "AN-01",
+    "latestPackCode": "AO-02",
     "latestStatus": "In progress",
-    "updatedAt": "2026-06-09T20:17:34.360Z"
+    "updatedAt": "2026-06-09T20:21:09.733Z"
   }
 }
