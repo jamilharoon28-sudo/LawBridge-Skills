@@ -1,6 +1,6 @@
 {
   "studentId": "student-1780574310097-931b2a56ce72b8",
-  "updatedAt": "2026-06-09T20:26:08.823Z",
+  "updatedAt": "2026-06-09T20:28:39.156Z",
   "packs": {
     "AN-01": {
       "packCode": "AN-01",
@@ -81,16 +81,27 @@
       "updatedAt": "2026-06-09T20:26:08.823Z",
       "lastOpenedAt": "2026-06-09T20:26:08.823Z",
       "draftSavedAt": "2026-06-09T20:26:08.823Z"
+    },
+    "BFA-01": {
+      "packCode": "BFA-01",
+      "packTitle": "Helping a Start-Up Prioritise Legal Spend",
+      "skill": "Business and Financial Awareness",
+      "answerRoute": "/answer-pack?pack=BFA-01",
+      "mode": "Opened from resources dashboard",
+      "status": "In progress",
+      "updatedAt": "2026-06-09T20:28:39.156Z",
+      "lastOpenedAt": "2026-06-09T20:28:39.156Z",
+      "draftSavedAt": "2026-06-09T20:28:39.156Z"
     }
   },
-  "latestPackCode": "LD-02",
+  "latestPackCode": "BFA-01",
   "summary": {
-    "totalStarted": 7,
-    "inProgress": 7,
+    "totalStarted": 8,
+    "inProgress": 8,
     "submittedForAiCheck": 0,
     "completed": 0,
-    "latestPackCode": "LD-02",
+    "latestPackCode": "BFA-01",
     "latestStatus": "In progress",
-    "updatedAt": "2026-06-09T20:26:08.823Z"
+    "updatedAt": "2026-06-09T20:28:39.156Z"
   }
 }
