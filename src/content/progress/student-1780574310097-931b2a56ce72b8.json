@@ -1,6 +1,6 @@
 {
   "studentId": "student-1780574310097-931b2a56ce72b8",
-  "updatedAt": "2026-06-09T20:24:31.453Z",
+  "updatedAt": "2026-06-09T20:26:08.823Z",
   "packs": {
     "AN-01": {
       "packCode": "AN-01",
@@ -70,16 +70,27 @@
       "updatedAt": "2026-06-09T20:24:31.453Z",
       "lastOpenedAt": "2026-06-09T20:24:31.453Z",
       "draftSavedAt": "2026-06-09T20:24:31.453Z"
+    },
+    "LD-02": {
+      "packCode": "LD-02",
+      "packTitle": "Limitation of Liability Clause",
+      "skill": "Legal Drafting",
+      "answerRoute": "/answer-pack?pack=LD-02",
+      "mode": "Opened from resources dashboard",
+      "status": "In progress",
+      "updatedAt": "2026-06-09T20:26:08.823Z",
+      "lastOpenedAt": "2026-06-09T20:26:08.823Z",
+      "draftSavedAt": "2026-06-09T20:26:08.823Z"
     }
   },
-  "latestPackCode": "CLA-01",
+  "latestPackCode": "LD-02",
   "summary": {
-    "totalStarted": 6,
-    "inProgress": 6,
+    "totalStarted": 7,
+    "inProgress": 7,
     "submittedForAiCheck": 0,
     "completed": 0,
-    "latestPackCode": "CLA-01",
+    "latestPackCode": "LD-02",
     "latestStatus": "In progress",
-    "updatedAt": "2026-06-09T20:24:31.453Z"
+    "updatedAt": "2026-06-09T20:26:08.823Z"
   }
 }
