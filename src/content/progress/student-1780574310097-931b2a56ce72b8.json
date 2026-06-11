@@ -1,20 +1,20 @@
 {
   "studentId": "student-1780574310097-931b2a56ce72b8",
-  "updatedAt": "2026-06-09T21:36:25.654Z",
+  "updatedAt": "2026-06-11T12:54:59.513Z",
   "packs": {
     "AN-01": {
       "packCode": "AN-01",
       "packTitle": "Contract Dispute Missing Evidence",
       "skill": "Attendance Notes and Legal Analysis",
       "status": "In progress",
-      "mode": "Answer Pack",
-      "updatedAt": "2026-06-09T21:36:25.654Z",
+      "mode": "Opened from resources dashboard",
+      "updatedAt": "2026-06-11T12:54:59.513Z",
       "category": "Legal Practice Skills",
       "categoryGroup": "Legal Practice Skills",
       "answerRoute": "/answer-pack?pack=AN-01",
       "answerCount": 5,
       "lastOpenedAt": "2026-06-04T21:59:57.104Z",
-      "draftSavedAt": "2026-06-09T21:36:25.654Z"
+      "draftSavedAt": "2026-06-11T12:54:59.513Z"
     },
     "AN-02": {
       "packCode": "AN-02",
@@ -102,6 +102,6 @@
     "completed": 0,
     "latestPackCode": "AN-01",
     "latestStatus": "In progress",
-    "updatedAt": "2026-06-09T21:36:25.654Z"
+    "updatedAt": "2026-06-11T12:54:59.513Z"
   }
 }
