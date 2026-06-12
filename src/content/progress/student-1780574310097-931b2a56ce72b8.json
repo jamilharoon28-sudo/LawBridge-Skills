@@ -1,6 +1,6 @@
 {
   "studentId": "student-1780574310097-931b2a56ce72b8",
-  "updatedAt": "2026-06-11T12:54:59.513Z",
+  "updatedAt": "2026-06-12T12:45:13.082Z",
   "packs": {
     "AN-01": {
       "packCode": "AN-01",
@@ -34,9 +34,9 @@
       "mode": "Answer Pack",
       "status": "In progress",
       "answerCount": 5,
-      "updatedAt": "2026-06-04T22:07:32.279Z",
+      "updatedAt": "2026-06-12T12:45:13.082Z",
       "lastOpenedAt": "2026-06-04T22:07:32.279Z",
-      "draftSavedAt": "2026-06-04T22:07:32.279Z"
+      "draftSavedAt": "2026-06-12T12:45:13.082Z"
     },
     "LD-01": {
       "packCode": "LD-01",
@@ -94,14 +94,14 @@
       "draftSavedAt": "2026-06-09T20:28:39.156Z"
     }
   },
-  "latestPackCode": "AN-01",
+  "latestPackCode": "AO-01",
   "summary": {
     "totalStarted": 8,
     "inProgress": 8,
     "submittedForAiCheck": 0,
     "completed": 0,
-    "latestPackCode": "AN-01",
+    "latestPackCode": "AO-01",
     "latestStatus": "In progress",
-    "updatedAt": "2026-06-11T12:54:59.513Z"
+    "updatedAt": "2026-06-12T12:45:13.082Z"
   }
 }
